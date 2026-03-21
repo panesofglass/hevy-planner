@@ -1,523 +1,552 @@
-# Mobility Tracker — Architecture Spec
+# Mobility Tracker — Product Spec
 
-## Project Overview
+## What Is This?
 
-A personal workout tracking app for the **Mobility & Joint Restoration Program**, built as a hypermedia-first system. The server owns the UI and application logic; clients are thin rendering surfaces with platform-specific bridges.
+A native iOS + watchOS app for tracking the Mobility & Joint Restoration Program. The app tells you what to do today, lets you tap through exercises as you complete them, automatically adjusts if you miss a workout, and logs everything to Apple Health.
 
-The app will be open-sourced. All user data is private and protected by default.
+No server, no accounts, no setup. Install it, pick a start date, and go.
 
-### Goals
-
-- Track daily CARs, focused sessions (A/B/C), and active recovery
-- Automatic **reflow**: if a workout is missed, the sequence advances correctly rather than leaving gaps
-- Surface the next workout at a glance (especially on Apple Watch)
-- Integrate with **Apple HealthKit** to log workouts and read health data
-- Serve as a learning project for **CloudflareFS (F#/Fable)**, **Datastar**, and **Swift/watchOS**
-
-### Non-Goals (for v1)
-
-- Social/sharing features
-- Program editor UI (programs are seeded from data, editing is a future PWA feature)
-- Android support
-- AI-driven programming or adaptive difficulty
+A Cloudflare Workers backend (TypeScript + Datastar) may be added in a future phase for web access and program sharing. The domain logic is kept in a standalone Swift module so it can be reimplemented server-side without reworking the apps.
 
 ---
 
-## Architecture
+## Screens
+
+### 1. Today (Home Screen)
+
+What you see when you open the app. Shows today's workout queue in order.
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                    Cloudflare Workers                         │
-│                 (F# via Fable / CloudflareFS)                │
-│                                                              │
-│  ┌───────────────────────────────────────────────────────┐   │
-│  │                 Auth Middleware (F#)                   │   │
-│  │  validateRequest : Request -> Result<UserId, AuthErr> │   │
-│  │  Cloudflare Access (personal) | Bearer token (OSS)    │   │
-│  └───────────────────────┬───────────────────────────────┘   │
-│                          │                                    │
-│  ┌──────────────┐  ┌─────┴─────┐  ┌──────────────┐          │
-│  │ Datastar SSE │  │ JSON API  │  │  Static HTML  │          │
-│  │  (fragments) │  │ (watchOS) │  │  (initial load│          │
-│  └──────┬───────┘  └─────┬─────┘  │   + PWA shell)│          │
-│         │                │        └──────┬───────┘          │
-│  ┌──────┴────────────────┴───────────────┴───────┐          │
-│  │              Domain Logic (F#)                 │          │
-│  │  - Workout sequencing & reflow                │          │
-│  │  - Progression tracking (weeks 1-2, 3-4, 5-8) │          │
-│  │  - Queue state machine (DU-based)             │          │
-│  │  - Daily CARs reset logic                     │          │
-│  └──────────────────────┬────────────────────────┘          │
-│                         │                                    │
-│  ┌──────────────────────┴────────────────────────────────┐  │
-│  │                   Storage (layered)                    │  │
-│  │                                                        │  │
-│  │  Durable Objects ─── active workout state, SSE host   │  │
-│  │  D1 (SQLite) ─────── program data, history, analytics │  │
-│  │  KV ──────────────── cached snapshots (next workout)  │  │
-│  └───────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────────┘
-        │                    │                │
-   text/event-stream    application/json   text/html
-        │                    │                │
-   ┌────┴────┐         ┌────┴────┐      ┌────┴────┐
-   │ iOS App │         │ watchOS │      │   PWA   │
-   │WKWebView│         │ SwiftUI │      │ Browser │
-   │+HealthKit         │+HealthKit│      │         │
-   │+Keychain │         │+Keychain│      │         │
-   └─────────┘         └─────────┘      └─────────┘
-        │                    │
-   direct API           direct API
-   (WKWebView +         (URLSession,
-    JS bridge)           no phone relay)
+┌─────────────────────────────────┐
+│  MOBILITY TRACKER               │
+│  Week 2 · Foundation Phase      │
+│                                 │
+│  ┌───────────────────────────┐  │
+│  │  DAILY CARs               │  │
+│  │ 5-7 min · 5 exercises     │  │
+│  │                           │  │
+│  │         [Start CARs]      │  │
+│  └───────────────────────────┘  │
+│                                 │
+│  ┌───────────────────────────┐  │
+│  │  Session B: Knees & Hips  │  │
+│  │ 15-20 min · 6 exercises   │  │
+│  │                           │  │
+│  │      [Start Session]      │  │
+│  └───────────────────────────┘  │
+│                                 │
+│  ── This Week ──────────────    │
+│  Mon  CARs + Shoulders    ✓    │
+│  Tue  CARs + Strength     ✓    │
+│  Wed  CARs + Knees & Hips ←    │
+│  Thu  CARs + Strength          │
+│  Fri  CARs + Ankle             │
+│  Sat  Recovery                  │
+│  Sun  Rest                      │
+│                                 │
+│  [Today]  [History]  [Program]  │
+└─────────────────────────────────┘
 ```
 
-### Content Negotiation
+**Behavior:**
+- Queue items appear in order: CARs first, then the day's main session
+- Tapping "Start" opens the active workout screen
+- Completed items show a checkmark and collapse
+- When all items are done, the hero area shows "All done today" with a preview of tomorrow
+- The week overview highlights today and shows completion state for each day
 
-All workout-facing endpoints support content negotiation via the `Accept` header:
+### 2. Active Workout
 
-| Accept Header         | Response Format         | Client              |
-|-----------------------|-------------------------|----------------------|
-| `text/event-stream`   | Datastar SSE fragments  | iOS WKWebView, PWA   |
-| `text/html`           | Full HTML page           | Initial page load    |
-| `application/json`    | Structured JSON          | watchOS, future APIs |
-| (future) binary       | Protobuf / CBOR          | Optimized watch sync |
+The tap-through flow for completing a workout. One exercise at a time, focused.
 
-The F# domain logic is invoked once regardless of format; the response serializer is selected by `Accept`.
+```
+┌─────────────────────────────────┐
+│  ← Back          Session B      │
+│                  3 of 6         │
+│                                 │
+│  Banded Terminal Knee           │
+│  Extensions                     │
+│                                 │
+│  3×15 each leg                  │
+│                                 │
+│  Attach band behind your knee   │
+│  to a low anchor. Stand facing  │
+│  away, slight bend. Squeeze to  │
+│  full lockout against band      │
+│  resistance. This isolates the  │
+│  VMO — the inner quad muscle    │
+│  that stabilizes the kneecap.   │
+│                                 │
+│  [▶ Video Tutorial]             │
+│                                 │
+│  ┌─────────────────────────┐    │
+│  │                         │    │
+│  │     [Done ✓]            │    │
+│  │                         │    │
+│  │     [Skip →]            │    │
+│  └─────────────────────────┘    │
+│                                 │
+│  ●●●○○○  progress dots          │
+└─────────────────────────────────┘
+```
+
+**Behavior:**
+- Shows one exercise at a time with name, sets/reps, coaching notes, and video link
+- "Done" advances to the next exercise
+- "Skip" moves to next exercise (logged as skipped, not counted as completed)
+- Progress dots show position in the session
+- "Back" returns to the Today screen (workout is paused, not lost)
+- When the last exercise is completed: workout is saved to history, logged to HealthKit, and the Today screen updates
+- A timer runs in the background tracking total session duration (displayed at the top)
+
+### 3. History
+
+Weekly and monthly view of completed workouts.
+
+```
+┌─────────────────────────────────┐
+│  HISTORY                        │
+│                                 │
+│  ── This Week ──────────────    │
+│  Mon  Shoulders     22 min  ✓   │
+│  Mon  Daily CARs     6 min  ✓   │
+│  Tue  Daily CARs     5 min  ✓   │
+│  Wed  (today)                   │
+│                                 │
+│  ── Last Week ──────────────    │
+│  Mon  Shoulders     19 min  ✓   │
+│  Mon  Daily CARs     7 min  ✓   │
+│  Wed  Knees & Hips  18 min  ✓   │
+│  Wed  Daily CARs     5 min  ✓   │
+│  Fri  Ankle          16 min ✓   │
+│  Fri  Daily CARs     6 min  ✓   │
+│  Sat  Recovery       25 min ✓   │
+│                                 │
+│  ── Stats ──────────────────    │
+│  Streak: 8 days                 │
+│  This week: 4/10 sessions       │
+│  Total sessions: 34             │
+│                                 │
+│  [Today]  [History]  [Program]  │
+└─────────────────────────────────┘
+```
+
+**Behavior:**
+- Grouped by week, most recent first
+- Tapping a completed workout shows the detail: which exercises were done/skipped, duration, heart rate (if available from Watch)
+- Simple stats at the top: current streak, sessions this week, total sessions
+- Streak counts any day where at least CARs were completed
+
+### 4. Program
+
+Reference view of the full program. Read-only in v1.
+
+```
+┌─────────────────────────────────┐
+│  PROGRAM                        │
+│  Mobility & Joint Restoration   │
+│                                 │
+│  Week 2 of 8 · Foundation       │
+│  Template: 5-Day (Recommended)  │
+│                                 │
+│  [Daily CARs]                   │
+│  [A: Shoulder Rehab & Stability]│
+│  [B: Knee & Hip Mobility]       │
+│  [C: Ankle/Achilles & Integr.] │
+│  [Active Recovery]              │
+│                                 │
+│  ── Current Phase ──────────    │
+│  Weeks 1-2: Foundation          │
+│  Learn the movements. Don't     │
+│  chase depth or load.           │
+│  - CARs: 70% effort             │
+│  - All exercises at bodyweight   │
+│  - ATG Split Squat: use bench   │
+│                                 │
+│  [Today]  [History]  [Program]  │
+└─────────────────────────────────┘
+```
+
+**Behavior:**
+- Tapping a session expands to show all exercises with full coaching notes and video links
+- Current progression phase is highlighted with its guidance
+- Upcoming phases shown dimmed
+- Template selection (4-day, 5-day, 6-day) accessible from this screen via settings
+
+### 5. watchOS — Workout
+
+The Watch shows the essentials. No browsing, no history — just the next workout.
+
+```
+┌───────────────────┐
+│  Daily CARs       │
+│  5 exercises       │
+│                   │
+│  [Start]          │
+│                   │
+│  Then: Knees &    │
+│  Hips (6 ex.)     │
+└───────────────────┘
+
+→ After tapping Start:
+
+┌───────────────────┐
+│  Neck CARs        │
+│  1×5 each dir.    │
+│                   │
+│  Slow, controlled │
+│  circles. Keep    │
+│  shoulders still. │
+│                   │
+│  [Done ✓]         │
+│  3 of 5           │
+└───────────────────┘
+```
+
+**Behavior:**
+- On launch: shows today's queue (CARs + main session)
+- Tapping "Start" begins the workout and starts an HKWorkoutSession (live HR tracking)
+- Exercises shown one at a time: name, sets, abbreviated notes
+- "Done" advances; haptic tap confirms
+- On completion: workout saved to HealthKit, Watch shows summary (duration, HR avg, exercises completed)
+- Complication: shows next session name ("CARs + Knees" or "All done")
 
 ---
 
-## Technology Stack
+## User Flows
 
-| Layer              | Technology                        | Notes                                           |
-|--------------------|-----------------------------------|-------------------------------------------------|
-| Backend runtime    | Cloudflare Workers                | Edge compute, global distribution               |
-| Backend language   | F# via Fable → JavaScript         | CloudflareFS bindings for Workers API           |
-| Datastar bindings  | Hawaii (TS → F# binding generator)| Generate F# types from Datastar TypeScript SDK  |
-| Active state       | Cloudflare Durable Objects        | Per-user workout state machine, SSE host        |
-| Database           | Cloudflare D1 (SQLite)            | Program data, workout history, analytics        |
-| Read cache         | Cloudflare KV                     | "Next workout" snapshots, fast Watch reads      |
-| Frontend (web)     | Datastar (~12KB) + HTML/CSS       | No build step, no npm, SSE-driven reactivity    |
-| iOS app            | Swift, WKWebView, HealthKit       | Thin shell: web view + native bridges           |
-| watchOS app        | Swift, SwiftUI, HealthKit         | Native UI consuming JSON API directly           |
-| Auth (personal)    | Cloudflare Access (Zero Trust)    | JWT-based, no app-level auth code needed        |
-| Auth (OSS)         | Bearer token (API key in D1)      | Hashed key in D1, stored in Keychain on device  |
+### First Launch
 
-### CloudflareFS + Datastar Integration
+1. Welcome screen: "Mobility & Joint Restoration Program — 8 weeks to better movement"
+2. Pick a start date (defaults to today, can backdate if already started)
+3. Pick a template: 4-day, 5-day (recommended), or 6-day
+4. Request HealthKit permissions (write workouts, read activity summary + heart rate)
+5. Land on Today screen with the first day's queue populated
 
-CloudflareFS provides typed F# access to Workers APIs (D1, KV, R2, DO) via Fable. The Datastar TypeScript SDK defines the SSE event format, fragment merge modes, and signal types.
+### Daily Use (iPhone)
 
-**Binding strategy**: Use **Hawaii** to generate F# types from the Datastar TS SDK. The types (merge modes, event options, signal shapes) are the primary value — they prevent bugs at compile time. For the SSE emitter itself, write a thin manual implementation in F#. The protocol is standard SSE with specific `event:` names and `data:` payloads containing HTML fragments or JSON signals. This is ~50-100 lines of F# and avoids fragility if Hawaii can't fully map the SDK's runtime helpers.
+1. Open app → Today screen shows queue (CARs + main session)
+2. Tap "Start CARs" → Active Workout screen, exercise 1 of 5
+3. Tap "Done" through each exercise
+4. CARs complete → back to Today, CARs shows checkmark, main session is now the hero card
+5. Tap "Start Session" → Active Workout, exercise 1 of 6
+6. Tap through exercises
+7. Session complete → saved to history, logged to HealthKit, Today shows "All done"
 
-Generated/manual F# helpers:
+### Daily Use (Watch)
 
-- `MergeFragments` — build `datastar-merge-fragments` SSE events with typed merge modes
-- `MergeSignals` — push signal updates to the client
-- `RemoveFragments` / `RemoveSignals` — cleanup events
-- `ExecuteScript` — server-pushed JS execution (use sparingly)
+1. Raise wrist or tap complication → see today's queue
+2. Tap "Start" → HKWorkoutSession begins, first exercise shown
+3. Tap "Done" through each exercise (haptic confirmation on each)
+4. Workout complete → summary screen (duration, avg HR), saved to HealthKit
+5. Complication updates to next session or "All done"
 
----
+### Missed Workout
 
-## Storage Architecture
+1. It's Thursday. Wednesday's Session B was not completed.
+2. Open the app Thursday morning.
+3. Today screen shows: [CARs] [Strength note] (Thursday's normal schedule)
+4. Session B has been re-enqueued to the first open day (Sunday, if room, else dropped for the week)
+5. Week overview shows Wednesday as missed (dimmed, not checked)
+6. Friday proceeds normally with Session C
 
-### Why Three Layers
+### Week Boundary
 
-The usage pattern drives the storage design: **intense bursts** during a workout (rapid exercise completions, sub-second response needed), followed by **read-heavy review** (progress over weeks, session history, analytics).
-
-### Durable Objects — Active Workout State
-
-Each user gets a single DO instance. During a workout, the DO holds the queue state machine in memory. Exercise completions are instant (no database round-trip). The DO:
-
-- Hosts the SSE connection for Datastar (fragment pushes during a workout)
-- Runs the queue state machine as F# discriminated unions
-- Uses `alarm()` for daily CARs reset (fires at midnight or first access)
-- Flushes completed workout data to D1 when a session ends
-- Writes a "next workout" snapshot to KV after any queue state change
-
-The workout queue state machine is modeled as:
-
-```fsharp
-type QueueItemStatus =
-    | Pending                        // scheduled but not yet today
-    | Ready                          // today's item, available to start
-    | InProgress of startedAt: DateTime  // actively being worked
-    | Completed of completedAt: DateTime // done, pending flush to D1
-    | Skipped                        // date passed, will be re-enqueued or dropped
-```
-
-State transitions are pure functions — easy to test in isolation, deployed inside the DO.
-
-### D1 (SQLite) — Durable History & Program Data
-
-D1 stores everything that needs relational queries:
-
-- Program definitions (sessions, exercises, templates, progressions)
-- Completed workout history (with exercise-level logs)
-- User state (active program, template, start date)
-- Auth tokens (hashed) for OSS deployments
-
-Used for: history views, analytics (which sessions are skipped most often, progression tracking over weeks), and seeding the DO on cold start.
-
-### KV — Read Cache
-
-KV stores pre-computed snapshots for fast reads:
-
-- `next-workout:{userId}` — the next queued workout with full exercise details
-- `week-overview:{userId}` — the current week's queue state
-
-Written by the DO after every state change. Read by the watchOS app on launch and background refresh. Eventually consistent (fine for reads that are seconds old).
+1. It's Monday of week 2.
+2. Any remaining skipped sessions from week 1 are dropped.
+3. A fresh queue is generated from the template.
+4. If week 2 is still "Foundation" phase, exercise descriptions include Foundation-phase coaching ("CARs: 70% effort", "use bench support", etc.)
+5. When week 3 starts, descriptions update to "Build" phase coaching.
 
 ---
 
-## Data Model
+## Data Model (Swift)
 
-### Program (seeded, read-only in v1)
+### Program Data (bundled, read-only)
 
-```
-Program
-  ├── id: string
-  ├── title: string
-  ├── sessions: Session[]
-  │     ├── id: string (e.g., "daily", "sessionA")
-  │     ├── title: string
-  │     ├── subtitle: string
-  │     ├── description: string
-  │     ├── targetFrequency: int (per week)
-  │     └── exercises: Exercise[]
-  │           ├── name: string
-  │           ├── sets: string
-  │           ├── notes: string
-  │           └── videoUrl: string | null
-  ├── weekTemplates: WeekTemplate[]
-  │     ├── name: string (e.g., "5-Day (Recommended)")
-  │     ├── description: string
-  │     └── days: DaySlot[]
-  │           ├── dayOfWeek: int (0=Mon)
-  │           ├── sessions: string[] (session IDs)
-  │           └── note: string | null
-  └── progressions: Progression[]
-        ├── weekRange: string
-        ├── focus: string
-        └── details: string[]
-```
+```swift
+struct Program {
+    let id: String
+    let title: String
+    let sessions: [Session]
+    let weekTemplates: [WeekTemplate]
+    let progressions: [Progression]
+}
 
-### User State
+struct Session {
+    let id: String              // "daily", "sessionA", "sessionB", etc.
+    let title: String
+    let subtitle: String
+    let description: String
+    let targetFrequency: Int    // per week
+    let exercises: [Exercise]
+}
 
-```
-UserState
-  ├── userId: string
-  ├── activeProgram: string (program ID)
-  ├── activeTemplate: string (template name)
-  ├── startDate: date
-  ├── currentWeek: int (derived)
-  └── currentPhase: string (derived from progressions)
-```
+struct Exercise {
+    let id: String
+    let name: String
+    let sets: String            // "3x8 each side"
+    let notes: String
+    let videoURL: URL?
+}
 
-### Workout Queue (lives in DO, flushed to D1)
+struct WeekTemplate {
+    let name: String            // "5-Day (Recommended)"
+    let description: String
+    let days: [DaySlot]
+}
 
-```
-WorkoutQueue
-  ├── userId: string
-  ├── queue: QueuedWorkout[]  (ordered list of today's + upcoming sessions)
-  │     ├── sessionId: string
-  │     ├── scheduledDate: date (suggested, not fixed)
-  │     ├── position: int
-  │     ├── isDaily: bool (true for CARs entries)
-  │     └── status: Pending | Ready | InProgress | Completed | Skipped
-  └── history: CompletedWorkout[]  (flushed to D1)
-        ├── sessionId: string
-        ├── completedAt: datetime
-        ├── durationSeconds: int
-        ├── exercises: ExerciseLog[]
-        │     ├── exerciseId: string
-        │     ├── completed: bool
-        │     └── notes: string | null
-        └── healthKitWorkoutId: string | null
+struct DaySlot {
+    let dayOfWeek: Int          // 1=Monday (matching Calendar)
+    let sessionIDs: [String]
+    let note: String?           // "Strength training — CARs as warmup"
+}
+
+struct Progression {
+    let weekRange: String       // "Weeks 1-2"
+    let phaseName: String       // "Foundation"
+    let focus: String
+    let details: [String]
+}
 ```
 
-### Reflow Logic
+### User State (SwiftData, synced via iCloud)
 
-The queue is the core of the "missed workout" problem:
+```swift
+@Model
+class UserState {
+    var activeTemplateIndex: Int    // which week template
+    var startDate: Date
+    var currentWeek: Int { /* derived from startDate */ }
+    var currentPhase: String { /* derived from progressions */ }
+}
+```
 
-1. Each day, the queue is evaluated. **Daily CARs are inserted at the top** of the day's items if not already present, followed by the day's scheduled session(s) from the template. For a Wednesday on the 5-Day template: `[Daily CARs (ready), Session B: Knees & Hips (ready)]`. For a strength training Tuesday: `[Daily CARs (ready), note: "CARs as warmup + Session A prehab"]`.
+### Workout Queue (SwiftData)
 
-2. The **next workout item** is always the first `Ready` item in today's queue. The user works through items in sequence: CARs first, then the main session.
+```swift
+@Model
+class QueueItem {
+    var sessionID: String
+    var scheduledDate: Date
+    var position: Int
+    var isDaily: Bool
+    var status: QueueItemStatus     // pending, ready, inProgress, completed, skipped
+    var startedAt: Date?
+    var completedAt: Date?
+}
 
-3. When an item is **completed**, it moves to `Completed` status. The next `Ready` item (if any) becomes the active prompt. When all items for the day are done, the hero card shows the next day's preview.
+enum QueueItemStatus: String, Codable {
+    case pending        // scheduled but not yet today
+    case ready          // today's item, available to start
+    case inProgress     // actively being worked
+    case completed      // done
+    case skipped        // date passed without completion
+}
+```
 
-4. **Daily CARs have special reset behavior**: they are never reflowed. If CARs are not completed by end of day, they are simply dropped. A fresh CARs entry is inserted at the top of the next day's queue. CARs always reset — they don't accumulate.
+### Workout History (SwiftData, synced via iCloud)
 
-5. **Non-daily sessions follow reflow rules**: when a scheduled date passes without completion, the session's status becomes `Skipped` and it is **re-enqueued after the remaining scheduled sessions** for the week. Example: miss Session B on Wednesday → Thursday's queue is `[CARs, Strength note]`, Friday's is `[CARs, Session C]`, Saturday is `[Recovery]`, and Session B slides to Sunday if there's room, otherwise dropped.
+```swift
+@Model
+class CompletedWorkout {
+    var sessionID: String
+    var sessionTitle: String
+    var completedAt: Date
+    var durationSeconds: Int
+    var exerciseLogs: [ExerciseLog]
+    var healthKitWorkoutID: UUID?
+    var averageHeartRate: Double?    // from Watch, if available
+}
 
-6. At the **end of each week**, any remaining `Skipped` sessions are dropped. The next week's queue is generated fresh from the template.
-
-7. The DO's `alarm()` fires daily to handle the CARs reset, date transitions, and skip detection.
+struct ExerciseLog: Codable {
+    let exerciseID: String
+    let completed: Bool
+    let skipped: Bool
+}
+```
 
 ---
 
-## Authentication
+## Domain Logic (standalone module)
 
-### Design Principle
+The queue state machine and reflow logic live in a pure Swift module with no SwiftUI or SwiftData dependencies. This is the code that would be reimplemented in TypeScript if a Workers backend is added later.
 
-Auth is implemented as a single F# middleware function that every endpoint passes through. The same function handles both auth strategies:
+### Queue Engine
 
-```fsharp
-type AuthResult =
-    | Authenticated of UserId
-    | Unauthorized of reason: string
+```swift
+// Pure functions — no side effects, fully testable
 
-let validateRequest (request: Request) : AuthResult =
-    // Try Cloudflare Access JWT first (personal deployment)
-    // Fall back to Bearer token (OSS deployment)
-    // Both paths produce the same UserId on success
+struct QueueEngine {
+
+    /// Generate today's queue items from the template
+    static func generateDay(
+        template: WeekTemplate,
+        dayOfWeek: Int,
+        date: Date,
+        existingQueue: [QueueItem]
+    ) -> [QueueItem]
+    // Inserts CARs at position 0, then scheduled sessions in template order.
+    // Skips if items for this date already exist.
+
+    /// Advance the queue when an item is completed
+    static func complete(
+        item: QueueItem,
+        at: Date,
+        queue: [QueueItem]
+    ) -> [QueueItem]
+    // Marks item as .completed, sets completedAt.
+    // If next item exists for today, it becomes .ready.
+
+    /// Handle day transition: detect missed sessions, insert new CARs
+    static func advanceDay(
+        from previousDate: Date,
+        to currentDate: Date,
+        queue: [QueueItem],
+        template: WeekTemplate
+    ) -> [QueueItem]
+    // 1. Any .ready or .pending items from previous dates -> .skipped
+    // 2. Skipped non-daily items: re-enqueue after remaining week items
+    // 3. Skipped daily items (CARs): drop, don't re-enqueue
+    // 4. Generate new day's items (CARs first, then scheduled sessions)
+
+    /// Handle week boundary: drop remaining skipped, generate fresh week
+    static func advanceWeek(
+        queue: [QueueItem],
+        template: WeekTemplate,
+        weekStartDate: Date
+    ) -> [QueueItem]
+    // Drops all .skipped items. Generates the full week's queue.
+
+    /// Get the current progression phase for a given week number
+    static func currentPhase(
+        week: Int,
+        progressions: [Progression]
+    ) -> Progression?
+}
 ```
 
-### Personal Deployment: Cloudflare Access
+### Key Design Rule
 
-Cloudflare Access (Zero Trust) gates the entire Worker. The user authenticates once via browser; all subsequent requests carry a CF Access JWT. The Worker validates the JWT signature and extracts the user identity. No auth code in the iOS/Watch apps — the Access session covers the device.
-
-### OSS Deployment: Bearer Token
-
-For self-hosted/OSS use:
-
-1. On first setup, the user generates an API key (via a CLI command or setup endpoint)
-2. The key is hashed (SHA-256) and stored in D1
-3. The iOS app stores the key in **Keychain** (not UserDefaults)
-4. The watchOS app stores a copy in its own **Keychain** (independent of phone)
-5. The WKWebView injects the token via a custom `WKURLSchemeHandler` or cookie so Datastar SSE requests carry credentials automatically
-6. All API requests include `Authorization: Bearer <key>`
-
-Both strategies coexist. Cloudflare Access is checked first; if no Access JWT is present, the Bearer token path is tried. A request that fails both is rejected.
-
----
-
-## Datastar Fragment Contract
-
-The server returns HTML fragments that Datastar merges into the DOM. Key fragments:
-
-### `#next-workout` — The hero card on the home screen
-
-Shows the next item in today's queue (CARs first, then main session):
-
-```html
-<!-- Pushed via SSE when the next workout changes -->
-<div id="next-workout" data-merge-mode="morph">
-  <span class="badge daily">Up Next</span>
-  <h2>Daily CARs</h2>
-  <p class="subtitle">Controlled Articular Rotations — 5-7 min</p>
-  <p class="description">Do these every single day, no exceptions...</p>
-  <div class="queue-peek">Then: Session B — Knees & Hips (15-20 min)</div>
-  <button data-on-click="$$get('/api/workout/start/daily')">
-    Start CARs
-  </button>
-</div>
-```
-
-### `#exercise-list` — Rendered when a workout is started
-
-```html
-<div id="exercise-list" data-merge-mode="morph">
-  <div class="exercise-card" id="ex-0">
-    <h3>90/90 Hip Switches</h3>
-    <span class="sets">3×8 each side</span>
-    <p class="notes">Sit with both legs at 90°. Rotate from one side...</p>
-    <button data-on-click="$$get('/api/exercise/complete/ex-0')">
-      Done
-    </button>
-  </div>
-  <!-- more exercises -->
-</div>
-```
-
-### `#week-overview` — Calendar/queue view
-
-```html
-<div id="week-overview" data-merge-mode="morph">
-  <div class="day completed">Mon — Daily CARs + Shoulders ✓</div>
-  <div class="day completed">Tue — Daily CARs + Strength ✓</div>
-  <div class="day today">
-    Wed — <span class="done">Daily CARs ✓</span> + Knees & Hips ← now
-  </div>
-  <div class="day upcoming">Thu — Daily CARs + Strength</div>
-  <div class="day upcoming">Fri — Daily CARs + Ankle & Integration</div>
-  <div class="day upcoming">Sat — Active Recovery</div>
-  <div class="day rest">Sun — Full rest</div>
-</div>
-```
-
-### Signal Contract
-
-Datastar signals (reactive state shared between client and server):
-
-```
-workout.active: bool          — is a workout in progress?
-workout.sessionId: string     — current session ID
-workout.exerciseIndex: int    — current exercise position
-workout.elapsed: int          — seconds since workout started
-queue.todayItems: int         — number of items in today's queue
-queue.todayCompleted: int     — how many completed so far
-queue.nextSession: string     — ID of the next queued session
-queue.nextDate: string        — suggested date for next session
-user.currentWeek: int         — week number in program
-user.currentPhase: string     — "Foundation" / "Build" / "Load"
-```
+These functions take data in and return data out. No SwiftData queries, no HealthKit calls, no UI updates. The caller (a SwiftUI view model or a background task) is responsible for persisting the result and triggering side effects.
 
 ---
 
 ## HealthKit Integration
 
-### Data Written (iOS → HealthKit)
+### Permissions Requested
 
-- **HKWorkout**: logged when a session is completed
-  - Type: `.flexibility` (for mobility sessions) or `.cooldown` (for recovery)
-  - Duration: elapsed time from start to last exercise completion
-  - Metadata: session title, exercises completed
+- **Write**: HKWorkoutType (.flexibility, .cooldown)
+- **Read**: HKActivitySummaryType, HKQuantityType(.heartRate), HKWorkoutType
 
-### Data Read (HealthKit → app)
+### When Workouts Are Logged
 
-- **HKActivitySummary**: move/exercise/stand rings (display on dashboard)
-- **HKWorkout history**: show mobility sessions alongside other workouts
-- **Heart rate** (if Watch is worn during session): display average HR for completed sessions
+- **iPhone**: After the last exercise in a session is completed (or skipped), an HKWorkout is saved with:
+  - Type: .flexibility (mobility sessions) or .cooldown (recovery)
+  - Start time: when "Start" was tapped
+  - End time: when the last exercise was completed
+  - Metadata: session title, exercises completed count
 
-### Bridge Architecture (iOS)
+- **Watch**: Same as above, but wrapped in an HKWorkoutSession for live heart rate collection. Heart rate samples are automatically associated with the workout.
 
-```
-Datastar HTML                    Swift Shell
-─────────────                    ───────────
-data-on-click="$$get(...)"  →   WKWebView handles navigation
-                                      │
-JS: postMessage('healthkit',     WKScriptMessageHandler
-     {action: 'startWorkout',         │
-      sessionId: 'sessionB'})    HealthKit API calls
-                                      │
-                                 evaluateJavaScript(
-                                   "ds.signals.workout = ...")
-                                      │
-                                 Datastar picks up signal change
-```
+### Data Read
 
-### watchOS — Direct API
-
-The Watch app does NOT use Datastar or the phone as a relay. It communicates directly with the Workers API via `URLSession`:
-
-1. On launch + background refresh: `GET /api/queue/next` (JSON, served from KV cache for speed)
-2. Displays the next workout(s) in a SwiftUI list — shows CARs + main session for the day
-3. Allows marking exercises complete: `POST /api/exercise/complete/:id` (hits the DO directly)
-4. Starts an `HKWorkoutSession` for live heart rate tracking during the workout
-5. Logs completed workout to HealthKit locally on the Watch
-6. **Watch Connectivity** is used only for sharing HealthKit data that requires phone-side queries (e.g., historical workout summaries that the Watch can't query directly)
-
-Auth: Bearer token stored in the Watch's independent Keychain.
+- Activity rings (move/exercise/stand) displayed on the Today screen if available
+- Average heart rate shown on completed workout detail (if Watch was worn)
+- Workout history from HealthKit is NOT read — the app tracks its own history in SwiftData to avoid HealthKit query complexity
 
 ---
 
-## Offline Strategy (Nice-to-Have)
+## iCloud Sync
 
-Offline support is not required for v1 but the architecture should not preclude it.
+SwiftData with CloudKit integration provides automatic sync:
 
-### Read Cache (Service Worker)
-
-A service worker (supported in WKWebView on iOS 16.4+) caches:
-
-- Datastar JS (~12KB)
-- Shell HTML and CSS
-- The current day's workout fragment (pre-rendered)
-
-On connectivity loss, the cached workout is still viewable and interactive for read-only use.
-
-### Offline Writes (Command Queue)
-
-When the device is offline during a workout, the Swift shell queues commands locally:
-
-```fsharp
-type OfflineCommand =
-    | CompleteExercise of exerciseId: string * completedAt: DateTime
-    | CompleteWorkout of sessionId: string * completedAt: DateTime
-    | SkipExercise of exerciseId: string
-```
-
-On reconnect, the Swift shell posts the command queue to the DO. The DO replays commands in order. The F# state machine is deterministic — replaying commands produces the correct final state regardless of arrival time.
-
-### Watch Offline
-
-The Watch caches the "next workout" JSON snapshot locally. If connectivity is unavailable, it can display the workout and queue completions locally, syncing when a connection is restored.
+- UserState, QueueItem, CompletedWorkout all sync via iCloud
+- iPhone to Mac sync is automatic
+- Watch uses a shared CloudKit container for the same data
+- No conflict resolution logic needed for single-user — last write wins
+- If iCloud is unavailable, data persists locally and syncs when reconnected
 
 ---
 
-## Phased Build Plan
+## Settings
 
-### Phase 0: Foundation (CloudflareFS + Datastar hello world)
+Accessible from the Program screen:
 
-- [ ] Set up CloudflareFS project with Fable toolchain
-- [ ] Attempt Hawaii binding generation from Datastar TS SDK; assess coverage
-- [ ] Write manual SSE emitter helpers in F# (MergeFragments, MergeSignals)
-- [ ] Deploy a "hello world" Worker that serves an HTML page with one Datastar-reactive element
-- [ ] Verify SSE streaming works on Cloudflare Workers
-- **Gate**: A button click triggers an SSE response that updates a `<div>` via Datastar fragment merge
+- **Template**: Switch between 4-day, 5-day, 6-day (regenerates future queue items)
+- **Start Date**: Adjust if needed (recalculates current week/phase)
+- **HealthKit**: Toggle workout logging on/off
+- **Reset Program**: Start over from week 1 (confirmation required)
 
-### Phase 1: Storage + Data Model + Auth
+---
 
-- [ ] Set up D1 schema for Program, UserState, CompletedWorkout history
-- [ ] Set up Durable Object class for per-user workout queue state
-- [ ] Set up KV namespace for cached snapshots
-- [ ] Implement auth middleware (Cloudflare Access + Bearer token paths)
-- [ ] Seed the Mobility & Joint Restoration Program data into D1
-- [ ] Build F# domain types and queue state machine (discriminated unions)
-- [ ] Implement basic endpoints: `GET /api/program`, `GET /api/queue/next`, `GET /api/queue/today`
-- **Gate**: Authenticated request to `GET /api/queue/today` returns today's queue (CARs + scheduled session) as JSON. DO state persists across requests. KV snapshot is written on state change.
+## Phase 2: Workers Backend (Future)
 
-### Phase 2: Workout UI (Datastar)
+When the product proves itself and web access is desired:
 
-- [ ] Build the home page: `#next-workout` hero card (CARs first, then main session) + `#week-overview`
-- [ ] Build the workout flow: start → exercise list → mark complete → next exercise → finish
-- [ ] Implement daily CARs reset logic in the DO (alarm-based)
-- [ ] Implement reflow: missed session detection, re-enqueue, weekly reset
-- [ ] SSE-push fragment updates as exercises are completed
-- [ ] Style with minimal CSS (dark theme inspired by the original HTML artifact)
-- **Gate**: In a browser: complete CARs, then complete a main session. Week view updates in real-time. Miss a day, verify reflow places the session later in the week. Daily CARs reset the next day.
+1. Reimplement QueueEngine in TypeScript for Cloudflare Workers
+2. Add D1 database mirroring the SwiftData schema
+3. Add Datastar SSE frontend (hypermedia approach)
+4. Add sync layer: iOS/Watch apps POST completions to the Workers API
+5. Add auth (Cloudflare Access for personal, Bearer token for OSS)
+6. PWA comes free from the Datastar frontend
 
-### Phase 3: iOS Shell
+The iOS/Watch apps continue working locally. The sync layer is additive — not a replacement for local SwiftData storage.
 
-- [ ] Create Xcode project: single-view app with WKWebView pointing at Workers URL
-- [ ] Implement Keychain storage for Bearer token
-- [ ] Inject auth credentials into WKWebView requests
-- [ ] Implement WKScriptMessageHandler bridge for HealthKit
-- [ ] Log completed workouts to HealthKit
-- [ ] Read activity summary and display via Datastar signals
-- **Gate**: Complete a workout on iPhone; verify it appears in Apple Health
+---
 
-### Phase 4: watchOS Companion
+## Parallel Agent Strategy (Weekend Build)
 
-- [ ] Create watchOS target in the Xcode project
-- [ ] Implement Keychain storage for Bearer token (independent from phone)
-- [ ] Fetch today's queue via JSON API (`GET /api/queue/today`) on launch + background refresh
-- [ ] Display CARs + main session in a SwiftUI list with completion toggles
-- [ ] `POST /api/exercise/complete/:id` on tap
-- [ ] Start HKWorkoutSession for live HR tracking
-- [ ] Complication showing next session name
-- **Gate**: Complete a workout from the Watch without the phone nearby. Data syncs to Workers backend and appears in workout history.
+Using Boris Cherny's method, the project can be split across parallel Claude Code agents:
 
-### Phase 5: PWA + Offline + Polish
+### Agent 1: Domain Logic + Data Model
+- Domain/ module: QueueEngine, all pure functions
+- Model/ module: SwiftData models (QueueItem, CompletedWorkout, UserState)
+- Program data definition (all sessions, exercises, templates, progressions as Swift structs)
+- Unit tests for QueueEngine (reflow, CARs reset, week boundary, missed workouts)
+- **Gate**: All unit tests pass. QueueEngine handles every scenario in the "User Flows" section.
 
-- [ ] Add service worker for offline read caching in the browser
-- [ ] Add web app manifest for "Add to Home Screen"
-- [ ] Implement offline command queue in Swift shell (nice-to-have)
-- [ ] Implement progression phase display (current week/phase, progression notes in exercise descriptions)
-- [ ] Add workout history view (query D1, display trends)
-- [ ] Performance pass: minimize SSE payload sizes, optimize D1 queries
-- **Gate**: PWA installable from Safari. Workout history shows completion trends. If offline support is implemented: start a workout, lose connectivity, complete exercises, reconnect — verify state is correct.
+### Agent 2: iOS App (SwiftUI)
+- Today screen, Active Workout screen, History screen, Program screen
+- Tab bar navigation
+- View models that call QueueEngine and persist via SwiftData
+- Dark theme styling (#141210 background, #e8e4df text)
+- First launch onboarding flow
+- **Gate**: Full workout flow works in the iOS Simulator. Can complete CARs + main session, see history, view program.
+
+### Agent 3: watchOS App
+- Workout list screen, Active Workout screen, Summary screen
+- HKWorkoutSession integration for live HR
+- Complication (next session name)
+- Background refresh (update queue state)
+- **Gate**: Full workout flow works in the Watch Simulator. Workout appears in HealthKit.
+
+### Agent 4: HealthKit + Integration
+- HealthKit permission requests
+- Workout logging (iPhone + Watch paths)
+- Activity ring display on Today screen
+- Heart rate display on workout detail
+- iCloud sync configuration (shared CloudKit container)
+- Integration testing across iPhone + Watch
+- **Gate**: Complete a workout on Watch, verify it appears in iPhone history and Apple Health.
+
+### Sequencing
+
+Agents 1 and 2 can start in parallel. Agent 2 depends on Agent 1's data model and QueueEngine API (but can stub initially). Agent 3 depends on the data model from Agent 1. Agent 4 depends on Agents 2 and 3 for integration points.
+
+Recommended: start Agents 1 + 2 simultaneously. When Agent 1 finishes, start Agent 3. When Agents 2 + 3 finish, start Agent 4 for integration.
 
 ---
 
 ## Decisions Log
 
-Decisions made during planning, for reference:
-
 | # | Decision | Rationale |
 |---|----------|-----------|
-| 1 | **Three-layer storage**: DO (active state) + D1 (history) + KV (read cache) | Usage pattern is burst writes during workout (needs in-memory speed) then read-heavy review (needs relational queries). KV bridges the gap for Watch cold-start reads. |
-| 2 | **Hawaii for types, manual SSE emitter** | Types prevent bugs at compile time. The SSE protocol is simple enough that a manual emitter is less fragile than depending on full SDK binding generation. |
-| 3 | **Offline is nice-to-have, not v1** | Architecture supports it (command queue pattern, service worker caching) but building it is deferred to Phase 5. |
-| 4 | **Watch uses direct API, not Watch Connectivity** | Watch may be the only device during a gym workout. Direct HTTP avoids phone dependency. Watch Connectivity reserved for HealthKit data that requires the phone. |
-| 5 | **Dual auth: Cloudflare Access (personal) + Bearer token (OSS)** | Access is zero-effort for personal use. Bearer token is portable for OSS self-hosting. Same F# middleware handles both. |
-| 6 | **Daily CARs are queue items that reset daily** | Unified queue model — everything is a queue entry. CARs are inserted at the top of each day's queue in the recommended sequence (CARs first, then main session). Never reflowed, just dropped and regenerated. |
+| 1 | Native Swift + SwiftData, no server for v1 | Fastest path to a usable product. Server is additive Phase 2. |
+| 2 | Domain logic in standalone module | Keeps reflow/queue logic testable and portable to TypeScript if a backend is added later. |
+| 3 | iCloud sync via CloudKit | Free, automatic, handles iPhone / Watch / Mac. No infrastructure to manage. |
+| 4 | Program data bundled in app | Static content doesn't need a database. Embedded Swift structs or a JSON file in the app bundle. |
+| 5 | Daily CARs are queue items that reset daily | Unified queue model. CARs always appear first, never reflowed, dropped and regenerated each day. |
+| 6 | One exercise at a time in active workout | Focused, low-cognitive-load UI for mid-workout use. Sweaty hands, distracted mind — keep it simple. |
+| 7 | Watch uses shared CloudKit, not Watch Connectivity for data | Simpler architecture. Watch Connectivity only for phone-dependent HealthKit queries. |
+| 8 | Dark theme | Matches the original program artifact aesthetic. Easier on eyes during early-morning workouts. |

@@ -2,70 +2,78 @@
 
 ## Project Overview
 
-Hypermedia-first workout tracker for the Mobility & Joint Restoration Program. Read `SPEC.md` for the full architecture spec.
+Native iOS + watchOS workout tracker for the Mobility & Joint Restoration Program. Read `SPEC.md` for the full product spec including screens, user flows, and data model.
 
 ## Tech Stack
 
-- **Backend**: F# via Fable → JavaScript, running on Cloudflare Workers (CloudflareFS bindings)
-- **Frontend**: Datastar (~12KB) + server-rendered HTML, SSE-driven reactivity
-- **Storage**: Durable Objects (active workout state) + D1/SQLite (history, program data) + KV (read cache)
-- **iOS**: Swift thin shell with WKWebView + HealthKit bridge
-- **watchOS**: SwiftUI + direct JSON API + HealthKit
-- **Auth**: Cloudflare Access (personal) + Bearer token (OSS)
+- **iOS**: Swift, SwiftUI, SwiftData
+- **watchOS**: Swift, SwiftUI, HealthKit (HKWorkoutSession)
+- **Storage**: SwiftData with CloudKit sync (iCloud)
+- **Health**: HealthKit (workout logging, activity rings, heart rate)
+- **No server for v1** — Cloudflare Workers + Datastar is a future Phase 2
 
 ## Key Architectural Decisions
 
-- Server owns the UI. Clients are rendering surfaces.
-- Content negotiation: `text/event-stream` (Datastar SSE) for iOS/PWA, `application/json` for watchOS, `text/html` for initial page loads.
-- Datastar binding strategy: Hawaii-generated F# types from TS SDK where possible, manual SSE emitter (~50-100 lines F#) for the event protocol.
-- Workout queue is a state machine using F# discriminated unions, hosted in a per-user Durable Object.
+- Domain logic (QueueEngine, reflow, state machine) lives in a **standalone Swift module** with no SwiftUI or SwiftData dependencies. Pure functions, fully testable, portable to TypeScript later.
 - Daily CARs are queue items that reset every day (never reflowed, just dropped and regenerated).
-- Watch communicates directly with Workers API (no phone relay).
+- Watch uses shared CloudKit container for data sync (not Watch Connectivity).
+- Program data is bundled in the app as Swift structs (read-only in v1).
+- One exercise shown at a time during active workouts — focused, low-cognitive-load.
 
 ## Project Structure
 
 ```
 mobility-tracker/
 ├── CLAUDE.md              ← you are here
-├── SPEC.md                ← architecture spec (read this first)
+├── SPEC.md                ← product spec (read this first)
 ├── .claude/
-│   └── commands/          ← slash commands for repeated workflows
-├── worker/                ← CloudflareFS / Fable project (Cloudflare Worker)
-│   ├── src/               ← F# source
-│   │   ├── Domain/        ← pure domain logic (queue state machine, reflow)
-│   │   ├── Api/           ← request routing, content negotiation, auth middleware
-│   │   ├── Datastar/      ← SSE emitter, fragment builders
-│   │   └── Storage/       ← D1, KV, DO bindings
-│   └── wrangler.toml      ← Cloudflare Workers config
-├── ios/                   ← Xcode project (iOS + watchOS)
-│   ├── MobilityTracker/   ← iOS app (WKWebView shell + HealthKit bridge)
-│   └── MobilityWatch/     ← watchOS app (SwiftUI + JSON API)
-└── seed/                  ← program data seeding scripts
+│   ├── skills/            ← reusable skill definitions
+│   └── agents/            ← agent definitions for complex workflows
+└── MobilityTracker/       ← Xcode project
+    ├── Domain/            ← QueueEngine, pure functions (no UI/persistence deps)
+    ├── Model/             ← SwiftData models (QueueItem, CompletedWorkout, UserState)
+    ├── Data/              ← Program definition (sessions, exercises, templates)
+    ├── Views/             ← SwiftUI views
+    │   ├── Today/         ← Home screen (queue + week overview)
+    │   ├── Workout/       ← Active workout flow (one exercise at a time)
+    │   ├── History/       ← Completed workout history
+    │   ├── Program/       ← Program reference + settings
+    │   └── Onboarding/    ← First launch flow
+    ├── ViewModels/        ← View models calling QueueEngine, persisting via SwiftData
+    ├── HealthKit/         ← HealthKit integration (permissions, logging, reading)
+    └── Watch/             ← watchOS target
+        ├── Views/         ← Watch SwiftUI screens
+        ├── Workout/       ← HKWorkoutSession management
+        └── Complications/ ← Next session complication
 ```
 
 ## Style & Conventions
 
-- F# idiomatic style: discriminated unions for state, pure functions for transitions, pipeline operators
-- Prefer `Result<'T, 'E>` over exceptions
-- All domain logic must be testable without IO (pure functions, DI for storage)
-- HTML fragments: minimal CSS, dark theme (#141210 background, #e8e4df text — matching original program artifact)
+- Swift idiomatic style: enums for state, structs for data, protocols for abstraction
+- Domain functions are pure: data in, data out. No side effects.
+- SwiftData models use @Model macro
+- Dark theme: #141210 background, #e8e4df text (matching original program artifact)
 - Commit messages: imperative mood, concise
 
 ## Common Mistakes to Avoid
 
-- Do NOT use the Datastar .NET SDK (StarFederation.Datastar) — it targets ASP.NET Core, not Fable/JS
-- Do NOT use Watch Connectivity for API calls — Watch talks directly to Workers API
-- Do NOT store auth tokens in UserDefaults — use Keychain on both iOS and watchOS
-- Fable compiles F# to JS. Do not use .NET-specific APIs (System.IO, HttpClient, etc.) — use CloudflareFS bindings for Workers APIs
-- KV is eventually consistent — never use it for write-then-read patterns during a workout session
+- Do NOT put queue/reflow logic in view models or views — it belongs in Domain/QueueEngine
+- Do NOT use Watch Connectivity for data sync — use shared CloudKit container
+- Do NOT read workout history from HealthKit — track it in SwiftData to avoid query complexity
+- Do NOT use UserDefaults for anything — SwiftData + iCloud handles all persistence
+- QueueItemStatus enum must be String/Codable for SwiftData storage
+- ExerciseLog must be Codable (stored as transformable in SwiftData)
+- Watch HKWorkoutSession must be started BEFORE collecting heart rate samples
 
-## Local Development
+## Parallel Agent Strategy
 
-- CloudflareFS project: see `worker/` directory
-- Fable toolchain required: `dotnet tool restore` then `dotnet fable`
-- Cloudflare Workers: `npx wrangler dev` for local dev, `npx wrangler deploy` for production
-- iOS/watchOS: open `ios/MobilityTracker.xcodeproj` in Xcode
+See SPEC.md § Parallel Agent Strategy for the full breakdown. Summary:
+
+1. **Agent 1**: Domain logic + data model + unit tests (start immediately)
+2. **Agent 2**: iOS SwiftUI app (start in parallel with Agent 1, stub domain initially)
+3. **Agent 3**: watchOS app (start after Agent 1 finishes)
+4. **Agent 4**: HealthKit + iCloud integration (start after Agents 2+3)
 
 ## Current Phase
 
-**Phase 0: Foundation** — CloudflareFS + Datastar hello world. See SPEC.md § Phased Build Plan.
+**Pre-build** — Product spec complete. Ready to initialize Xcode project and begin parallel agent work.
