@@ -1,46 +1,26 @@
-# Xcode
-build/
-DerivedData/
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata/
-*.xccheckout
-*.moved-aside
-*.hmap
-*.ipa
-*.dSYM.zip
-*.dSYM
+# Dependencies
+node_modules/
 
-# Swift Package Manager
-.build/
-Packages/
-Package.pins
-Package.resolved
-*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+# Build output
+dist/
+.wrangler/
 
-# CocoaPods
-Pods/
+# Environment & secrets
+.dev.vars
+.env
+.env.*
 
-# Fastlane
-fastlane/report.xml
-fastlane/Preview.html
-fastlane/screenshots/**/*.png
-fastlane/test_output
+# Cloudflare
+wrangler.toml.bak
 
 # macOS
 .DS_Store
-.AppleDouble
-.LSOverride
 ._*
 
-# Thumbnails
+# Windows
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # IDE
 *.swp
@@ -49,13 +29,9 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Provisioning profiles
-*.mobileprovision
-*.provisionprofile
+# TypeScript
+*.tsbuildinfo
 
-# Playgrounds
-timeline.xctimeline
-playground.xcworkspace
-
-# Swift Playgrounds
-*.xcplayground
+# Logs
+*.log
+npm-debug.log*

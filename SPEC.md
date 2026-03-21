@@ -407,6 +407,32 @@ On first push, the companion attempts to auto-match by name. Unmatched exercises
 
 ---
 
+## Authentication
+
+The app is protected by [Cloudflare Access](https://www.cloudflare.com/zero-trust/products/access/), which handles authentication at the edge before any request reaches the Worker. There is no application-level login flow, session management, or password storage.
+
+**How it works**: Cloudflare Access acts as an identity-aware reverse proxy. Users authenticate through a configured identity provider (email OTP, GitHub, Google, etc.) and receive a signed JWT. The Worker validates this token on every request — unauthenticated requests never reach application code.
+
+**Access policy**: An allowlist of permitted email addresses (starting with the owner's). Adding new users means adding an email to the Cloudflare Access policy — no application changes required.
+
+**What the Worker does**:
+
+- Validates the `Cf-Access-Jwt-Assertion` header on every request
+- Extracts the authenticated user identity from the token claims
+- Uses the identity to scope all D1 queries (each user sees only their own data)
+- Rejects requests with missing or invalid tokens (403)
+
+**What the Worker does NOT do**:
+
+- Store passwords or credentials
+- Manage login/logout sessions
+- Implement OAuth flows
+- Handle user registration
+
+**Cost**: Cloudflare Access is free for up to 50 users. This is more than sufficient for personal use and early open-source adoption.
+
+---
+
 ## Settings
 
 - **Hevy Connection**: API key management, sync status, last sync time
@@ -459,3 +485,4 @@ The Hevy API documentation does not publish explicit rate limits. The app should
 | 6 | Daily sessions are queue items that reset daily | Unified queue model. Daily items always appear first, never reflowed. |
 | 7 | Hevy API for sync, not scraping or manual entry | Official API with routine and workout CRUD. Requires Pro subscription. |
 | 8 | PWA for mobile access | No App Store needed. Install from browser. Works on any device with a browser. |
+| 9 | Cloudflare Access for authentication | Zero application auth code. Identity handled at the edge. Free for up to 50 users. |
