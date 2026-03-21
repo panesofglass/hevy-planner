@@ -3,7 +3,7 @@
   "checkpoint_id": "0bf239a45af6",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 0,
+  "checkpoints_count": 2,
   "files_touched": [
     ".claude/skills/dev/SKILL.md",
     ".claude/skills/hevy-test/SKILL.md",
@@ -17,13 +17,19 @@
       "transcript": "/0b/f239a45af6/0/full.jsonl",
       "content_hash": "/0b/f239a45af6/0/content_hash.txt",
       "prompt": "/0b/f239a45af6/0/prompt.txt"
+    },
+    {
+      "metadata": "/0b/f239a45af6/1/metadata.json",
+      "transcript": "/0b/f239a45af6/1/full.jsonl",
+      "content_hash": "/0b/f239a45af6/1/content_hash.txt",
+      "prompt": "/0b/f239a45af6/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 64,
-    "cache_creation_tokens": 47985,
-    "cache_read_tokens": 2500674,
-    "output_tokens": 13175,
-    "api_call_count": 39
+    "input_tokens": 7161,
+    "cache_creation_tokens": 426081,
+    "cache_read_tokens": 18715854,
+    "output_tokens": 99201,
+    "api_call_count": 176
   }
 }
