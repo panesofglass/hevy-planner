@@ -1,0 +1,117 @@
+/context-dump
+
+---
+
+I want to learn Boris Cherny's methods on this project: https://howborisusesclaudecode.com
+
+---
+
+yes, install the skill first.
+
+---
+
+Yes, let's plan using Boris's approach.
+
+---
+
+yes
+
+---
+
+A, including reflow and skill tracking. The rest can be made into enhancements.
+
+---
+
+A, but it should be the scaffolding for the later Roadmap/Benchmarks page. Just placeholders or ignore the rest for now. I was hoping the availability of an initial .html would be a good bootstrap for this. I have that, the JSON, and the SQLite available, if it will help.
+
+---
+
+yes, I have experience with Datastar. I contributed to the datastar-dotnet library, the Frank.Datastar library, and have a working example in a tic-tac-toe game. All three repositories are available locally in /Users/ryanr/Code/
+
+---
+
+Those artifacts are all prototypes and not final versions. We should continue Boris's method for making sure to find the critical path in the design and not accept all of that wholesale.
+
+---
+
+yes
+
+---
+
+yes
+
+---
+
+Wait, we need to revisit section 2. I gave an incorrect answer on the reflow.
+
+---
+
+It should not be tied to a weekly format.
+
+---
+
+conveyor belt. The whole thing shifts if missed. If only some portions are skipped, they can be marked skipped, and the next day's workout replaces it **unless** it's CARs only on the next day. The idea is to maintain the same general duration max (~25 minutes) and not piling on. However, I regularly find I have to shift days due to life events, and it's hard to fit to an exact calendar / daily / weekly schedule. If I miss a day of more than CARS, and the next day is CARs only, then move the previous day to the next. I will likely always do CARs as it is short and easy to do anywhere (that's assumed in the plan). However, when traveling or other things happen, days just need to shift. Questions?
+
+---
+
+Scenario A is the correct one. I basically want the freedom to dynamically switch days when I have limited time with back-to-back effort days and not push out, then have a light CARs still in between.
+
+---
+
+Almost. If the current day has a main session and the next day has a main session, it's the conveyor belt. If the current day has CARs only and the next day has a main session, just drop the CARs only. If the current day has a main session and the next day has CARs only, drop the CARs only and move the current day into that spot. If that's too difficult, we can do conveyor belt. However, that's the idea I'm going for. It's roughly swap an easy CARs day with the main session but keep all main sessions on the conveyor belt.
+
+---
+
+nail meet hammer. You got it.
+
+---
+
+yes
+
+---
+
+Each page gets a single SSE connection. All fragments are streamed after first page render. MPA, not SPA. Structure looks correct.
+
+---
+
+I really dislike that design style. Can you match the Hevy theme since this is a companion?
+
+---
+
+I like it. Do the details include links to videos demonstrating the moves as in the original html?
+
+---
+
+Mockup session detail screen next. Today screen looks good.
+
+---
+
+Apply the correct Hevy theme. I see you sneaking in some of that awful side border with rounded corners
+
+---
+
+Much better. Looks good.
+
+---
+
+Looks good. Does each Skill expand? Will it be possible for other users to set their own "WHERE YOU ARE" through an onboarding session (future enhancement)?
+
+---
+
+Hmm ... this raises a good point about the nature of this content and structure. but we can worry abou the details later.
+
+---
+
+If Roadmap and Benchmarks are also static (are they?) why not add them since we already have the page?
+
+---
+
+Yes
+
+---
+
+approve
+
+---
+
+One quibble: use content negotiation for the SSE pattern. Loading / with accept header text/event-stream should be sufficient and avoid the need for a unique path given the contents are related. Same for /progress.
