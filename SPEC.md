@@ -1,12 +1,27 @@
-# Mobility Tracker — Product Spec
+# Product Spec
 
 ## What Is This?
 
-A native iOS + watchOS app for tracking the Mobility & Joint Restoration Program. The app tells you what to do today, lets you tap through exercises as you complete them, automatically adjusts if you miss a workout, and logs everything to Apple Health.
+An iOS + watchOS training app. It tells you what to do today, lets you tap through exercises as you complete them, automatically adjusts if you miss a workout, and logs everything to Apple Health.
 
-No server, no accounts, no setup. Install it, pick a start date, and go.
+No accounts, no setup. Install it, pick a program, and go.
 
-A Cloudflare Workers backend (TypeScript + Datastar) may be added in a future phase for web access and program sharing. The domain logic is kept in a standalone Swift module so it can be reimplemented server-side without reworking the apps.
+The first bundled program is the **Mobility & Joint Restoration Program** — an 8-week plan for joint health, shoulder rehab, knee/hip mobility, and Achilles recovery. The app is designed to host any training program: strength, calisthenics, mobility, or a combination.
+
+### Goals
+
+- Show the user exactly what to do today, in order
+- Make completing a workout as few taps as possible
+- Automatically reflow the schedule when life gets in the way
+- Track progress over weeks and months
+- Work on the wrist (Apple Watch) with no phone dependency during a workout
+
+### Non-Goals (v1)
+
+- Program editor (programs are bundled; import from JSON is a future feature)
+- Social or sharing features
+- Web or Android access
+- AI-driven programming or adaptive difficulty
 
 ---
 
@@ -18,19 +33,19 @@ What you see when you open the app. Shows today's workout queue in order.
 
 ```
 ┌─────────────────────────────────┐
-│  MOBILITY TRACKER               │
+│  [APP NAME]                     │
 │  Week 2 · Foundation Phase      │
 │                                 │
 │  ┌───────────────────────────┐  │
 │  │  DAILY CARs               │  │
-│  │ 5-7 min · 5 exercises     │  │
+│  │  5-7 min · 5 exercises    │  │
 │  │                           │  │
 │  │         [Start CARs]      │  │
 │  └───────────────────────────┘  │
 │                                 │
 │  ┌───────────────────────────┐  │
 │  │  Session B: Knees & Hips  │  │
-│  │ 15-20 min · 6 exercises   │  │
+│  │  15-20 min · 6 exercises  │  │
 │  │                           │  │
 │  │      [Start Session]      │  │
 │  └───────────────────────────┘  │
@@ -49,7 +64,7 @@ What you see when you open the app. Shows today's workout queue in order.
 ```
 
 **Behavior:**
-- Queue items appear in order: CARs first, then the day's main session
+- Queue items appear in order: daily items first (e.g., CARs), then the day's main session
 - Tapping "Start" opens the active workout screen
 - Completed items show a checkmark and collapse
 - When all items are done, the hero area shows "All done today" with a preview of tomorrow
@@ -96,16 +111,21 @@ The tap-through flow for completing a workout. One exercise at a time, focused.
 - "Skip" moves to next exercise (logged as skipped, not counted as completed)
 - Progress dots show position in the session
 - "Back" returns to the Today screen (workout is paused, not lost)
-- When the last exercise is completed: workout is saved to history, logged to HealthKit, and the Today screen updates
+- When the last exercise is completed: workout is saved to history, logged to Apple Health, and the Today screen updates
 - A timer runs in the background tracking total session duration (displayed at the top)
 
 ### 3. History
 
-Weekly and monthly view of completed workouts.
+Weekly view of completed workouts with simple stats.
 
 ```
 ┌─────────────────────────────────┐
 │  HISTORY                        │
+│                                 │
+│  ── Stats ──────────────────    │
+│  Streak: 8 days                 │
+│  This week: 4/10 sessions       │
+│  Total sessions: 34             │
 │                                 │
 │  ── This Week ──────────────    │
 │  Mon  Shoulders     22 min  ✓   │
@@ -122,24 +142,19 @@ Weekly and monthly view of completed workouts.
 │  Fri  Daily CARs     6 min  ✓   │
 │  Sat  Recovery       25 min ✓   │
 │                                 │
-│  ── Stats ──────────────────    │
-│  Streak: 8 days                 │
-│  This week: 4/10 sessions       │
-│  Total sessions: 34             │
-│                                 │
 │  [Today]  [History]  [Program]  │
 └─────────────────────────────────┘
 ```
 
 **Behavior:**
+- Stats at the top: current streak, sessions this week, total sessions
 - Grouped by week, most recent first
-- Tapping a completed workout shows the detail: which exercises were done/skipped, duration, heart rate (if available from Watch)
-- Simple stats at the top: current streak, sessions this week, total sessions
-- Streak counts any day where at least CARs were completed
+- Tapping a completed workout shows detail: which exercises were done/skipped, duration, heart rate (if available from Watch)
+- Streak counts any day where at least one session was completed
 
 ### 4. Program
 
-Reference view of the full program. Read-only in v1.
+Reference view of the active program. Read-only in v1.
 
 ```
 ┌─────────────────────────────────┐
@@ -171,9 +186,9 @@ Reference view of the full program. Read-only in v1.
 - Tapping a session expands to show all exercises with full coaching notes and video links
 - Current progression phase is highlighted with its guidance
 - Upcoming phases shown dimmed
-- Template selection (4-day, 5-day, 6-day) accessible from this screen via settings
+- Template selection (4-day, 5-day, 6-day) accessible via settings
 
-### 5. watchOS — Workout
+### 5. watchOS
 
 The Watch shows the essentials. No browsing, no history — just the next workout.
 
@@ -204,12 +219,12 @@ The Watch shows the essentials. No browsing, no history — just the next workou
 ```
 
 **Behavior:**
-- On launch: shows today's queue (CARs + main session)
-- Tapping "Start" begins the workout and starts an HKWorkoutSession (live HR tracking)
+- On launch: shows today's queue (daily items + main session)
+- Tapping "Start" begins the workout with live heart rate tracking
 - Exercises shown one at a time: name, sets, abbreviated notes
 - "Done" advances; haptic tap confirms
-- On completion: workout saved to HealthKit, Watch shows summary (duration, HR avg, exercises completed)
-- Complication: shows next session name ("CARs + Knees" or "All done")
+- On completion: workout saved to Apple Health, summary shown (duration, HR avg, exercises completed)
+- Complication: shows next session name or "All done"
 
 ---
 
@@ -217,255 +232,195 @@ The Watch shows the essentials. No browsing, no history — just the next workou
 
 ### First Launch
 
-1. Welcome screen: "Mobility & Joint Restoration Program — 8 weeks to better movement"
+1. Welcome screen with program title and brief description
 2. Pick a start date (defaults to today, can backdate if already started)
-3. Pick a template: 4-day, 5-day (recommended), or 6-day
-4. Request HealthKit permissions (write workouts, read activity summary + heart rate)
+3. Pick a schedule template: 4-day, 5-day (recommended), or 6-day
+4. Request health tracking permissions
 5. Land on Today screen with the first day's queue populated
 
 ### Daily Use (iPhone)
 
-1. Open app → Today screen shows queue (CARs + main session)
-2. Tap "Start CARs" → Active Workout screen, exercise 1 of 5
+1. Open app → Today screen shows queue (daily items + main session)
+2. Tap "Start" on the first item → Active Workout screen, exercise 1
 3. Tap "Done" through each exercise
-4. CARs complete → back to Today, CARs shows checkmark, main session is now the hero card
-5. Tap "Start Session" → Active Workout, exercise 1 of 6
-6. Tap through exercises
-7. Session complete → saved to history, logged to HealthKit, Today shows "All done"
+4. Session complete → back to Today, item shows checkmark, next item becomes the hero card
+5. Repeat for remaining items
+6. All done → Today shows completion state with tomorrow's preview
 
 ### Daily Use (Watch)
 
 1. Raise wrist or tap complication → see today's queue
-2. Tap "Start" → HKWorkoutSession begins, first exercise shown
+2. Tap "Start" → heart rate tracking begins, first exercise shown
 3. Tap "Done" through each exercise (haptic confirmation on each)
-4. Workout complete → summary screen (duration, avg HR), saved to HealthKit
+4. Workout complete → summary screen (duration, avg HR)
 5. Complication updates to next session or "All done"
 
 ### Missed Workout
 
 1. It's Thursday. Wednesday's Session B was not completed.
 2. Open the app Thursday morning.
-3. Today screen shows: [CARs] [Strength note] (Thursday's normal schedule)
-4. Session B has been re-enqueued to the first open day (Sunday, if room, else dropped for the week)
-5. Week overview shows Wednesday as missed (dimmed, not checked)
-6. Friday proceeds normally with Session C
+3. Today screen shows Thursday's normal schedule.
+4. Session B has been re-enqueued to the first open day this week (if room, else dropped).
+5. Week overview shows Wednesday as missed (dimmed, not checked).
+6. Friday proceeds normally with its scheduled session.
 
 ### Week Boundary
 
 1. It's Monday of week 2.
 2. Any remaining skipped sessions from week 1 are dropped.
 3. A fresh queue is generated from the template.
-4. If week 2 is still "Foundation" phase, exercise descriptions include Foundation-phase coaching ("CARs: 70% effort", "use bench support", etc.)
-5. When week 3 starts, descriptions update to "Build" phase coaching.
+4. If the program has progression phases, coaching notes update to reflect the current phase.
 
 ---
 
-## Data Model (Swift)
+## Queue & Reflow Rules
 
-### Program Data (bundled, read-only)
+The queue is the core of the scheduling system. These rules define how workouts are ordered, what happens when you miss one, and how the schedule recovers.
 
-```swift
-struct Program {
-    let id: String
-    let title: String
-    let sessions: [Session]
-    let weekTemplates: [WeekTemplate]
-    let progressions: [Progression]
-}
+1. Each day, the queue is populated from the active template. **Daily sessions** (e.g., CARs) are inserted first, followed by the day's scheduled session(s), in template order.
 
-struct Session {
-    let id: String              // "daily", "sessionA", "sessionB", etc.
-    let title: String
-    let subtitle: String
-    let description: String
-    let targetFrequency: Int    // per week
-    let exercises: [Exercise]
-}
+2. The user works through items in sequence. The **next item** is always the first incomplete item in today's queue.
 
-struct Exercise {
-    let id: String
-    let name: String
-    let sets: String            // "3x8 each side"
-    let notes: String
-    let videoURL: URL?
-}
+3. When an item is **completed**, it's marked done and the next item becomes active. When all items for the day are done, the hero card shows tomorrow's preview.
 
-struct WeekTemplate {
-    let name: String            // "5-Day (Recommended)"
-    let description: String
-    let days: [DaySlot]
-}
+4. **Daily sessions have special reset behavior**: they are never reflowed. If not completed by end of day, they are dropped. A fresh daily entry is inserted at the top of the next day's queue. Daily sessions always reset — they don't accumulate.
 
-struct DaySlot {
-    let dayOfWeek: Int          // 1=Monday (matching Calendar)
-    let sessionIDs: [String]
-    let note: String?           // "Strength training — CARs as warmup"
-}
+5. **Non-daily sessions follow reflow rules**: when a scheduled date passes without completion, the session is **re-enqueued after the remaining scheduled sessions** for the week. If no open day remains, it's dropped for the week.
 
-struct Progression {
-    let weekRange: String       // "Weeks 1-2"
-    let phaseName: String       // "Foundation"
-    let focus: String
-    let details: [String]
-}
+6. At the **end of each week**, any remaining skipped sessions are dropped. The next week's queue is generated fresh from the template.
+
+---
+
+## Data Schema
+
+Programs are defined as structured data. In v1, the first program is bundled with the app. In the future, programs can be imported from JSON files, enabling community-created and personalized plans.
+
+### Program
+
+```
+Program
+  id: string
+  title: string
+  description: string
+  durationWeeks: int (0 = ongoing)
+  sessions: Session[]
+  weekTemplates: WeekTemplate[]
+  progressions: Progression[]
 ```
 
-### User State (SwiftData, synced via iCloud)
+### Session
 
-```swift
-@Model
-class UserState {
-    var activeTemplateIndex: Int    // which week template
-    var startDate: Date
-    var currentWeek: Int { /* derived from startDate */ }
-    var currentPhase: String { /* derived from progressions */ }
-}
+```
+Session
+  id: string                    e.g., "daily-cars", "shoulder-rehab"
+  title: string
+  subtitle: string              e.g., "15-20 min — Do 2x per week"
+  description: string           coaching context for the session
+  isDaily: bool                 true = resets daily, not reflowed
+  exercises: Exercise[]
 ```
 
-### Workout Queue (SwiftData)
+### Exercise
 
-```swift
-@Model
-class QueueItem {
-    var sessionID: String
-    var scheduledDate: Date
-    var position: Int
-    var isDaily: Bool
-    var status: QueueItemStatus     // pending, ready, inProgress, completed, skipped
-    var startedAt: Date?
-    var completedAt: Date?
-}
-
-enum QueueItemStatus: String, Codable {
-    case pending        // scheduled but not yet today
-    case ready          // today's item, available to start
-    case inProgress     // actively being worked
-    case completed      // done
-    case skipped        // date passed without completion
-}
+```
+Exercise
+  id: string
+  name: string
+  sets: string                  e.g., "3×8 each side"
+  notes: string                 coaching notes, cues, progression tips
+  videoURL: string?             link to tutorial video
 ```
 
-### Workout History (SwiftData, synced via iCloud)
+### Week Template
 
-```swift
-@Model
-class CompletedWorkout {
-    var sessionID: String
-    var sessionTitle: String
-    var completedAt: Date
-    var durationSeconds: Int
-    var exerciseLogs: [ExerciseLog]
-    var healthKitWorkoutID: UUID?
-    var averageHeartRate: Double?    // from Watch, if available
-}
+```
+WeekTemplate
+  name: string                  e.g., "5-Day (Recommended)"
+  description: string
+  days: DaySlot[]
+```
 
-struct ExerciseLog: Codable {
-    let exerciseID: String
-    let completed: Bool
-    let skipped: Bool
-}
+### Day Slot
+
+```
+DaySlot
+  dayOfWeek: int                1=Monday, 7=Sunday
+  sessionIDs: string[]          references to Session.id
+  note: string?                 e.g., "Strength training — CARs as warmup"
+```
+
+### Progression
+
+```
+Progression
+  weekRange: string             e.g., "Weeks 1-2"
+  phaseName: string             e.g., "Foundation"
+  focus: string                 one-line summary
+  details: string[]             specific coaching adjustments for this phase
+```
+
+### Queue Item (persisted user data)
+
+```
+QueueItem
+  sessionID: string
+  scheduledDate: date
+  position: int
+  isDaily: bool
+  status: pending | ready | inProgress | completed | skipped
+  startedAt: datetime?
+  completedAt: datetime?
+```
+
+### Completed Workout (persisted user data)
+
+```
+CompletedWorkout
+  sessionID: string
+  sessionTitle: string
+  completedAt: datetime
+  durationSeconds: int
+  exerciseLogs: ExerciseLog[]
+  averageHeartRate: double?
+```
+
+### Exercise Log
+
+```
+ExerciseLog
+  exerciseID: string
+  completed: bool
+  skipped: bool
+```
+
+### User State (persisted user data)
+
+```
+UserState
+  activeProgramID: string
+  activeTemplateIndex: int
+  startDate: date
 ```
 
 ---
 
-## Domain Logic (standalone module)
+## Apple Health Integration
 
-The queue state machine and reflow logic live in a pure Swift module with no SwiftUI or SwiftData dependencies. This is the code that would be reimplemented in TypeScript if a Workers backend is added later.
+### What the App Writes
 
-### Queue Engine
+When a session is completed, a workout record is saved to Apple Health:
+- Workout type based on session content (flexibility, strength, etc.)
+- Start time: when "Start" was tapped
+- End time: when the last exercise was completed
+- Metadata: session title, exercise completion count
 
-```swift
-// Pure functions — no side effects, fully testable
+On Apple Watch, the workout also captures live heart rate data.
 
-struct QueueEngine {
+### What the App Reads
 
-    /// Generate today's queue items from the template
-    static func generateDay(
-        template: WeekTemplate,
-        dayOfWeek: Int,
-        date: Date,
-        existingQueue: [QueueItem]
-    ) -> [QueueItem]
-    // Inserts CARs at position 0, then scheduled sessions in template order.
-    // Skips if items for this date already exist.
-
-    /// Advance the queue when an item is completed
-    static func complete(
-        item: QueueItem,
-        at: Date,
-        queue: [QueueItem]
-    ) -> [QueueItem]
-    // Marks item as .completed, sets completedAt.
-    // If next item exists for today, it becomes .ready.
-
-    /// Handle day transition: detect missed sessions, insert new CARs
-    static func advanceDay(
-        from previousDate: Date,
-        to currentDate: Date,
-        queue: [QueueItem],
-        template: WeekTemplate
-    ) -> [QueueItem]
-    // 1. Any .ready or .pending items from previous dates -> .skipped
-    // 2. Skipped non-daily items: re-enqueue after remaining week items
-    // 3. Skipped daily items (CARs): drop, don't re-enqueue
-    // 4. Generate new day's items (CARs first, then scheduled sessions)
-
-    /// Handle week boundary: drop remaining skipped, generate fresh week
-    static func advanceWeek(
-        queue: [QueueItem],
-        template: WeekTemplate,
-        weekStartDate: Date
-    ) -> [QueueItem]
-    // Drops all .skipped items. Generates the full week's queue.
-
-    /// Get the current progression phase for a given week number
-    static func currentPhase(
-        week: Int,
-        progressions: [Progression]
-    ) -> Progression?
-}
-```
-
-### Key Design Rule
-
-These functions take data in and return data out. No SwiftData queries, no HealthKit calls, no UI updates. The caller (a SwiftUI view model or a background task) is responsible for persisting the result and triggering side effects.
-
----
-
-## HealthKit Integration
-
-### Permissions Requested
-
-- **Write**: HKWorkoutType (.flexibility, .cooldown)
-- **Read**: HKActivitySummaryType, HKQuantityType(.heartRate), HKWorkoutType
-
-### When Workouts Are Logged
-
-- **iPhone**: After the last exercise in a session is completed (or skipped), an HKWorkout is saved with:
-  - Type: .flexibility (mobility sessions) or .cooldown (recovery)
-  - Start time: when "Start" was tapped
-  - End time: when the last exercise was completed
-  - Metadata: session title, exercises completed count
-
-- **Watch**: Same as above, but wrapped in an HKWorkoutSession for live heart rate collection. Heart rate samples are automatically associated with the workout.
-
-### Data Read
-
-- Activity rings (move/exercise/stand) displayed on the Today screen if available
-- Average heart rate shown on completed workout detail (if Watch was worn)
-- Workout history from HealthKit is NOT read — the app tracks its own history in SwiftData to avoid HealthKit query complexity
-
----
-
-## iCloud Sync
-
-SwiftData with CloudKit integration provides automatic sync:
-
-- UserState, QueueItem, CompletedWorkout all sync via iCloud
-- iPhone to Mac sync is automatic
-- Watch uses a shared CloudKit container for the same data
-- No conflict resolution logic needed for single-user — last write wins
-- If iCloud is unavailable, data persists locally and syncs when reconnected
+- Activity rings (move/exercise/stand) displayed on the Today screen
+- Average heart rate shown on completed workout detail (when Watch was worn)
+- The app tracks its own workout history rather than reading it back from Apple Health
 
 ---
 
@@ -473,68 +428,23 @@ SwiftData with CloudKit integration provides automatic sync:
 
 Accessible from the Program screen:
 
-- **Template**: Switch between 4-day, 5-day, 6-day (regenerates future queue items)
-- **Start Date**: Adjust if needed (recalculates current week/phase)
-- **HealthKit**: Toggle workout logging on/off
+- **Template**: Switch between schedule templates (regenerates future queue items)
+- **Start Date**: Adjust if needed (recalculates current week and phase)
+- **Health Tracking**: Toggle workout logging on/off
 - **Reset Program**: Start over from week 1 (confirmation required)
 
 ---
 
-## Phase 2: Workers Backend (Future)
+## Future Directions
 
-When the product proves itself and web access is desired:
+These are not in scope for v1 but inform design decisions:
 
-1. Reimplement QueueEngine in TypeScript for Cloudflare Workers
-2. Add D1 database mirroring the SwiftData schema
-3. Add Datastar SSE frontend (hypermedia approach)
-4. Add sync layer: iOS/Watch apps POST completions to the Workers API
-5. Add auth (Cloudflare Access for personal, Bearer token for OSS)
-6. PWA comes free from the Datastar frontend
-
-The iOS/Watch apps continue working locally. The sync layer is additive — not a replacement for local SwiftData storage.
-
----
-
-## Parallel Agent Strategy (Weekend Build)
-
-Using Boris Cherny's method, the project can be split across parallel Claude Code agents:
-
-### Agent 1: Domain Logic + Data Model
-- Domain/ module: QueueEngine, all pure functions
-- Model/ module: SwiftData models (QueueItem, CompletedWorkout, UserState)
-- Program data definition (all sessions, exercises, templates, progressions as Swift structs)
-- Unit tests for QueueEngine (reflow, CARs reset, week boundary, missed workouts)
-- **Gate**: All unit tests pass. QueueEngine handles every scenario in the "User Flows" section.
-
-### Agent 2: iOS App (SwiftUI)
-- Today screen, Active Workout screen, History screen, Program screen
-- Tab bar navigation
-- View models that call QueueEngine and persist via SwiftData
-- Dark theme styling (#141210 background, #e8e4df text)
-- First launch onboarding flow
-- **Gate**: Full workout flow works in the iOS Simulator. Can complete CARs + main session, see history, view program.
-
-### Agent 3: watchOS App
-- Workout list screen, Active Workout screen, Summary screen
-- HKWorkoutSession integration for live HR
-- Complication (next session name)
-- Background refresh (update queue state)
-- **Gate**: Full workout flow works in the Watch Simulator. Workout appears in HealthKit.
-
-### Agent 4: HealthKit + Integration
-- HealthKit permission requests
-- Workout logging (iPhone + Watch paths)
-- Activity ring display on Today screen
-- Heart rate display on workout detail
-- iCloud sync configuration (shared CloudKit container)
-- Integration testing across iPhone + Watch
-- **Gate**: Complete a workout on Watch, verify it appears in iPhone history and Apple Health.
-
-### Sequencing
-
-Agents 1 and 2 can start in parallel. Agent 2 depends on Agent 1's data model and QueueEngine API (but can stub initially). Agent 3 depends on the data model from Agent 1. Agent 4 depends on Agents 2 and 3 for integration points.
-
-Recommended: start Agents 1 + 2 simultaneously. When Agent 1 finishes, start Agent 3. When Agents 2 + 3 finish, start Agent 4 for integration.
+- **Program import**: Load programs from JSON files, enabling community-created plans
+- **Program editor**: Create and modify programs within the app
+- **Goal tracking**: Target specific milestones (first muscle-up, squat depth, etc.)
+- **Exercise progressions**: Load increases, rep schemes, deload weeks
+- **Web backend**: Cloudflare Workers + Datastar for web access, sharing, and analytics
+- **Export**: Share workout history and program definitions
 
 ---
 
@@ -542,11 +452,11 @@ Recommended: start Agents 1 + 2 simultaneously. When Agent 1 finishes, start Age
 
 | # | Decision | Rationale |
 |---|----------|-----------|
-| 1 | Native Swift + SwiftData, no server for v1 | Fastest path to a usable product. Server is additive Phase 2. |
-| 2 | Domain logic in standalone module | Keeps reflow/queue logic testable and portable to TypeScript if a backend is added later. |
-| 3 | iCloud sync via CloudKit | Free, automatic, handles iPhone / Watch / Mac. No infrastructure to manage. |
-| 4 | Program data bundled in app | Static content doesn't need a database. Embedded Swift structs or a JSON file in the app bundle. |
-| 5 | Daily CARs are queue items that reset daily | Unified queue model. CARs always appear first, never reflowed, dropped and regenerated each day. |
-| 6 | One exercise at a time in active workout | Focused, low-cognitive-load UI for mid-workout use. Sweaty hands, distracted mind — keep it simple. |
-| 7 | Watch uses shared CloudKit, not Watch Connectivity for data | Simpler architecture. Watch Connectivity only for phone-dependent HealthKit queries. |
-| 8 | Dark theme | Matches the original program artifact aesthetic. Easier on eyes during early-morning workouts. |
+| 1 | No server for v1 | Fastest path to a usable product. Server is an additive future phase. |
+| 2 | Domain logic separated from UI and persistence | Keeps scheduling and reflow logic testable and portable to other platforms. |
+| 3 | Program data bundled in app, schema supports future JSON import | Ships fast now, extensible later. |
+| 4 | Daily sessions are queue items that reset daily | Unified queue model. Daily items always appear first, never reflowed, dropped and regenerated each day. |
+| 5 | One exercise at a time in active workout | Focused, low-cognitive-load UI for mid-workout use. |
+| 6 | `isDaily` flag on sessions rather than hardcoding CARs behavior | Any program can designate daily sessions (warmups, stretching, etc.) |
+| 7 | Data schema is platform-agnostic | Defined independent of any persistence technology. Can map to SwiftData, SQLite, JSON, or a server database. |
+| 8 | Dark theme | Easier on eyes during early-morning workouts. |
