@@ -2,34 +2,77 @@
 
 ## What Is This?
 
-An iOS + watchOS training app. It tells you what to do today, lets you tap through exercises as you complete them, automatically adjusts if you miss a workout, and logs everything to Apple Health.
+A training companion that adds the planning intelligence Hevy doesn't have. It tells you what to do today, automatically adjusts your schedule when you miss a workout, tracks long-term skill progression, and manages benchmark testing across a multi-phase roadmap — all built around programs you can define, import, and share.
 
-No accounts, no setup. Install it, pick a program, and go.
+Hevy handles the workout itself: exercise logging, Apple Watch, sets/reps, PRs, history. This companion handles everything upstream and downstream: scheduling, reflow, phase management, and program definition.
 
-The first bundled program is the **Mobility & Joint Restoration Program** — an 8-week plan for joint health, shoulder rehab, knee/hip mobility, and Achilles recovery. The app is designed to host any training program: strength, calisthenics, mobility, or a combination.
+It runs as a web app hosted on Cloudflare Workers, accessed from any browser or as a PWA on your phone's home screen. It syncs with Hevy via the Hevy API.
 
 ### Goals
 
-- Show the user exactly what to do today, in order
-- Make completing a workout as few taps as possible
-- Automatically reflow the schedule when life gets in the way
-- Track progress over weeks and months
-- Work on the wrist (Apple Watch) with no phone dependency during a workout
+- Show the user exactly what to do today, in order, with coaching context
+- Automatically reflow the schedule when a workout is missed
+- Track progress across a multi-phase roadmap (weeks to months to a year)
+- Gate advancement between phases on measurable benchmarks
+- Track long-term skill goals (muscle-up, handstand, etc.) with milestone progression
+- Push today's routine to Hevy so it's ready when you open the app
+- Pull completion data from Hevy to advance the queue
+- Define programs via an open JSON schema that anyone can create and share
 
 ### Non-Goals (v1)
 
-- Program editor (programs are bundled; import from JSON is a future feature)
-- Social or sharing features
-- Web or Android access
-- AI-driven programming or adaptive difficulty
+- Replacing Hevy for workout logging (sets, reps, rest timers, PRs)
+- Building native iOS or watchOS apps
+- AI-generated programming or adaptive difficulty
+- Social features
+
+---
+
+## How It Works With Hevy
+
+### Sync Model
+
+```
+   Companion (Cloudflare)              Hevy
+   ─────────────────────              ────
+   Program loaded from JSON
+   Queue generated from template
+   "Today: CARs + Session B"
+            │
+            ├──push routine──────►  Routine appears in Hevy
+            │                       User opens Hevy, does workout
+            │                       Logs sets/reps on phone or Watch
+            │
+            ◄──pull completion───  Workout marked complete
+            │
+   Queue advances
+   Reflow if needed
+   Next day's routine ready
+```
+
+### Hevy API Integration
+
+The [Hevy API](https://api.hevyapp.com/docs/) (requires Pro subscription) provides:
+
+- **Routines**: Create, update, and list workout routines. The companion pushes today's session as a Hevy routine.
+- **Workouts**: List completed workouts with full exercise/set detail. The companion polls for completions to advance the queue.
+- **Exercises**: List available exercises and exercise templates. Used to map program exercises to Hevy's exercise library.
+- **Routine Folders**: Organize routines by program or phase.
+
+### Sync Triggers
+
+- **On page load**: Pull recent workouts from Hevy, reconcile with queue state
+- **On "Push to Hevy" tap**: Create or update today's routine in Hevy
+- **On manual refresh**: Re-pull from Hevy to check for new completions
+- **Future**: Webhook or polling interval for automatic sync
 
 ---
 
 ## Screens
 
-### 1. Today (Home Screen)
+### 1. Today (Home)
 
-What you see when you open the app. Shows today's workout queue in order.
+What you see when you open the app. Shows today's queue in order.
 
 ```
 ┌─────────────────────────────────┐
@@ -38,121 +81,170 @@ What you see when you open the app. Shows today's workout queue in order.
 │                                 │
 │  ┌───────────────────────────┐  │
 │  │  DAILY CARs               │  │
-│  │  5-7 min · 5 exercises    │  │
-│  │                           │  │
-│  │         [Start CARs]      │  │
+│  │  7-10 min · 7 exercises   │  │
+│  │  [Push to Hevy]           │  │
 │  └───────────────────────────┘  │
 │                                 │
 │  ┌───────────────────────────┐  │
 │  │  Session B: Knees & Hips  │  │
-│  │  15-20 min · 6 exercises  │  │
-│  │                           │  │
-│  │      [Start Session]      │  │
+│  │  15-20 min · 9 exercises  │  │
+│  │  [Push to Hevy]           │  │
 │  └───────────────────────────┘  │
 │                                 │
 │  ── This Week ──────────────    │
 │  Mon  CARs + Shoulders    ✓    │
-│  Tue  CARs + Strength     ✓    │
+│  Tue  CARs + Core         ✓    │
 │  Wed  CARs + Knees & Hips ←    │
 │  Thu  CARs + Strength          │
 │  Fri  CARs + Ankle             │
 │  Sat  Recovery                  │
 │  Sun  Rest                      │
 │                                 │
-│  [Today]  [History]  [Program]  │
+│  [Today] [Roadmap] [Benchmarks] │
+│            [Program]            │
 └─────────────────────────────────┘
 ```
 
 **Behavior:**
-- Queue items appear in order: daily items first (e.g., CARs), then the day's main session
-- Tapping "Start" opens the active workout screen
-- Completed items show a checkmark and collapse
-- When all items are done, the hero area shows "All done today" with a preview of tomorrow
+- Queue items appear in order: daily sessions first, then the day's main session
+- Each card shows session title, duration, exercise count, and coaching description
+- "Push to Hevy" creates or updates the routine in Hevy for that session
+- Completed items (detected via Hevy API) show a checkmark and collapse
+- When all items are done, the hero area shows "All done today" with tomorrow's preview
 - The week overview highlights today and shows completion state for each day
+- Updated via Datastar SSE: completion state refreshes without page reload
 
-### 2. Active Workout
+### 2. Session Detail
 
-The tap-through flow for completing a workout. One exercise at a time, focused.
+Tapping a session card expands it to show the full exercise list with coaching context.
 
 ```
 ┌─────────────────────────────────┐
-│  ← Back          Session B      │
-│                  3 of 6         │
+│  ← Today                       │
 │                                 │
-│  Banded Terminal Knee           │
-│  Extensions                     │
+│  Session B: Knees & Hips        │
+│  15-20 min · 9 exercises        │
 │                                 │
-│  3×15 each leg                  │
+│  Your lateral lunge pain and    │
+│  cross-legged sitting difficulty│
+│  both point to tight hip        │
+│  adductors and weak VMO...      │
 │                                 │
-│  Attach band behind your knee   │
-│  to a low anchor. Stand facing  │
-│  away, slight bend. Squeeze to  │
-│  full lockout against band      │
-│  resistance. This isolates the  │
-│  VMO — the inner quad muscle    │
-│  that stabilizes the kneecap.   │
+│  ── Foundation Phase Notes ──   │
+│  - Cossack Squat: hold          │
+│    doorframe, partial depth     │
+│  - ATG Split Squat: use bench   │
+│  - Copenhagen plank from knees  │
 │                                 │
-│  [▶ Video Tutorial]             │
+│  ┌───────────────────────────┐  │
+│  │ 1. 90/90 Hip Switches     │  │
+│  │    3×8 each side           │  │
+│  │    [expand for notes]      │  │
+│  ├───────────────────────────┤  │
+│  │ 2. Glute Bridge w/ Hold ◆ │  │
+│  │    3×12                    │  │
+│  ├───────────────────────────┤  │
+│  │ 3. Banded Clamshells ◆    │  │
+│  │    3×15 each side          │  │
+│  │    ...                     │  │
+│  └───────────────────────────┘  │
 │                                 │
-│  ┌─────────────────────────┐    │
-│  │                         │    │
-│  │     [Done ✓]            │    │
-│  │                         │    │
-│  │     [Skip →]            │    │
-│  └─────────────────────────┘    │
-│                                 │
-│  ●●●○○○  progress dots          │
+│  [Push to Hevy]    [▶ Videos]   │
 └─────────────────────────────────┘
 ```
 
 **Behavior:**
-- Shows one exercise at a time with name, sets/reps, coaching notes, and video link
-- "Done" advances to the next exercise
-- "Skip" moves to next exercise (logged as skipped, not counted as completed)
-- Progress dots show position in the session
-- "Back" returns to the Today screen (workout is paused, not lost)
-- When the last exercise is completed: workout is saved to history, logged to Apple Health, and the Today screen updates
-- A timer runs in the background tracking total session duration (displayed at the top)
+- Full exercise list with sets/reps and coaching notes
+- Phase-specific coaching adjustments shown at the top
+- Exercises tagged with ◆ (or other markers) indicate cross-session exercises (e.g., core integration)
+- Expanding an exercise shows full notes and a link to video tutorial
+- "Push to Hevy" sends this session as a routine
+- "Videos" opens a view with all video links for the session
 
-### 3. History
+### 3. Roadmap
 
-Weekly view of completed workouts with simple stats.
+Long-term view of the multi-phase training journey.
 
 ```
 ┌─────────────────────────────────┐
-│  HISTORY                        │
+│  ROADMAP                        │
 │                                 │
-│  ── Stats ──────────────────    │
-│  Streak: 8 days                 │
-│  This week: 4/10 sessions       │
-│  Total sessions: 34             │
+│  ● Phase 1: Joint Restoration   │
+│    Weeks 1-8 · CURRENT          │
+│    Week 2 of 8                  │
+│    Gate: pass 7 benchmarks      │
 │                                 │
-│  ── This Week ──────────────    │
-│  Mon  Shoulders     22 min  ✓   │
-│  Mon  Daily CARs     6 min  ✓   │
-│  Tue  Daily CARs     5 min  ✓   │
-│  Wed  (today)                   │
+│  ○ Phase 2: Strength Prereqs    │
+│    Weeks 9-20                   │
+│    Pull-up volume, straight-arm │
+│    conditioning, wrist prep     │
 │                                 │
-│  ── Last Week ──────────────    │
-│  Mon  Shoulders     19 min  ✓   │
-│  Mon  Daily CARs     7 min  ✓   │
-│  Wed  Knees & Hips  18 min  ✓   │
-│  Wed  Daily CARs     5 min  ✓   │
-│  Fri  Ankle          16 min ✓   │
-│  Fri  Daily CARs     6 min  ✓   │
-│  Sat  Recovery       25 min ✓   │
+│  ○ Phase 3: Skill Acquisition   │
+│    Weeks 21-36                  │
+│    Muscle-up transition,        │
+│    planche leans, pistol depth  │
 │                                 │
-│  [Today]  [History]  [Program]  │
+│  ○ Phase 4: Refinement          │
+│    Weeks 37-52+                 │
+│    Polish and progress          │
+│                                 │
+│  ── Skills ─────────────────    │
+│  ★ Muscle Up      6-9 months   │
+│  ◆ Tuck Planche   9-12 months  │
+│  ● Pistol Squat   5-8 months   │
+│  ▲ Handstand      9-15 months  │
+│                                 │
+│  [Today] [Roadmap] [Benchmarks] │
 └─────────────────────────────────┘
 ```
 
 **Behavior:**
-- Stats at the top: current streak, sessions this week, total sessions
-- Grouped by week, most recent first
-- Tapping a completed workout shows detail: which exercises were done/skipped, duration, heart rate (if available from Watch)
-- Streak counts any day where at least one session was completed
+- Shows all roadmap phases with current phase highlighted
+- Each phase shows week range, summary, and gate test status
+- Tapping a phase expands to show key focus, exercises introduced, and gate benchmarks
+- Tapping a skill shows current state, requirements, gap analysis, timeline, and milestones
+- Phase advancement: when all gate benchmarks pass, the user is prompted to advance
 
-### 4. Program
+### 4. Benchmarks
+
+Track measurable assessments over time.
+
+```
+┌─────────────────────────────────┐
+│  BENCHMARKS                     │
+│                                 │
+│  ── Due This Week ──────────    │
+│  Wall Dorsiflexion Test         │
+│  Last: 3.5 in (R) · 2 wks ago  │
+│  Target: 4-5 in                 │
+│  [Log Result]                   │
+│                                 │
+│  Single-Leg Balance             │
+│  Last: 22 sec (R) · 2 wks ago  │
+│  Target: 30 sec                 │
+│  [Log Result]                   │
+│                                 │
+│  ── Upcoming ───────────────    │
+│  Hollow Body Hold    in 1 week  │
+│  Overhead Reach      in 2 weeks │
+│  Deep Squat          in 3 weeks │
+│                                 │
+│  ── History ────────────────    │
+│  Wall Dorsiflexion: 2.5→3.0→3.5│
+│  Balance (R): 12→18→22 sec     │
+│                                 │
+│  [Today] [Roadmap] [Benchmarks] │
+└─────────────────────────────────┘
+```
+
+**Behavior:**
+- Shows benchmarks due for retesting, sorted by urgency
+- Each benchmark shows last result, target, and trend
+- "Log Result" opens a simple input for recording the measurement
+- History shows progression over time (sparkline or simple value list)
+- Benchmarks linked to roadmap gate tests show pass/fail status
+
+### 5. Program
 
 Reference view of the active program. Read-only in v1.
 
@@ -168,124 +260,83 @@ Reference view of the active program. Read-only in v1.
 │  [A: Shoulder Rehab & Stability]│
 │  [B: Knee & Hip Mobility]       │
 │  [C: Ankle/Achilles & Integr.] │
+│  [D: Core Stability]            │
 │  [Active Recovery]              │
 │                                 │
-│  ── Current Phase ──────────    │
-│  Weeks 1-2: Foundation          │
-│  Learn the movements. Don't     │
-│  chase depth or load.           │
-│  - CARs: 70% effort             │
-│  - All exercises at bodyweight   │
-│  - ATG Split Squat: use bench   │
+│  ── Foundations ─────────────   │
+│  [Breathing & Bracing Protocol] │
 │                                 │
-│  [Today]  [History]  [Program]  │
+│  ── Settings ───────────────    │
+│  Template: 5-Day (Recommended)  │
+│  Start Date: March 9, 2026      │
+│  Hevy Sync: Connected           │
+│  [Reset Program]                │
+│                                 │
+│  [Today] [Roadmap] [Benchmarks] │
 └─────────────────────────────────┘
 ```
-
-**Behavior:**
-- Tapping a session expands to show all exercises with full coaching notes and video links
-- Current progression phase is highlighted with its guidance
-- Upcoming phases shown dimmed
-- Template selection (4-day, 5-day, 6-day) accessible via settings
-
-### 5. watchOS
-
-The Watch shows the essentials. No browsing, no history — just the next workout.
-
-```
-┌───────────────────┐
-│  Daily CARs       │
-│  5 exercises       │
-│                   │
-│  [Start]          │
-│                   │
-│  Then: Knees &    │
-│  Hips (6 ex.)     │
-└───────────────────┘
-
-→ After tapping Start:
-
-┌───────────────────┐
-│  Neck CARs        │
-│  1×5 each dir.    │
-│                   │
-│  Slow, controlled │
-│  circles. Keep    │
-│  shoulders still. │
-│                   │
-│  [Done ✓]         │
-│  3 of 5           │
-└───────────────────┘
-```
-
-**Behavior:**
-- On launch: shows today's queue (daily items + main session)
-- Tapping "Start" begins the workout with live heart rate tracking
-- Exercises shown one at a time: name, sets, abbreviated notes
-- "Done" advances; haptic tap confirms
-- On completion: workout saved to Apple Health, summary shown (duration, HR avg, exercises completed)
-- Complication: shows next session name or "All done"
 
 ---
 
 ## User Flows
 
-### First Launch
+### First Launch / Setup
 
-1. Welcome screen with program title and brief description
-2. Pick a start date (defaults to today, can backdate if already started)
-3. Pick a schedule template: 4-day, 5-day (recommended), or 6-day
-4. Request health tracking permissions
-5. Land on Today screen with the first day's queue populated
+1. Open the app URL in browser (or install as PWA)
+2. Connect Hevy: enter API key (from Hevy Settings > Developer)
+3. Load a program: select bundled program or import from JSON file
+4. Pick a start date (defaults to today)
+5. Pick a schedule template (4-day, 5-day, 6-day)
+6. Land on Today screen with the first day's queue populated
 
-### Daily Use (iPhone)
+### Daily Use
 
-1. Open app → Today screen shows queue (daily items + main session)
-2. Tap "Start" on the first item → Active Workout screen, exercise 1
-3. Tap "Done" through each exercise
-4. Session complete → back to Today, item shows checkmark, next item becomes the hero card
-5. Repeat for remaining items
-6. All done → Today shows completion state with tomorrow's preview
-
-### Daily Use (Watch)
-
-1. Raise wrist or tap complication → see today's queue
-2. Tap "Start" → heart rate tracking begins, first exercise shown
-3. Tap "Done" through each exercise (haptic confirmation on each)
-4. Workout complete → summary screen (duration, avg HR)
-5. Complication updates to next session or "All done"
+1. Open companion → Today screen shows queue (CARs + main session)
+2. Review session detail and coaching notes if needed
+3. Tap "Push to Hevy" → routine appears in Hevy
+4. Open Hevy on phone or Watch, do the workout, log sets/reps
+5. Return to companion (or it auto-syncs) → workout detected as complete
+6. Queue advances, next item updates, week overview reflects completion
 
 ### Missed Workout
 
 1. It's Thursday. Wednesday's Session B was not completed.
-2. Open the app Thursday morning.
-3. Today screen shows Thursday's normal schedule.
-4. Session B has been re-enqueued to the first open day this week (if room, else dropped).
-5. Week overview shows Wednesday as missed (dimmed, not checked).
+2. Open the companion Thursday morning.
+3. Today screen shows Thursday's normal schedule (CARs + strength note).
+4. Session B has been re-enqueued to the first open day this week.
+5. Week overview shows Wednesday as missed.
 6. Friday proceeds normally with its scheduled session.
 
-### Week Boundary
+### Benchmark Testing
 
-1. It's Monday of week 2.
-2. Any remaining skipped sessions from week 1 are dropped.
-3. A fresh queue is generated from the template.
-4. If the program has progression phases, coaching notes update to reflect the current phase.
+1. Benchmarks screen shows "Wall Dorsiflexion Test — due this week"
+2. User performs the test, taps "Log Result", enters measurement
+3. Result is saved, trend updates, gate test status recalculated
+4. If all gate tests for current roadmap phase pass, user is prompted to advance
+
+### Phase Advancement
+
+1. All Phase 1 gate benchmarks pass
+2. Roadmap screen shows "Phase 1 complete — ready to advance?"
+3. User confirms → Phase 2 becomes active
+4. New sessions/exercises are added to the queue from the Phase 2 program definition
+5. Schedule template may update (or user is prompted to choose a new one)
 
 ---
 
 ## Queue & Reflow Rules
 
-The queue is the core of the scheduling system. These rules define how workouts are ordered, what happens when you miss one, and how the schedule recovers.
+Same rules as before — the queue is the core scheduling engine:
 
-1. Each day, the queue is populated from the active template. **Daily sessions** (e.g., CARs) are inserted first, followed by the day's scheduled session(s), in template order.
+1. Each day, the queue is populated from the active template. **Daily sessions** are inserted first, followed by the day's scheduled session(s), in template order.
 
 2. The user works through items in sequence. The **next item** is always the first incomplete item in today's queue.
 
-3. When an item is **completed**, it's marked done and the next item becomes active. When all items for the day are done, the hero card shows tomorrow's preview.
+3. When Hevy reports an item as **completed**, it's marked done and the queue advances.
 
-4. **Daily sessions have special reset behavior**: they are never reflowed. If not completed by end of day, they are dropped. A fresh daily entry is inserted at the top of the next day's queue. Daily sessions always reset — they don't accumulate.
+4. **Daily sessions have special reset behavior**: never reflowed when missed, just dropped. A fresh daily entry is inserted at the top of the next day's queue.
 
-5. **Non-daily sessions follow reflow rules**: when a scheduled date passes without completion, the session is **re-enqueued after the remaining scheduled sessions** for the week. If no open day remains, it's dropped for the week.
+5. **Non-daily sessions follow reflow rules**: when a scheduled date passes without completion, the session is re-enqueued after the remaining scheduled sessions for the week. If no open day remains, it's dropped for the week.
 
 6. At the **end of each week**, any remaining skipped sessions are dropped. The next week's queue is generated fresh from the template.
 
@@ -293,158 +344,106 @@ The queue is the core of the scheduling system. These rules define how workouts 
 
 ## Data Schema
 
-Programs are defined as structured data. In v1, the first program is bundled with the app. In the future, programs can be imported from JSON files, enabling community-created and personalized plans.
+Programs are defined via the JSON Schema in `schema/program.schema.json`. The schema covers:
 
-### Program
+- **Program metadata**: title, author, duration, tags
+- **Sessions**: named groups of exercises, with an `isDaily` flag for daily-reset behavior
+- **Exercises**: name, sets/reps, coaching notes, video links, cross-session tags, per-phase overrides
+- **Week templates**: multiple schedule options (e.g., 4-day, 5-day, 6-day)
+- **Progressions**: phase-based coaching adjustments within the program
+- **Roadmap phases**: long-term phases with gate tests that reference benchmarks
+- **Skills**: long-term goals with milestones and timelines
+- **Benchmarks**: measurable assessments with targets and retest frequencies
+- **Foundations**: protocols (breathing, bracing) that apply across the program
+- **Theme**: optional per-program and per-session color theming
 
-```
-Program
-  id: string
-  title: string
-  description: string
-  durationWeeks: int (0 = ongoing)
-  sessions: Session[]
-  weekTemplates: WeekTemplate[]
-  progressions: Progression[]
-```
+See `schema/program.schema.json` for the full definition.
 
-### Session
-
-```
-Session
-  id: string                    e.g., "daily-cars", "shoulder-rehab"
-  title: string
-  subtitle: string              e.g., "15-20 min — Do 2x per week"
-  description: string           coaching context for the session
-  isDaily: bool                 true = resets daily, not reflowed
-  exercises: Exercise[]
-```
-
-### Exercise
+### User Data (persisted in D1)
 
 ```
-Exercise
-  id: string
-  name: string
-  sets: string                  e.g., "3×8 each side"
-  notes: string                 coaching notes, cues, progression tips
-  videoURL: string?             link to tutorial video
-```
+UserState
+  userID: string
+  activeProgramID: string
+  activeTemplateID: string
+  startDate: date
+  currentRoadmapPhaseID: string
+  hevyAPIKey: string (encrypted)
 
-### Week Template
-
-```
-WeekTemplate
-  name: string                  e.g., "5-Day (Recommended)"
-  description: string
-  days: DaySlot[]
-```
-
-### Day Slot
-
-```
-DaySlot
-  dayOfWeek: int                1=Monday, 7=Sunday
-  sessionIDs: string[]          references to Session.id
-  note: string?                 e.g., "Strength training — CARs as warmup"
-```
-
-### Progression
-
-```
-Progression
-  weekRange: string             e.g., "Weeks 1-2"
-  phaseName: string             e.g., "Foundation"
-  focus: string                 one-line summary
-  details: string[]             specific coaching adjustments for this phase
-```
-
-### Queue Item (persisted user data)
-
-```
 QueueItem
   sessionID: string
   scheduledDate: date
   position: int
   isDaily: bool
-  status: pending | ready | inProgress | completed | skipped
-  startedAt: datetime?
-  completedAt: datetime?
-```
+  status: pending | ready | completed | skipped
+  hevyRoutineID: string?
+  hevyWorkoutID: string?
 
-### Completed Workout (persisted user data)
+BenchmarkResult
+  benchmarkID: string
+  recordedAt: datetime
+  value: string
+  notes: string?
 
-```
 CompletedWorkout
   sessionID: string
-  sessionTitle: string
   completedAt: datetime
+  hevyWorkoutID: string
   durationSeconds: int
-  exerciseLogs: ExerciseLog[]
-  averageHeartRate: double?
 ```
 
-### Exercise Log
+### Hevy Exercise Mapping
+
+Programs define exercises by name. The companion maps these to Hevy's exercise library when pushing routines. A mapping table in D1 stores confirmed matches:
 
 ```
-ExerciseLog
-  exerciseID: string
-  completed: bool
-  skipped: bool
+ExerciseMapping
+  programExerciseID: string
+  hevyExerciseID: string
+  confirmedByUser: bool
 ```
 
-### User State (persisted user data)
-
-```
-UserState
-  activeProgramID: string
-  activeTemplateIndex: int
-  startDate: date
-```
-
----
-
-## Apple Health Integration
-
-### What the App Writes
-
-When a session is completed, a workout record is saved to Apple Health:
-- Workout type based on session content (flexibility, strength, etc.)
-- Start time: when "Start" was tapped
-- End time: when the last exercise was completed
-- Metadata: session title, exercise completion count
-
-On Apple Watch, the workout also captures live heart rate data.
-
-### What the App Reads
-
-- Activity rings (move/exercise/stand) displayed on the Today screen
-- Average heart rate shown on completed workout detail (when Watch was worn)
-- The app tracks its own workout history rather than reading it back from Apple Health
+On first push, the companion attempts to auto-match by name. Unmatched exercises are flagged for the user to resolve manually.
 
 ---
 
 ## Settings
 
-Accessible from the Program screen:
-
+- **Hevy Connection**: API key management, sync status, last sync time
 - **Template**: Switch between schedule templates (regenerates future queue items)
 - **Start Date**: Adjust if needed (recalculates current week and phase)
-- **Health Tracking**: Toggle workout logging on/off
+- **Program**: View active program, import new program from JSON
 - **Reset Program**: Start over from week 1 (confirmation required)
 
 ---
 
-## Future Directions
+## Prerequisites & Costs
 
-These are not in scope for v1 but inform design decisions:
+### What You Need
 
-- **Program import**: Load programs from JSON files, enabling community-created plans
-- **Program editor**: Create and modify programs within the app
-- **Goal tracking**: Target specific milestones (first muscle-up, squat depth, etc.)
-- **Exercise progressions**: Load increases, rep schemes, deload weeks
-- **Web backend**: Cloudflare Workers + Datastar for web access, sharing, and analytics
-- **Export**: Share workout history and program definitions
+- **Hevy Pro subscription** ($9.99/month or $49.99/year) — required for API access. Get your API key from [Hevy Settings > Developer](https://hevy.com/settings?developer). [Hevy app](https://www.hevyapp.com/).
+- **Cloudflare account** (free tier is sufficient to start) — [Sign up](https://dash.cloudflare.com/sign-up).
+- **Node.js 18+** — for local development and the Wrangler CLI.
+- **Wrangler CLI** — Cloudflare's deployment tool (`npm install -g wrangler`).
+
+### Cloudflare Costs
+
+The free tier covers most personal use:
+
+| Resource | Free Tier | Notes |
+|----------|-----------|-------|
+| Workers requests | 100,000/day | More than enough for a personal app |
+| D1 database | 5 GB storage, 5M rows read/day | Workout history for years |
+| KV (if used) | 100,000 reads/day | Not required for v1 |
+| Custom domain | Bring your own | Optional; `*.workers.dev` subdomain is free |
+
+**Estimated cost for personal use: $0/month** beyond the Hevy Pro subscription.
+
+If usage grows (multiple users, heavy API polling), the Workers Paid plan is $5/month and covers 10M requests/month with higher D1 limits.
+
+### Hevy API Limits
+
+The Hevy API documentation does not publish explicit rate limits. The app should implement conservative backoff/retry logic and cache aggressively. For a single user syncing a few times per day, rate limits are unlikely to be an issue.
 
 ---
 
@@ -452,11 +451,11 @@ These are not in scope for v1 but inform design decisions:
 
 | # | Decision | Rationale |
 |---|----------|-----------|
-| 1 | No server for v1 | Fastest path to a usable product. Server is an additive future phase. |
-| 2 | Domain logic separated from UI and persistence | Keeps scheduling and reflow logic testable and portable to other platforms. |
-| 3 | Program data bundled in app, schema supports future JSON import | Ships fast now, extensible later. |
-| 4 | Daily sessions are queue items that reset daily | Unified queue model. Daily items always appear first, never reflowed, dropped and regenerated each day. |
-| 5 | One exercise at a time in active workout | Focused, low-cognitive-load UI for mid-workout use. |
-| 6 | `isDaily` flag on sessions rather than hardcoding CARs behavior | Any program can designate daily sessions (warmups, stretching, etc.) |
-| 7 | Data schema is platform-agnostic | Defined independent of any persistence technology. Can map to SwiftData, SQLite, JSON, or a server database. |
-| 8 | Dark theme | Easier on eyes during early-morning workouts. |
+| 1 | Companion to Hevy, not a standalone tracker | Hevy already has native apps, Watch support, exercise logging, PRs. Don't rebuild what works. |
+| 2 | Cloudflare Workers + Datastar | The entire product is a web app. Datastar's SSE-driven hypermedia is a natural fit. No native apps needed. |
+| 3 | TypeScript on Workers | First-class Cloudflare support. Datastar TS SDK works directly. Claude knows it deeply for agent-assisted builds. |
+| 4 | D1 for persistence | Relational queries for queue state, workout history, benchmark trends. SQLite at the edge. |
+| 5 | Programs defined via JSON Schema | Open, shareable, community-extensible. Anyone can create a program. |
+| 6 | Daily sessions are queue items that reset daily | Unified queue model. Daily items always appear first, never reflowed. |
+| 7 | Hevy API for sync, not scraping or manual entry | Official API with routine and workout CRUD. Requires Pro subscription. |
+| 8 | PWA for mobile access | No App Store needed. Install from browser. Works on any device with a browser. |

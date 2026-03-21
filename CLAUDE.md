@@ -2,60 +2,73 @@
 
 ## Project Overview
 
-iOS + watchOS training app. Read `SPEC.md` for the product spec — screens, user flows, data schema, and queue/reflow rules.
+A training companion web app that adds scheduling intelligence to Hevy. Read `SPEC.md` for the full product spec — screens, user flows, Hevy integration, and queue/reflow rules.
 
-The first bundled program is the Mobility & Joint Restoration Program. The app is designed to host any training program via a generic data schema.
+Hevy handles workout logging (sets, reps, PRs, Apple Watch). This companion handles everything else: program management, queue-based scheduling with automatic reflow, multi-phase roadmaps, benchmark tracking, and skill progression.
 
 ## Tech Stack
 
-- **iOS**: Swift, SwiftUI, SwiftData
-- **watchOS**: Swift, SwiftUI, HealthKit (HKWorkoutSession)
-- **Persistence**: SwiftData with CloudKit sync (iCloud)
-- **Health**: HealthKit (workout logging, activity rings, heart rate)
+- **Runtime**: Cloudflare Workers (TypeScript)
+- **Frontend**: Datastar (SSE-driven hypermedia, ~12KB, no build step)
+- **Database**: Cloudflare D1 (SQLite at the edge)
+- **Integration**: Hevy API (routines, workouts, exercises)
+- **Deployment**: Cloudflare Workers (wrangler)
+- **PWA**: Service worker + web app manifest for home screen install
 
 ## Architecture
 
-Domain logic (queue engine, reflow, scheduling) lives in a **standalone Swift module** with no SwiftUI or SwiftData dependencies. Pure functions, fully testable. This is the code that would be reimplemented server-side if a web backend is added later.
+The server owns the UI. Cloudflare Workers serves HTML pages with Datastar attributes. User interactions trigger SSE responses that push HTML fragment updates. No client-side framework, no build step, no SPA routing.
 
-The data schema in SPEC.md is platform-agnostic. The Swift implementation maps it to SwiftData @Model classes, but the schema itself could map to SQLite, JSON, or a server database.
+```
+Workers (TypeScript)
+├── Routes (request handling, content serving)
+├── Domain (queue engine, reflow, phase logic — pure functions)
+├── Datastar (SSE fragment builders, signal management)
+├── Hevy (API client — routines, workouts, exercises)
+└── Storage (D1 queries, user state, queue, benchmarks)
+```
 
 ## Project Structure
 
 ```
-MobilityTracker/
-├── Domain/            ← QueueEngine, pure functions (no UI/persistence deps)
-├── Model/             ← SwiftData models (QueueItem, CompletedWorkout, UserState)
-├── Data/              ← Bundled program definition (sessions, exercises, templates)
-├── Views/
-│   ├── Today/         ← Home screen (queue + week overview)
-│   ├── Workout/       ← Active workout flow (one exercise at a time)
-│   ├── History/       ← Completed workout history + stats
-│   ├── Program/       ← Program reference + settings
-│   └── Onboarding/    ← First launch flow
-├── ViewModels/        ← Calls QueueEngine, persists via SwiftData
-├── HealthKit/         ← Permissions, logging, reading
-└── Watch/
-    ├── Views/         ← Watch SwiftUI screens
-    ├── Workout/       ← HKWorkoutSession management
-    └── Complications/ ← Next session complication
+mobility-tracker/
+├── CLAUDE.md
+├── SPEC.md
+├── schema/
+│   └── program.schema.json     ← JSON Schema for program definition
+├── .claude/
+│   ├── skills/
+│   └── agents/
+├── src/
+│   ├── index.ts                ← Worker entry point, routing
+│   ├── domain/                 ← Queue engine, reflow, phase logic (pure functions)
+│   ├── hevy/                   ← Hevy API client
+│   ├── fragments/              ← Datastar HTML fragment builders
+│   ├── storage/                ← D1 queries
+│   └── auth/                   ← API key management
+├── programs/
+│   └── mobility-joint-restoration.json  ← first bundled program
+├── wrangler.toml
+└── package.json
 ```
 
 ## Style & Conventions
 
 - Domain functions are pure: data in, data out. No side effects.
-- SwiftData models use @Model macro
-- Dark theme: #141210 background, #e8e4df text
-- Commit messages: imperative mood, concise
+- Datastar fragments return HTML strings. No JSX, no templating engine.
+- D1 queries use prepared statements (no raw string interpolation).
+- Dark theme: #141210 background, #e8e4df text.
+- Commit messages: imperative mood, concise.
 
 ## Common Mistakes to Avoid
 
-- Do NOT put queue/reflow logic in view models or views — it belongs in Domain/QueueEngine
-- Do NOT read workout history from HealthKit — track it in SwiftData
-- QueueItemStatus enum must be String/Codable for SwiftData storage
-- ExerciseLog must be Codable (stored as transformable in SwiftData)
-- Watch HKWorkoutSession must be started BEFORE collecting heart rate samples
-- `isDaily` flag lives on the Session definition, not hardcoded to CARs
+- Do NOT put queue/reflow logic in route handlers — it belongs in domain/
+- Do NOT store Hevy API keys in plaintext — encrypt at rest in D1
+- Do NOT poll Hevy on every page load — cache recent workout data, refresh on user action
+- Datastar SSE events must end with two newlines (`\n\n`)
+- D1 has a 1MB response size limit per query — paginate workout history
+- Hevy API rate limits are undocumented — add backoff/retry logic
 
 ## Current Phase
 
-**Pre-build** — Product spec complete. Ready to initialize Xcode project and begin implementation.
+**Pre-build** — Product spec complete. Ready to initialize the Workers project and begin implementation.

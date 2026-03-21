@@ -1,0 +1,444 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ryanriley/mobility-tracker/schema/program.schema.json",
+  "title": "Training Program",
+  "description": "Schema for defining a training program. Programs contain sessions, exercises, weekly schedule templates, progression phases, optional skill goals, benchmarks, and a long-term roadmap.",
+  "type": "object",
+  "required": ["meta", "sessions", "weekTemplates", "progressions"],
+  "additionalProperties": false,
+  "properties": {
+
+    "meta": {
+      "type": "object",
+      "description": "Program metadata.",
+      "required": ["version", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Schema version (semver).",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Program title displayed in the app."
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief description of the program's purpose and scope."
+        },
+        "author": {
+          "type": "string"
+        },
+        "durationWeeks": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total program duration in weeks. 0 = ongoing/indefinite."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Searchable tags (e.g., 'mobility', 'strength', 'calisthenics')."
+        }
+      }
+    },
+
+    "sessions": {
+      "type": "array",
+      "description": "All sessions in the program. A session is a named group of exercises done together.",
+      "items": { "$ref": "#/$defs/session" },
+      "minItems": 1
+    },
+
+    "weekTemplates": {
+      "type": "array",
+      "description": "Weekly schedule templates. Users select one template to follow.",
+      "items": { "$ref": "#/$defs/weekTemplate" },
+      "minItems": 1
+    },
+
+    "progressions": {
+      "type": "array",
+      "description": "Progression phases within the program (e.g., Foundation, Build, Load). Coaching notes adjust per phase.",
+      "items": { "$ref": "#/$defs/progression" }
+    },
+
+    "roadmap": {
+      "type": "array",
+      "description": "Optional long-term roadmap phases beyond the core program (e.g., Skill Acquisition, Refinement). Each phase may span many weeks and gate on benchmarks.",
+      "items": { "$ref": "#/$defs/roadmapPhase" }
+    },
+
+    "skills": {
+      "type": "array",
+      "description": "Optional long-term skill goals tracked across the roadmap (e.g., Muscle Up, Pistol Squat).",
+      "items": { "$ref": "#/$defs/skill" }
+    },
+
+    "benchmarks": {
+      "type": "array",
+      "description": "Optional measurable assessments for tracking progress. Can serve as gate tests between roadmap phases.",
+      "items": { "$ref": "#/$defs/benchmark" }
+    },
+
+    "foundations": {
+      "type": "array",
+      "description": "Optional foundational protocols (breathing, bracing, warmup rituals) that apply across the program.",
+      "items": { "$ref": "#/$defs/foundation" }
+    },
+
+    "theme": {
+      "$ref": "#/$defs/theme",
+      "description": "Optional color theme for the program."
+    }
+  },
+
+  "$defs": {
+
+    "session": {
+      "type": "object",
+      "required": ["id", "title", "exercises"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the session within this program."
+        },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "description": {
+          "type": "string",
+          "description": "Coaching context explaining why this session exists and what it targets."
+        },
+        "isDaily": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, this session resets daily (never reflowed when missed, just dropped and regenerated)."
+        },
+        "sortOrder": {
+          "type": "integer",
+          "description": "Display order in the program view."
+        },
+        "color": {
+          "type": "string",
+          "description": "Optional CSS color string for theming this session (e.g., 'rgb(96, 165, 224)')."
+        },
+        "exercises": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/exercise" },
+          "minItems": 1
+        }
+      }
+    },
+
+    "exercise": {
+      "type": "object",
+      "required": ["id", "name", "sets"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the exercise within this program."
+        },
+        "name": { "type": "string" },
+        "sets": {
+          "type": "string",
+          "description": "Human-readable set/rep scheme (e.g., '3×8 each side', '2×45 sec')."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Coaching notes, cues, and progression tips."
+        },
+        "videoURL": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "Link to a tutorial video."
+        },
+        "searchTerms": {
+          "type": ["string", "null"],
+          "description": "Search keywords for finding tutorial videos."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tags indicating cross-cutting concerns (e.g., 'core-integration', 'tspine-integration', 'glute-activation'). Exercises tagged this way originate from a foundational session but appear in other sessions."
+        },
+        "progressionByPhase": {
+          "type": "object",
+          "description": "Optional per-phase overrides for sets, notes, or cues. Keys are progression phase names.",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "sets": { "type": "string" },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "weekTemplate": {
+      "type": "object",
+      "required": ["id", "name", "days"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": {
+          "type": "string",
+          "description": "Display name (e.g., '5-Day (Recommended)')."
+        },
+        "description": { "type": "string" },
+        "sortOrder": { "type": "integer" },
+        "days": {
+          "type": "array",
+          "description": "Seven entries, one per day of the week (Monday=index 0).",
+          "items": { "$ref": "#/$defs/daySlot" },
+          "minItems": 7,
+          "maxItems": 7
+        }
+      }
+    },
+
+    "daySlot": {
+      "type": "object",
+      "required": ["dayOfWeek"],
+      "additionalProperties": false,
+      "properties": {
+        "dayOfWeek": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6,
+          "description": "0=Monday, 6=Sunday."
+        },
+        "sessionIDs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "References to session IDs scheduled for this day. Empty = rest or user-directed."
+        },
+        "note": {
+          "type": ["string", "null"],
+          "description": "Optional coaching note for the day (e.g., 'Strength training — CARs as warmup')."
+        }
+      }
+    },
+
+    "progression": {
+      "type": "object",
+      "required": ["id", "weekRange", "phaseName"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "weekRange": {
+          "type": "string",
+          "description": "Human-readable week range (e.g., 'Weeks 1-2')."
+        },
+        "phaseName": {
+          "type": "string",
+          "description": "Phase name (e.g., 'Foundation', 'Build', 'Load')."
+        },
+        "focus": {
+          "type": "string",
+          "description": "One-line coaching summary for this phase."
+        },
+        "details": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Specific coaching adjustments and guidance for this phase."
+        },
+        "weekStart": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "First week number of this phase (for programmatic use)."
+        },
+        "weekEnd": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Last week number of this phase."
+        },
+        "sortOrder": { "type": "integer" }
+      }
+    },
+
+    "roadmapPhase": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": {
+          "type": "string",
+          "description": "Phase name (e.g., 'Phase 2: Strength Prerequisites')."
+        },
+        "weeks": {
+          "type": "string",
+          "description": "Human-readable duration (e.g., 'Weeks 9-20')."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["current", "future", "completed"],
+          "default": "future"
+        },
+        "summary": { "type": "string" },
+        "keyFocus": {
+          "type": "string",
+          "description": "Coaching guidance for this roadmap phase."
+        },
+        "gateTests": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "References to benchmark IDs that must pass before advancing to the next phase."
+        },
+        "color": { "type": "string" },
+        "sortOrder": { "type": "integer" }
+      }
+    },
+
+    "skill": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": {
+          "type": "string",
+          "description": "Skill name (e.g., 'Muscle Up')."
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Priority ranking (1 = highest)."
+        },
+        "icon": { "type": "string" },
+        "color": { "type": "string" },
+        "currentState": {
+          "type": "string",
+          "description": "Starting assessment of the user's ability."
+        },
+        "requirements": {
+          "type": "string",
+          "description": "What's needed to achieve this skill."
+        },
+        "gapAnalysis": {
+          "type": "string",
+          "description": "What's missing and how the program addresses it."
+        },
+        "timeline": {
+          "type": "string",
+          "description": "Expected progression milestones with timeframes."
+        },
+        "milestones": {
+          "type": "array",
+          "description": "Ordered list of sub-goals on the way to the skill.",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "targetWeek": {
+                "type": "integer",
+                "description": "Approximate week number when this milestone might be reached."
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "benchmark": {
+      "type": "object",
+      "required": ["id", "name", "howTo"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": {
+          "type": "string",
+          "description": "Benchmark name (e.g., 'Wall Dorsiflexion Test')."
+        },
+        "howTo": {
+          "type": "string",
+          "description": "Instructions for performing the assessment."
+        },
+        "target": {
+          "type": "string",
+          "description": "What a passing result looks like."
+        },
+        "frequency": {
+          "type": "string",
+          "description": "How often to retest (e.g., 'Every 2 weeks')."
+        },
+        "unit": {
+          "type": "string",
+          "description": "Optional measurement unit (e.g., 'inches', 'seconds')."
+        }
+      }
+    },
+
+    "foundation": {
+      "type": "object",
+      "required": ["id", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "title": {
+          "type": "string",
+          "description": "Protocol name (e.g., 'Breathing & Bracing Protocol')."
+        },
+        "description": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "instructions"],
+            "additionalProperties": false,
+            "properties": {
+              "step": { "type": "integer" },
+              "name": { "type": "string" },
+              "instructions": { "type": "string" },
+              "videoSearch": { "type": "string" }
+            }
+          }
+        },
+        "practice": {
+          "type": "string",
+          "description": "How and when to practice this protocol (e.g., '10 breaths before daily CARs for the first 2 weeks')."
+        },
+        "activeDuringWeeks": {
+          "type": "object",
+          "description": "Optional week range when this foundation is actively cued.",
+          "properties": {
+            "start": { "type": "integer" },
+            "end": { "type": "integer" }
+          }
+        }
+      }
+    },
+
+    "theme": {
+      "type": "object",
+      "description": "Optional visual theme for the program.",
+      "additionalProperties": false,
+      "properties": {
+        "backgroundColor": { "type": "string" },
+        "textColor": { "type": "string" },
+        "accentColor": { "type": "string" },
+        "sessionColors": {
+          "type": "object",
+          "description": "Per-session color overrides. Keys are session IDs.",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "background": { "type": "string" },
+              "accent": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
