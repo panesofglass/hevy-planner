@@ -1,0 +1,29 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "0bf239a45af6",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 0,
+  "files_touched": [
+    ".claude/skills/dev/SKILL.md",
+    ".claude/skills/hevy-test/SKILL.md",
+    ".claude/skills/preview-page/SKILL.md",
+    ".claude/skills/schema-check/SKILL.md",
+    ".claude/skills/seed/SKILL.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0b/f239a45af6/0/metadata.json",
+      "transcript": "/0b/f239a45af6/0/full.jsonl",
+      "content_hash": "/0b/f239a45af6/0/content_hash.txt",
+      "prompt": "/0b/f239a45af6/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 64,
+    "cache_creation_tokens": 47985,
+    "cache_read_tokens": 2500674,
+    "output_tokens": 13175,
+    "api_call_count": 39
+  }
+}

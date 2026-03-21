@@ -1,0 +1,17 @@
+Do we need to update the data-driven issue, assuming one was created to make all the static content data driven?
+
+---
+
+yes
+
+---
+
+For the data-driven issue, we should make it dependent on integrations. I would like to add BODi as an integration. Can you confirm there is an API to search or link to their programs and/or specific workouts within a program?
+
+---
+
+We'll track it, but it won't be a deep integration.
+
+---
+
+/context-dump
