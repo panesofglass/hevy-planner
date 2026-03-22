@@ -57,7 +57,7 @@ mobility-tracker/
 - Domain functions are pure: data in, data out. No side effects.
 - Datastar fragments return HTML strings. No JSX, no templating engine.
 - D1 queries use prepared statements (no raw string interpolation).
-- Dark theme: #141210 background, #e8e4df text.
+- Dark theme matching Hevy: #0D0D0F background, #1C1C1E cards, #FFFFFF text, #377DFF accent blue.
 - Commit messages: imperative mood, concise.
 
 ## Common Mistakes to Avoid

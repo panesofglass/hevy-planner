@@ -1,20 +1,5 @@
 import type { QueueItemRow, WeekTemplate, Session } from "../types";
 
-/**
- * Evaluate reflow on page load. The queue is a conveyor belt —
- * main sessions never drop. The first pending item IS the next
- * session, regardless of how many days passed. No items need moving.
- * The "reflow" is inherent in the playlist model.
- */
-export function evaluateReflow(
-  _items: QueueItemRow[],
-  _today: string
-): void {
-  // The conveyor belt model means reflow is a no-op on the queue itself.
-  // The first pending item is always "today's session" regardless of
-  // how many days were missed. Spacer interpolation happens at display
-  // time in computeUpcoming().
-}
 
 export interface UpcomingItem {
   type: "session" | "spacer";

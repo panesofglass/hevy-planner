@@ -20,7 +20,7 @@ export function htmlShell(opts: HtmlShellOptions): string {
 
   const bodyContent = opts.body
     ? opts.body
-    : `<div id="content"${sseAttr}></div>`;
+    : `<div id="content"></div>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -36,7 +36,7 @@ export function htmlShell(opts: HtmlShellOptions): string {
   <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
   <style>${CSS_THEME}</style>
 </head>
-<body>
+<body${sseAttr}>
   <header class="page-header">
     <h1 class="page-title">${escapeHtml(opts.title)}</h1>
     ${opts.subtitle ? `<p class="page-subtitle">${escapeHtml(opts.subtitle)}</p>` : ""}

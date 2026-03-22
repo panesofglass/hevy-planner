@@ -4,7 +4,7 @@
 
 export interface UserRow {
   readonly id: string;
-  readonly hevy_api_key_encrypted: string | null;
+  readonly hevy_api_key: string | null;
   readonly active_program: string;
   readonly template_id: string;
   readonly start_date: string;

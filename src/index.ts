@@ -15,6 +15,7 @@ import {
   getQueueItems,
   insertQueueItems,
   markQueueItemCompleted,
+  markQueueItemCompletedForUser,
   updateQueueItemHevyRoutineId,
   getExerciseMappings,
   upsertExerciseMapping,
@@ -32,7 +33,12 @@ import type { Program, Progression } from "./types";
 
 import programJson from "../programs/mobility-joint-restoration.json";
 
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 const program = programJson as unknown as Program;
+const APP_NAME = "Hevy Planner";
 
 export interface Env {
   DB: D1Database;
@@ -102,7 +108,7 @@ export default {
           // First-run: show setup page
           return htmlResponse(
             htmlShell({
-              title: program.meta.title,
+              title: APP_NAME,
               subtitle: "Setup",
               body: setupPage(program.weekTemplates),
             })
@@ -115,7 +121,7 @@ export default {
 
         return htmlResponse(
           htmlShell({
-            title: program.meta.title,
+            title: APP_NAME,
             subtitle: program.meta.subtitle,
             activeTab: "today",
             ssePath: "/",
@@ -258,25 +264,23 @@ async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
 /** SSE: Progress page — skills, roadmap, benchmarks */
 function handleProgressSSE(): Response {
   const fragments: string[] = [];
+  let isFirst = true;
+
+  const addFragment = (html: string) => {
+    fragments.push(patchElements(html, { selector: "#content", mode: isFirst ? "inner" : "append" }));
+    isFirst = false;
+  };
 
   if (program.skills && program.skills.length > 0) {
-    fragments.push(
-      patchElements(skillCards(program.skills), { selector: "#content", mode: "inner" })
-    );
+    addFragment(skillCards(program.skills));
   }
 
   if (program.roadmap && program.roadmap.length > 0) {
-    const mode = fragments.length > 0 ? "append" : "inner";
-    fragments.push(
-      patchElements(roadmapSection(program.roadmap), { selector: "#content", mode })
-    );
+    addFragment(roadmapSection(program.roadmap));
   }
 
   if (program.benchmarks && program.benchmarks.length > 0) {
-    const mode = fragments.length > 0 ? "append" : "inner";
-    fragments.push(
-      patchElements(benchmarksSection(program.benchmarks), { selector: "#content", mode })
-    );
+    addFragment(benchmarksSection(program.benchmarks));
   }
 
   return sseResponse(mergeFragments(fragments));
@@ -331,7 +335,7 @@ async function handleSetup(request: Request, env: Env, userId: string): Promise<
     active_program: program.meta.title,
     template_id: templateId,
     start_date: startDate,
-    hevy_api_key_encrypted: apiKey,
+    hevy_api_key: apiKey,
   });
 
   // Generate queue playlist
@@ -347,7 +351,7 @@ async function handleSetup(request: Request, env: Env, userId: string): Promise<
 /** POST /api/push-hevy/:id — push session to Hevy as routine */
 async function handlePush(env: Env, userId: string, sessionId: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
-  if (!user || !user.hevy_api_key_encrypted) {
+  if (!user || !user.hevy_api_key) {
     return sseResponse(
       patchElements(`<div class="card"><p>Connect your Hevy API key first.</p></div>`, {
         selector: "#content",
@@ -361,7 +365,7 @@ async function handlePush(env: Env, userId: string, sessionId: string): Promise<
     return new Response("Session not found", { status: 404 });
   }
 
-  const client = new HevyClient(user.hevy_api_key_encrypted);
+  const client = new HevyClient(user.hevy_api_key);
 
   // Get or auto-create exercise mappings
   let mappings = await getExerciseMappings(env.DB, userId);
@@ -426,15 +430,15 @@ async function handlePush(env: Env, userId: string, sessionId: string): Promise<
 
     return sseResponse(
       patchElements(
-        `<div class="card" style="border-left:3px solid var(--green)"><p>Pushed to Hevy!</p>${unmappedNote}</div>`,
+        `<div class="card"><p style="color:var(--green)">Pushed to Hevy!</p>${unmappedNote}</div>`,
         { selector: "#content", mode: "prepend" }
       )
     );
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Push failed";
+    const msg = escapeHtml(err instanceof Error ? err.message : "Push failed");
     return sseResponse(
       patchElements(
-        `<div class="card" style="border-left:3px solid var(--orange)"><p>${msg}</p></div>`,
+        `<div class="card"><p style="color:var(--orange)">${msg}</p></div>`,
         { selector: "#content", mode: "prepend" }
       )
     );
@@ -444,7 +448,7 @@ async function handlePush(env: Env, userId: string, sessionId: string): Promise<
 /** POST /api/pull — pull completions from Hevy */
 async function handlePull(env: Env, userId: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
-  if (!user || !user.hevy_api_key_encrypted) {
+  if (!user || !user.hevy_api_key) {
     return sseResponse(
       patchElements(`<div class="card"><p>Connect your Hevy API key first.</p></div>`, {
         selector: "#content",
@@ -453,21 +457,26 @@ async function handlePull(env: Env, userId: string): Promise<Response> {
     );
   }
 
-  const client = new HevyClient(user.hevy_api_key_encrypted);
+  const client = new HevyClient(user.hevy_api_key);
 
   try {
     const workouts = await client.getRecentWorkouts();
     const items = await getQueueItems(env.DB, userId);
     const pendingItems = items.filter((i) => i.status === "pending" && i.hevy_routine_id);
 
+    // Build a name→routine_id lookup from pending items
+    const nameToRoutineId = new Map<string, string>();
+    for (const item of pendingItems) {
+      const session = program.sessions.find((s) => s.id === item.session_id);
+      if (session && item.hevy_routine_id) {
+        nameToRoutineId.set(session.title, item.hevy_routine_id);
+      }
+    }
+
     const matches = matchCompletions(
       pendingItems,
       workouts,
-      (w) => {
-        // Hevy workouts don't directly expose routine_id in a standard field;
-        // match by workout name to routine title as a fallback
-        return null;
-      }
+      (w) => nameToRoutineId.get(w.name) ?? null
     );
 
     const today = todayString();
@@ -478,10 +487,10 @@ async function handlePull(env: Env, userId: string): Promise<Response> {
     // Re-render today page
     return await handleTodaySSE(env, userId);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Pull failed";
+    const msg = escapeHtml(err instanceof Error ? err.message : "Pull failed");
     return sseResponse(
       patchElements(
-        `<div class="card" style="border-left:3px solid var(--orange)"><p>${msg}</p></div>`,
+        `<div class="card"><p style="color:var(--orange)">${msg}</p></div>`,
         { selector: "#content", mode: "prepend" }
       )
     );
@@ -494,7 +503,10 @@ async function handleManualComplete(
   userId: string,
   itemId: number
 ): Promise<Response> {
+  if (!Number.isInteger(itemId)) {
+    return new Response("Invalid item ID", { status: 400 });
+  }
   const today = todayString();
-  await markQueueItemCompleted(env.DB, itemId, today);
+  await markQueueItemCompletedForUser(env.DB, itemId, userId, today);
   return await handleTodaySSE(env, userId);
 }

@@ -9,7 +9,9 @@ export function patchElements(html: string, opts?: PatchOptions): string {
   if (opts?.selector) lines += `data: selector ${opts.selector}\n`;
   if (opts?.mode) lines += `data: mode ${opts.mode}\n`;
   if (opts?.useViewTransition) lines += `data: useViewTransition true\n`;
-  lines += `data: elements ${html}\n\n`;
+  // SSE spec: each line of a multi-line value must be prefixed with "data: "
+  const htmlLines = html.replace(/\n/g, "\ndata: ");
+  lines += `data: elements ${htmlLines}\n\n`;
   return lines;
 }
 

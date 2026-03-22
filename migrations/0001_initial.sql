@@ -1,6 +1,6 @@
 CREATE TABLE users (
   id TEXT PRIMARY KEY,
-  hevy_api_key_encrypted TEXT,
+  hevy_api_key TEXT,  -- TODO: encrypt at rest before production
   active_program TEXT NOT NULL,
   template_id TEXT NOT NULL,
   start_date TEXT NOT NULL,

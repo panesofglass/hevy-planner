@@ -6,19 +6,19 @@ export async function getUser(db: D1Database, userId: string): Promise<UserRow |
 
 export async function upsertUser(
   db: D1Database,
-  user: { id: string; active_program: string; template_id: string; start_date: string; hevy_api_key_encrypted?: string }
+  user: { id: string; active_program: string; template_id: string; start_date: string; hevy_api_key?: string }
 ): Promise<void> {
   await db
     .prepare(
-      `INSERT INTO users (id, active_program, template_id, start_date, hevy_api_key_encrypted)
+      `INSERT INTO users (id, active_program, template_id, start_date, hevy_api_key)
        VALUES (?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          active_program = excluded.active_program,
          template_id = excluded.template_id,
          start_date = excluded.start_date,
-         hevy_api_key_encrypted = COALESCE(excluded.hevy_api_key_encrypted, users.hevy_api_key_encrypted)`
+         hevy_api_key = COALESCE(excluded.hevy_api_key, users.hevy_api_key)`
     )
-    .bind(user.id, user.active_program, user.template_id, user.start_date, user.hevy_api_key_encrypted ?? null)
+    .bind(user.id, user.active_program, user.template_id, user.start_date, user.hevy_api_key ?? null)
     .run();
 }
 
@@ -53,6 +53,21 @@ export async function markQueueItemCompleted(
       "UPDATE queue_items SET status = 'completed', completed_date = ?, hevy_workout_id = ? WHERE id = ?"
     )
     .bind(completedDate, hevyWorkoutId ?? null, itemId)
+    .run();
+}
+
+export async function markQueueItemCompletedForUser(
+  db: D1Database,
+  itemId: number,
+  userId: string,
+  completedDate: string,
+  hevyWorkoutId?: string
+): Promise<void> {
+  await db
+    .prepare(
+      "UPDATE queue_items SET status = 'completed', completed_date = ?, hevy_workout_id = ? WHERE id = ? AND user_id = ?"
+    )
+    .bind(completedDate, hevyWorkoutId ?? null, itemId, userId)
     .run();
 }
 

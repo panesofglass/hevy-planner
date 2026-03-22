@@ -38,7 +38,7 @@ export function skillCards(skills: Skill[]): string {
 
     return `<div class="skill-card" data-signals:${signalName}="${expanded}">
   <div class="skill-header" data-on:click="$${signalName} = !$${signalName}">
-    <div class="skill-icon" style="${iconBg}; color:${iconColor}">${skill.icon ?? ""}</div>
+    <div class="skill-icon" style="${iconBg}; color:${iconColor}">${escapeHtml(skill.icon ?? "")}</div>
     <span class="skill-name">${escapeHtml(skill.name)}</span>
     ${priorityLabel ? `<span class="skill-priority">${escapeHtml(priorityLabel)}</span>` : ""}
   </div>
@@ -65,9 +65,9 @@ export function roadmapSection(phases: RoadmapPhase[]): string {
       const isCurrent = phase.status === "current";
       const isCompleted = phase.status === "completed";
       const cls = isCurrent ? " roadmap-current" : "";
-      const dotColor = isCompleted
-        ? "var(--green)"
-        : isCurrent
+      const dotColor = isCurrent
+        ? "var(--blue)"
+        : isCompleted
           ? "var(--green)"
           : "var(--text-tertiary)";
 

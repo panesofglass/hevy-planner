@@ -18,6 +18,14 @@ describe("patchElements", () => {
     const result = patchElements("<li>Item</li>", { mode: "append" });
     expect(result).toContain("data: mode append");
   });
+
+  it("prefixes each line of multi-line HTML with data:", () => {
+    const result = patchElements("<div>\n  <span>Hi</span>\n</div>");
+    const lines = result.split("\n");
+    // Every non-empty line after "event:" should start with "data: "
+    const dataLines = lines.filter((l) => l.startsWith("data: "));
+    expect(dataLines.length).toBeGreaterThanOrEqual(3);
+  });
 });
 
 describe("mergeFragments", () => {

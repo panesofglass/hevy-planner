@@ -40,8 +40,7 @@ export interface HevyWorkout {
 export class HevyClient {
   private baseUrl = "https://api.hevyapp.com/v1";
   private apiKey: string;
-  private lastFetchTime = 0;
-  private minFetchIntervalMs = 60_000;
+  private static readonly MAX_PAGES = 50;
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
@@ -80,7 +79,7 @@ export class HevyClient {
   async getAllExerciseTemplates(): Promise<HevyExerciseTemplate[]> {
     const all: HevyExerciseTemplate[] = [];
     let page = 1;
-    while (true) {
+    while (page <= HevyClient.MAX_PAGES) {
       const data = await this.request<{ page: number; page_count: number; exercise_templates: HevyExerciseTemplate[] }>(
         `/exercise_templates?page=${page}&pageSize=10`
       );
@@ -108,12 +107,8 @@ export class HevyClient {
   }
 
   async getRecentWorkouts(page = 1, pageSize = 5): Promise<HevyWorkout[]> {
-    const now = Date.now();
-    if (now - this.lastFetchTime < this.minFetchIntervalMs) {
-      return [];
-    }
-    this.lastFetchTime = now;
-
+    // Note: Workers are stateless per request, so in-memory rate limiting
+    // doesn't work. Rate limiting should be done via D1 timestamp or caller logic.
     const data = await this.request<{ page: number; page_count: number; workouts: HevyWorkout[] }>(
       `/workouts?page=${page}&pageSize=${pageSize}`
     );
