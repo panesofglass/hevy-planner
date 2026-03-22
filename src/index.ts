@@ -4,6 +4,7 @@
 
 import { getAuthenticatedUserOrDev } from "./auth/access";
 import {
+  executeScript,
   isSSERequest,
   mergeFragments,
   patchElements,
@@ -345,7 +346,8 @@ async function handleSetup(request: Request, env: Env, userId: string): Promise<
     await insertQueueItems(env.DB, userId, playlist);
   }
 
-  return redirect("/");
+  // Navigate to Today page via Datastar (can't use HTTP redirect from @post)
+  return sseResponse(executeScript("window.location.href = '/'"));
 }
 
 /** POST /api/push-hevy/:id — push session to Hevy as routine */

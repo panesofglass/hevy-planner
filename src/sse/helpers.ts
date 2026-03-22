@@ -33,6 +33,10 @@ export function sseResponse(body: string): Response {
   });
 }
 
+export function executeScript(script: string): string {
+  return `event: datastar-execute-script\ndata: script ${script}\n\n`;
+}
+
 export function isSSERequest(request: Request): boolean {
   const accept = request.headers.get("accept") || "";
   return accept.includes("text/event-stream");
