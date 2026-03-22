@@ -15,12 +15,12 @@ export interface HtmlShellOptions {
 export function htmlShell(opts: HtmlShellOptions): string {
   const activeTab = opts.activeTab ?? "today";
   const sseAttr = opts.ssePath
-    ? ` data-on:load="@get('${opts.ssePath}')"`
+    ? ` data-init="@get('${opts.ssePath}')"`
     : "";
 
   const bodyContent = opts.body
     ? opts.body
-    : `<div id="content"></div>`;
+    : `<div id="content"${sseAttr}></div>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -42,7 +42,7 @@ export function htmlShell(opts: HtmlShellOptions): string {
   </script>
   <style>${CSS_THEME}</style>
 </head>
-<body${sseAttr}>
+<body>
   <header class="page-header">
     <h1 class="page-title">${escapeHtml(opts.title)}</h1>
     ${opts.subtitle ? `<p class="page-subtitle">${escapeHtml(opts.subtitle)}</p>` : ""}
