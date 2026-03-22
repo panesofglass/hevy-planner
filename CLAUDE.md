@@ -28,10 +28,20 @@ Workers (TypeScript)
 └── Storage (D1 queries, user state, queue, benchmarks)
 ```
 
+## Data Model
+
+Programs use Hevy-compatible **Exercise Templates** + **Routines** (not "sessions"):
+
+- **`exerciseTemplates`** — reusable exercise definitions with Hevy fields (type, equipmentCategory, primaryMuscleGroup) + coaching fields (notes, videoURL, tags, progressionByPhase). Defined once, referenced by routines.
+- **`routines`** — ordered groups of exercise references. Each exercise entry has `exerciseTemplateId` + `sets` (the prescription for this routine context), with optional `notes` override.
+- **`weekTemplates`** — days reference `routineIDs` (not sessionIDs).
+
+D1 tables: `exercise_template_mappings` (our template ID → Hevy template ID), `routine_mappings` (our routine ID → Hevy routine ID), `queue_items` (uses `routine_id`).
+
 ## Project Structure
 
 ```
-mobility-tracker/
+hevy-planner/
 ├── CLAUDE.md
 ├── SPEC.md
 ├── schema/
@@ -45,9 +55,11 @@ mobility-tracker/
 │   ├── hevy/                   ← Hevy API client
 │   ├── fragments/              ← Datastar HTML fragment builders
 │   ├── storage/                ← D1 queries
+│   ├── utils/                  ← Shared helpers (escapeHtml, escapeAttr, truncate)
 │   └── auth/                   ← API key management
 ├── programs/
 │   └── mobility-joint-restoration.json  ← first bundled program
+├── migrations/                 ← D1 schema migrations
 ├── wrangler.toml
 └── package.json
 ```
@@ -57,7 +69,8 @@ mobility-tracker/
 - Domain functions are pure: data in, data out. No side effects.
 - Datastar fragments return HTML strings. No JSX, no templating engine.
 - D1 queries use prepared statements (no raw string interpolation).
-- Dark theme matching Hevy: #0D0D0F background, #1C1C1E cards, #FFFFFF text, #377DFF accent blue.
+- Program data is immutable at runtime — hoist derived lookups (Maps, finds) to module scope instead of rebuilding per-request.
+- Dark theme: #141210 background, #e8e4df text.
 - Commit messages: imperative mood, concise.
 
 ## Common Mistakes to Avoid
@@ -65,10 +78,11 @@ mobility-tracker/
 - Do NOT put queue/reflow logic in route handlers — it belongs in domain/
 - Do NOT store Hevy API keys in plaintext — encrypt at rest in D1
 - Do NOT poll Hevy on every page load — cache recent workout data, refresh on user action
+- Do NOT define escapeHtml/escapeAttr/truncate locally in fragments — import from `src/utils/html.ts`
 - Datastar SSE events must end with two newlines (`\n\n`)
 - D1 has a 1MB response size limit per query — paginate workout history
 - Hevy API rate limits are undocumented — add backoff/retry logic
 
 ## Current Phase
 
-**Pre-build** — Product spec complete. Ready to initialize the Workers project and begin implementation.
+**v1 implementation** — Core app on `feature/v1-implementation` branch (30+ commits). Data model restructure (sessions → Exercise Templates + Routines) complete. Setup flow, Today page, Routine Detail, Progress page all working. 18 tests passing. Next: wire Hevy routine creation into the setup flow (storage queries already written).

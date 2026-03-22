@@ -38,6 +38,9 @@ Desktop.ini
 # Superpowers
 .superpowers/
 
+# Entire
+.entire/
+
 # Logs
 *.log
 npm-debug.log*
