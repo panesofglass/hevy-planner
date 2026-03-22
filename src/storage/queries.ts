@@ -1,4 +1,4 @@
-import type { UserRow, QueueItemRow, ExerciseTemplateMappingRow, RoutineMappingRow } from "../types";
+import type { UserRow, QueueItemRow, ExerciseTemplateMappingRow, RoutineMappingRow, ProgramRow } from "../types";
 
 export async function getUser(db: D1Database, userId: string): Promise<UserRow | null> {
   return db.prepare("SELECT * FROM users WHERE id = ?").bind(userId).first<UserRow>();
@@ -148,4 +148,35 @@ export async function bulkSetQueueItemRoutineIds(
     stmt.bind(hevyRoutineId, userId, programRoutineId)
   );
   await db.batch(batch);
+}
+
+export async function insertProgram(
+  db: D1Database,
+  userId: string,
+  jsonData: string
+): Promise<number> {
+  const deactivate = db
+    .prepare("UPDATE programs SET is_active = 0 WHERE user_id = ? AND is_active = 1")
+    .bind(userId);
+  const insert = db
+    .prepare("INSERT INTO programs (user_id, json_data) VALUES (?, ?)")
+    .bind(userId, jsonData);
+  const [, insertResult] = await db.batch([deactivate, insert]);
+  const id = insertResult.meta.last_row_id;
+  if (id == null) throw new Error(`Failed to insert program for user ${userId}`);
+  return id;
+}
+
+export async function getActiveProgram(
+  db: D1Database,
+  userId: string
+): Promise<Pick<ProgramRow, "id" | "json_data"> | null> {
+  return db
+    .prepare(
+      `SELECT id, json_data FROM programs
+       WHERE user_id = ? AND is_active = 1
+       ORDER BY created_at DESC LIMIT 1`
+    )
+    .bind(userId)
+    .first<Pick<ProgramRow, "id" | "json_data">>();
 }
