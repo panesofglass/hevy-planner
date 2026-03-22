@@ -313,9 +313,9 @@ async function handleSessionSSE(env: Env, userId: string, sessionId: string): Pr
 async function handleSetup(request: Request, env: Env, userId: string, urlTemplateId?: string): Promise<Response> {
   let body: { apiKey?: string; startDate?: string; templateId?: string } = {};
   try {
-    body = await request.json() as { apiKey?: string; startDate?: string; templateId?: string };
+    body = await request.json() as typeof body;
   } catch {
-    // Body may be empty when signals are minimal — that's OK
+    // Body may be empty — that's OK, template ID comes from URL
   }
 
   const templateId = urlTemplateId ?? body.templateId;

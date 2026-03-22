@@ -30,7 +30,7 @@ export function setupPage(templates: WeekTemplate[]): string {
     )
     .join("\n    ");
 
-  return `<div class="setup-container" data-signals:apiKey="''" data-signals:startDate="new Date().toLocaleDateString('en-CA')" data-signals:templateId="''">
+  return `<div class="setup-container" data-signals:api-key="''" data-signals:start-date="new Date().toLocaleDateString('en-CA')" data-signals:template-id="''">
   <div style="text-align:center; margin-bottom:32px">
     <h2 class="card-title" style="font-size:24px">Welcome</h2>
     <p class="card-subtitle" style="margin-top:4px">Connect your Hevy account and pick a schedule.</p>
@@ -44,7 +44,7 @@ export function setupPage(templates: WeekTemplate[]): string {
       class="form-input"
       placeholder="Enter your Hevy API key"
       autocomplete="off"
-      data-bind:apiKey
+      data-bind:api-key
     />
   </div>
 
@@ -54,7 +54,7 @@ export function setupPage(templates: WeekTemplate[]): string {
       id="startDate"
       type="date"
       class="form-input"
-      data-bind:startDate
+      data-bind:start-date
     />
   </div>
 
