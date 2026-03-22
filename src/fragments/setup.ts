@@ -13,7 +13,8 @@ import type { WeekTemplate } from "../types";
  * The form POSTs to /api/setup with { apiKey, startDate, templateId }.
  */
 export function setupPage(templates: WeekTemplate[]): string {
-  const today = new Date().toISOString().slice(0, 10);
+  // Default date is set client-side to avoid UTC/local timezone mismatch
+  const today = "";
 
   const sorted = [...templates].sort(
     (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
@@ -29,7 +30,7 @@ export function setupPage(templates: WeekTemplate[]): string {
     )
     .join("\n    ");
 
-  return `<div class="setup-container" data-signals:apiKey="''" data-signals:startDate="'${today}'" data-signals:templateId="''">
+  return `<div class="setup-container" data-signals:apiKey="''" data-signals:startDate="new Date().toLocaleDateString('en-CA')" data-signals:templateId="''">
   <div style="text-align:center; margin-bottom:32px">
     <h2 class="card-title" style="font-size:24px">Welcome</h2>
     <p class="card-subtitle" style="margin-top:4px">Connect your Hevy account and pick a schedule.</p>
