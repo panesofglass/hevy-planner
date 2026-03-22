@@ -34,7 +34,7 @@ export function sseResponse(body: string): Response {
 }
 
 export function executeScript(script: string): string {
-  return `event: datastar-execute-script\ndata: script ${script}\n\n`;
+  return patchElements(`<script>${script}</script>`, { selector: "body", mode: "append" });
 }
 
 export function isSSERequest(request: Request): boolean {
