@@ -32,7 +32,7 @@ export function htmlShell(opts: HtmlShellOptions): string {
   <meta name="theme-color" content="#0D0D0F" />
   <title>${escapeHtml(opts.title)}</title>
   <link rel="manifest" href="/manifest.json" />
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@starfederation/datastar@1"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.8/bundles/datastar.js"></script>
   <script>
     if('serviceWorker' in navigator && location.hostname !== 'localhost') {
       navigator.serviceWorker.register('/sw.js');
