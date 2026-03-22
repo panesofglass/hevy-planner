@@ -110,7 +110,7 @@ export default {
             htmlShell({
               title: APP_NAME,
               subtitle: "Setup",
-              body: setupPage(program.weekTemplates),
+              body: `<div id="content">${setupPage(program.weekTemplates)}</div>`,
             })
           );
         }
@@ -347,8 +347,8 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
     await insertQueueItems(env.DB, userId, playlist);
   }
 
-  // Navigate to Today page via Datastar (can't use HTTP redirect from @post)
-  return sseResponse(executeScript("window.location.href = '/'"));
+  // Return Today content directly — #content div is already on the page
+  return await handleTodaySSE(env, userId);
 }
 
 /** POST /api/push-hevy/:id — push session to Hevy as routine */
