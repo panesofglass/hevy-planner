@@ -94,17 +94,20 @@ export class HevyClient {
   }
 
   async createRoutine(routine: { title: string; exercises: HevyRoutineExercise[] }): Promise<HevyRoutine> {
+    const payload = { routine };
+    console.log("Hevy createRoutine payload:", JSON.stringify(payload, null, 2));
     const data = await this.request<{ routine: HevyRoutine }>("/routines", {
       method: "POST",
-      body: JSON.stringify(routine),
+      body: JSON.stringify(payload),
     });
     return data.routine;
   }
 
   async updateRoutine(routineId: string, routine: { title: string; exercises: HevyRoutineExercise[] }): Promise<HevyRoutine> {
+    const payload = { routine };
     const data = await this.request<{ routine: HevyRoutine }>(`/routines/${routineId}`, {
       method: "PUT",
-      body: JSON.stringify({ ...routine, routineId }),
+      body: JSON.stringify(payload),
     });
     return data.routine;
   }
