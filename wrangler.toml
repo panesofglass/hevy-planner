@@ -11,9 +11,9 @@ database_name = "hevy-planner"
 database_id = "local"
 
 [vars]
-ENVIRONMENT = "production"
-
-# Local dev overrides (wrangler dev uses .dev.vars or --env dev)
-[env.dev]
-[env.dev.vars]
 ENVIRONMENT = "development"
+
+# Production deploy: wrangler deploy --env production
+[env.production]
+[env.production.vars]
+ENVIRONMENT = "production"
