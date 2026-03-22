@@ -347,8 +347,8 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
     await insertQueueItems(env.DB, userId, playlist);
   }
 
-  // Return Today content directly — #content div is already on the page
-  return await handleTodaySSE(env, userId);
+  // Redirect to Today page via script injection (Datastar v1 pattern)
+  return sseResponse(executeScript("window.location.href = '/'"));
 }
 
 /** POST /api/push-hevy/:id — push session to Hevy as routine */
