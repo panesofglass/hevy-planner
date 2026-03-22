@@ -22,7 +22,7 @@ export function setupPage(templates: WeekTemplate[]): string {
   const templateCards = sorted
     .map(
       (t) =>
-        `<div class="template-card" data-on:click="$templateId = '${escapeAttr(t.id)}'; @post('/api/setup')">
+        `<div class="template-card" data-on:click="@post('/api/setup/${escapeAttr(t.id)}')">
   <div class="template-name">${escapeHtml(t.name)}</div>
   ${t.description ? `<div class="template-desc">${escapeHtml(t.description)}</div>` : ""}
 </div>`

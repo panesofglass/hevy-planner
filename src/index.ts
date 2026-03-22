@@ -164,9 +164,11 @@ export default {
         );
       }
 
-      // ── POST /api/setup ────────────────────────────────────────
-      if (method === "POST" && path === "/api/setup") {
-        return await handleSetup(request, env, auth.userId);
+      // ── POST /api/setup/:templateId ─────────────────────────────
+      const setupMatch = path.match(/^\/api\/setup\/([^/]+)$/);
+      if (method === "POST" && (path === "/api/setup" || setupMatch)) {
+        const urlTemplateId = setupMatch ? decodeURIComponent(setupMatch[1]) : undefined;
+        return await handleSetup(request, env, auth.userId, urlTemplateId);
       }
 
       // ── POST /api/push-hevy/:id ────────────────────────────────
@@ -308,16 +310,16 @@ async function handleSessionSSE(env: Env, userId: string, sessionId: string): Pr
   );
 }
 
-/** POST /api/setup — create user, generate queue, redirect */
-async function handleSetup(request: Request, env: Env, userId: string): Promise<Response> {
-  let body: { apiKey?: string; startDate?: string; templateId?: string };
+/** POST /api/setup — create user, generate queue, navigate to today */
+async function handleSetup(request: Request, env: Env, userId: string, urlTemplateId?: string): Promise<Response> {
+  let body: { apiKey?: string; startDate?: string; templateId?: string } = {};
   try {
     body = await request.json() as { apiKey?: string; startDate?: string; templateId?: string };
   } catch {
-    return new Response("Invalid request body", { status: 400 });
+    // Body may be empty when signals are minimal — that's OK
   }
 
-  const templateId = body.templateId;
+  const templateId = urlTemplateId ?? body.templateId;
   const startDate = body.startDate || todayString();
   const apiKey = body.apiKey || undefined;
 
