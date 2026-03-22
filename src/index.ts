@@ -20,6 +20,11 @@ import {
   updateQueueItemHevyRoutineId,
   getExerciseTemplateMappings,
   upsertExerciseTemplateMapping,
+  getRoutineMappings,
+  upsertRoutineMapping,
+  bulkSetQueueItemRoutineIds,
+  insertProgram,
+  getActiveProgram,
 } from "./storage/queries";
 import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "./domain/queue";
 import { computeUpcoming } from "./domain/reflow";

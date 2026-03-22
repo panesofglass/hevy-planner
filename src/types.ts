@@ -35,6 +35,14 @@ export interface RoutineMappingRow {
   readonly hevy_routine_id: string;
 }
 
+export interface ProgramRow {
+  readonly id: number;
+  readonly user_id: string;
+  readonly json_data: string;
+  readonly is_active: number;
+  readonly created_at: string;
+}
+
 // ──────────────────────────────────────────────────────────────────
 // Program domain types — used by queue and reflow logic
 // ──────────────────────────────────────────────────────────────────
