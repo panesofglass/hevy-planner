@@ -93,6 +93,34 @@ export function buildRoutinePayload(
 }
 
 // ──────────────────────────────────────────────────────────────────
+// buildExerciseTemplatePayload
+// ──────────────────────────────────────────────────────────────────
+
+export interface ExerciseTemplatePayload {
+  title: string;
+  exercise_type: string;
+  equipment_category: string;
+  primary_muscle_group: string;
+  other_muscles: string[];
+}
+
+/**
+ * Build a Hevy exercise template creation payload from a domain ExerciseTemplate.
+ * Pure mapping from domain shape (camelCase) to wire shape (snake_case).
+ */
+export function buildExerciseTemplatePayload(
+  template: ExerciseTemplate
+): ExerciseTemplatePayload {
+  return {
+    title: template.title,
+    exercise_type: template.type,
+    equipment_category: template.equipmentCategory,
+    primary_muscle_group: template.primaryMuscleGroup,
+    other_muscles: template.secondaryMuscleGroups ?? [],
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────
 // matchCompletions
 // ──────────────────────────────────────────────────────────────────
 

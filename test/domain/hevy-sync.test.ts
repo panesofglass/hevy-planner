@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildRoutinePayload, matchCompletions, autoMatchExercises } from "../../src/domain/hevy-sync";
 import type { Routine, ExerciseTemplate, ExerciseTemplateMappingRow } from "../../src/types";
+import type { HevyExerciseTemplate } from "../../src/hevy/client";
 
 describe("buildRoutinePayload", () => {
   it("maps routine exercises to Hevy exercise IDs via template mappings", () => {
@@ -61,9 +62,9 @@ describe("autoMatchExercises", () => {
       { id: "dead-hangs", title: "Dead Hangs", type: "duration", equipmentCategory: "pull_up_bar", primaryMuscleGroup: "lats" },
       { id: "scapular-pushups", title: "Scapular Push-ups", type: "bodyweight_reps", equipmentCategory: "none", primaryMuscleGroup: "chest" },
     ];
-    const hevyTemplates = [
-      { id: "h1", title: "Dead Hang", type: "duration", primary_muscle_group: "lats" },
-      { id: "h2", title: "Scapular Push Up", type: "reps", primary_muscle_group: "chest" },
+    const hevyTemplates: HevyExerciseTemplate[] = [
+      { id: "h1", title: "Dead Hang", type: "duration", primary_muscle_group: "lats", equipment_category: "other", other_muscles: [] },
+      { id: "h2", title: "Scapular Push Up", type: "reps", primary_muscle_group: "chest", equipment_category: "none", other_muscles: [] },
     ];
     const matches = autoMatchExercises(ourTemplates, hevyTemplates);
     expect(matches.get("dead-hangs")).toBe("h1");

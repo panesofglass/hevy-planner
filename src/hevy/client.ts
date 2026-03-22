@@ -3,6 +3,8 @@ export interface HevyExerciseTemplate {
   title: string;
   type: string;
   primary_muscle_group: string;
+  equipment_category: string;
+  other_muscles: string[];
 }
 
 export interface HevyRoutine {
@@ -110,6 +112,21 @@ export class HevyClient {
       body: JSON.stringify(payload),
     });
     return data.routine;
+  }
+
+  async createExerciseTemplate(template: {
+    title: string;
+    exercise_type: string;
+    equipment_category: string;
+    primary_muscle_group: string;
+    other_muscles: string[];
+  }): Promise<HevyExerciseTemplate> {
+    const payload = { exercise_template: template };
+    const data = await this.request<{ exercise_template: HevyExerciseTemplate }>("/exercise_templates", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return data.exercise_template;
   }
 
   async getRecentWorkouts(page = 1, pageSize = 5): Promise<HevyWorkout[]> {
