@@ -33,6 +33,7 @@ export function htmlShell(opts: HtmlShellOptions): string {
   <title>${escapeHtml(opts.title)}</title>
   <link rel="manifest" href="/manifest.json" />
   <script type="module" src="https://cdn.jsdelivr.net/npm/@starfederation/datastar@1"></script>
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
   <style>${CSS_THEME}</style>
 </head>
 <body>
