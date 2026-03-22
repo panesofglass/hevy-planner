@@ -3,6 +3,7 @@
 // ──────────────────────────────────────────────────────────────────
 
 import type { WeekTemplate } from "../types";
+import { escapeHtml, escapeAttr } from "../utils/html";
 
 /**
  * First-run setup page. Collects:
@@ -67,25 +68,3 @@ export function setupPage(templates: WeekTemplate[]): string {
 </div>`;
 }
 
-// ── Helpers ──
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function escapeAttr(str: string): string {
-  return str.replace(/[&<>"']/g, (c) => {
-    switch (c) {
-      case "&": return "&amp;";
-      case "<": return "&lt;";
-      case ">": return "&gt;";
-      case '"': return "&quot;";
-      case "'": return "&#39;";
-      default: return c;
-    }
-  });
-}

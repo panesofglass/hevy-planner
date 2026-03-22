@@ -1,9 +1,10 @@
 // ──────────────────────────────────────────────────────────────────
-// Today page fragments — CARs card, hero session, completed, upcoming
+// Today page fragments — CARs card, hero routine, completed, upcoming
 // ──────────────────────────────────────────────────────────────────
 
 import type { Routine, QueueItemRow } from "../types";
 import type { UpcomingItem } from "../domain/reflow";
+import { escapeHtml, escapeAttr, truncate } from "../utils/html";
 
 /**
  * Daily CARs card — always shown at the top of Today.
@@ -25,10 +26,10 @@ export function carsCard(routine: Routine): string {
 }
 
 /**
- * Hero session card — the next main session from the queue.
+ * Hero routine card — the next main routine from the queue.
  * Blue accent label, description preview, Push to Hevy + Details.
  */
-export function heroSessionCard(routine: Routine, queueItem: QueueItemRow): string {
+export function heroRoutineCard(routine: Routine, queueItem: QueueItemRow): string {
   const count = routine.exercises.length;
   const subtitle = routine.subtitle ?? `${count} exercises`;
   const desc = routine.description
@@ -104,30 +105,3 @@ ${rows}
 </div>`;
 }
 
-// ── Helpers ──
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function escapeAttr(str: string): string {
-  return str.replace(/[&<>"']/g, (c) => {
-    switch (c) {
-      case "&": return "&amp;";
-      case "<": return "&lt;";
-      case ">": return "&gt;";
-      case '"': return "&quot;";
-      case "'": return "&#39;";
-      default: return c;
-    }
-  });
-}
-
-function truncate(str: string, max: number): string {
-  if (str.length <= max) return str;
-  return str.slice(0, max).replace(/\s+\S*$/, "") + "\u2026";
-}

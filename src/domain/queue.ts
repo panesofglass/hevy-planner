@@ -36,12 +36,12 @@ export function generatePlaylist(
   return playlist;
 }
 
-export function getNextSession(items: QueueItemRow[]): QueueItemRow | null {
+export function getNextRoutine(items: QueueItemRow[]): QueueItemRow | null {
   const sorted = [...items].sort((a, b) => a.position - b.position);
   return sorted.find((item) => item.status === "pending") ?? null;
 }
 
-export function getCompletedSessions(items: QueueItemRow[], today: string): QueueItemRow[] {
+export function getCompletedRoutines(items: QueueItemRow[], today: string): QueueItemRow[] {
   return items
     .filter((item) => item.status === "completed" && item.completed_date === today)
     .sort((a, b) => a.position - b.position);

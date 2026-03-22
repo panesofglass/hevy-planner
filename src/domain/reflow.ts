@@ -2,7 +2,7 @@ import type { QueueItemRow, WeekTemplate, Routine } from "../types";
 
 
 export interface UpcomingItem {
-  type: "session" | "spacer";
+  type: "routine" | "spacer";
   routineId?: string;
   title: string;
   exerciseCount?: number;
@@ -18,7 +18,7 @@ export function computeUpcoming(
   const routineMap = new Map(routines.map((r) => [r.id, r]));
 
   // Build the template rhythm: which day indices are spacers vs routines
-  const templateRhythm: Array<{ type: "session" | "spacer"; routineId?: string }> = [];
+  const templateRhythm: Array<{ type: "routine" | "spacer"; routineId?: string }> = [];
   for (const day of template.days) {
     const mainIds = (day.routineIDs ?? []).filter((rid) => {
       const r = routineMap.get(rid);
@@ -28,7 +28,7 @@ export function computeUpcoming(
       templateRhythm.push({ type: "spacer" });
     } else if (mainIds.length > 0) {
       for (const rid of mainIds) {
-        templateRhythm.push({ type: "session", routineId: rid });
+        templateRhythm.push({ type: "routine", routineId: rid });
       }
     }
   }
@@ -57,7 +57,7 @@ export function computeUpcoming(
       const item = pendingItems[pendingIdx];
       const routine = routineMap.get(item.routine_id);
       result.push({
-        type: "session",
+        type: "routine",
         routineId: item.routine_id,
         title: routine?.title ?? item.routine_id,
         exerciseCount: routine?.exercises.length,

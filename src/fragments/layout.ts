@@ -2,6 +2,8 @@
 // HTML shell — full document with CSS theme, Datastar, tab bar
 // ──────────────────────────────────────────────────────────────────
 
+import { escapeHtml } from "../utils/html";
+
 export interface HtmlShellOptions {
   title: string;
   subtitle?: string;
@@ -71,14 +73,6 @@ export function htmlShell(opts: HtmlShellOptions): string {
   </nav>
 </body>
 </html>`;
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }
 
 const CSS_THEME = `

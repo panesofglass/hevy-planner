@@ -22,5 +22,5 @@ export function escapeAttr(str: string): string {
 export function truncate(str: string, max: number): string {
   if (str.length <= max) return str;
   const cut = str.lastIndexOf(" ", max);
-  return (cut > 0 ? str.slice(0, cut) : str.slice(0, max)) + "...";
+  return (cut > 0 ? str.slice(0, cut) : str.slice(0, max)) + "\u2026";
 }

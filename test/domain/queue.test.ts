@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generatePlaylist, getNextSession, getCompletedSessions } from "../../src/domain/queue";
+import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "../../src/domain/queue";
 import type { WeekTemplate, Routine, QueueItemRow } from "../../src/types";
 
 const routines: Routine[] = [
@@ -44,14 +44,14 @@ describe("generatePlaylist", () => {
   });
 });
 
-describe("getNextSession", () => {
+describe("getNextRoutine", () => {
   it("returns the first pending item", () => {
     const items: QueueItemRow[] = [
       { id: 1, user_id: "u", routine_id: "a", position: 0, status: "completed", completed_date: "2026-03-20", hevy_routine_id: null, hevy_workout_id: null },
       { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
       { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
     ];
-    const next = getNextSession(items);
+    const next = getNextRoutine(items);
     expect(next?.routine_id).toBe("b");
   });
 
@@ -59,18 +59,18 @@ describe("getNextSession", () => {
     const items: QueueItemRow[] = [
       { id: 1, user_id: "u", routine_id: "a", position: 0, status: "completed", completed_date: "2026-03-20", hevy_routine_id: null, hevy_workout_id: null },
     ];
-    expect(getNextSession(items)).toBeNull();
+    expect(getNextRoutine(items)).toBeNull();
   });
 });
 
-describe("getCompletedSessions", () => {
+describe("getCompletedRoutines", () => {
   it("returns only sessions completed today", () => {
     const items: QueueItemRow[] = [
       { id: 1, user_id: "u", routine_id: "a", position: 0, status: "completed", completed_date: "2026-03-20", hevy_routine_id: null, hevy_workout_id: null },
       { id: 2, user_id: "u", routine_id: "b", position: 1, status: "completed", completed_date: "2026-03-21", hevy_routine_id: null, hevy_workout_id: null },
       { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
     ];
-    const completed = getCompletedSessions(items, "2026-03-21");
+    const completed = getCompletedRoutines(items, "2026-03-21");
     expect(completed).toHaveLength(1);
     expect(completed[0].routine_id).toBe("b");
   });

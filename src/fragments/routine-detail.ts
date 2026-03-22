@@ -3,6 +3,7 @@
 // ──────────────────────────────────────────────────────────────────
 
 import type { Routine, ExerciseTemplate, Progression } from "../types";
+import { escapeHtml, escapeAttr } from "../utils/html";
 
 /**
  * Full routine detail page content — exercise list with numbered items,
@@ -16,7 +17,6 @@ export function routineDetailPage(
 ): string {
   const parts: string[] = [];
 
-  // Build a lookup map for O(1) template access
   const templateMap = new Map(exerciseTemplates.map((t) => [t.id, t]));
 
   // Back nav
@@ -51,10 +51,7 @@ export function routineDetailPage(
     // Title always comes from the template; fall back to ID if template missing
     const title = template?.title ?? routineExercise.exerciseTemplateId;
 
-    // Sets always a string on RoutineExercise
     const setsDisplay = routineExercise.sets;
-
-    // Notes: routine exercise override takes priority, then template default
     const notes = routineExercise.notes ?? template?.notes;
 
     const videoLink = template?.videoURL
@@ -88,29 +85,6 @@ export function routineDetailPage(
 </div>`);
 
   return parts.join("\n");
-}
-
-// ── Helpers ──
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function escapeAttr(str: string): string {
-  return str.replace(/[&<>"']/g, (c) => {
-    switch (c) {
-      case "&": return "&amp;";
-      case "<": return "&lt;";
-      case ">": return "&gt;";
-      case '"': return "&quot;";
-      case "'": return "&#39;";
-      default: return c;
-    }
-  });
 }
 
 /** Convert a tag like "core-integration" to "Core Integration" */

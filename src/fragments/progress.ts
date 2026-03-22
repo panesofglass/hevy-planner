@@ -3,6 +3,7 @@
 // ──────────────────────────────────────────────────────────────────
 
 import type { Skill, RoadmapPhase, Benchmark } from "../types";
+import { escapeHtml } from "../utils/html";
 
 /**
  * Skill cards — expandable cards with icon, name, timeline, priority badge.
@@ -111,12 +112,3 @@ ${items}
 </div>`;
 }
 
-// ── Helpers ──
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

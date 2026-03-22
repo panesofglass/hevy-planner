@@ -21,25 +21,24 @@ import {
   getExerciseTemplateMappings,
   upsertExerciseTemplateMapping,
 } from "./storage/queries";
-import { generatePlaylist, getNextSession, getCompletedSessions } from "./domain/queue";
+import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "./domain/queue";
 import { computeUpcoming } from "./domain/reflow";
 import { buildRoutinePayload, matchCompletions, autoMatchExercises } from "./domain/hevy-sync";
 import { HevyClient } from "./hevy/client";
 import { htmlShell } from "./fragments/layout";
-import { carsCard, heroSessionCard, completedSection, upcomingSection } from "./fragments/today";
+import { carsCard, heroRoutineCard, completedSection, upcomingSection } from "./fragments/today";
 import { routineDetailPage } from "./fragments/routine-detail";
 import { skillCards, roadmapSection, benchmarksSection } from "./fragments/progress";
 import { setupPage } from "./fragments/setup";
 import type { Program, Progression } from "./types";
+import { escapeHtml } from "./utils/html";
 
 import programJson from "../programs/mobility-joint-restoration.json";
 
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
-
 const program = programJson as unknown as Program;
 const APP_NAME = "Hevy Planner";
+const routineMap = new Map(program.routines.map((r) => [r.id, r]));
+const dailyRoutine = program.routines.find((r) => r.isDaily);
 
 export interface Env {
   DB: D1Database;
@@ -214,29 +213,26 @@ async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
 
   const items = await getQueueItems(env.DB, userId);
   const today = todayString();
-  const routineMap = new Map(program.routines.map((r) => [r.id, r]));
 
   const fragments: string[] = [];
 
-  // CARs card (daily routine)
-  const dailyRoutine = program.routines.find((r) => r.isDaily);
   if (dailyRoutine) {
     fragments.push(patchElements(carsCard(dailyRoutine), { selector: "#content", mode: "inner" }));
   }
 
   // Hero session card — next pending
-  const nextItem = getNextSession(items);
+  const nextItem = getNextRoutine(items);
   if (nextItem) {
     const routine = routineMap.get(nextItem.routine_id);
     if (routine) {
       fragments.push(
-        patchElements(heroSessionCard(routine, nextItem), { selector: "#content", mode: "append" })
+        patchElements(heroRoutineCard(routine, nextItem), { selector: "#content", mode: "append" })
       );
     }
   }
 
   // Completed today
-  const completed = getCompletedSessions(items, today);
+  const completed = getCompletedRoutines(items, today);
   if (completed.length > 0) {
     const completedData = completed.map((item) => ({
       title: routineMap.get(item.routine_id)?.title ?? item.routine_id,
@@ -416,26 +412,23 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
       (i) => i.routine_id === routineId && i.status === "pending"
     );
 
-    let routineId: string;
+    let hevyRoutineId: string;
     if (queueItem?.hevy_routine_id) {
-      // Update existing routine
-      const routine = await client.updateRoutine(queueItem.hevy_routine_id, {
+      const updated = await client.updateRoutine(queueItem.hevy_routine_id, {
         title: payload.title,
         exercises: payload.exercises,
       });
-      routineId = routine.id;
+      hevyRoutineId = updated.id;
     } else {
-      // Create new routine
-      const routine = await client.createRoutine({
+      const created = await client.createRoutine({
         title: payload.title,
         exercises: payload.exercises,
       });
-      routineId = routine.id;
+      hevyRoutineId = created.id;
     }
 
-    // Store routine ID on queue item
     if (queueItem) {
-      await updateQueueItemHevyRoutineId(env.DB, queueItem.id, routineId);
+      await updateQueueItemHevyRoutineId(env.DB, queueItem.id, hevyRoutineId);
     }
 
     const unmappedNote =
@@ -475,14 +468,15 @@ async function handlePull(env: Env, userId: string): Promise<Response> {
   const client = new HevyClient(user.hevy_api_key);
 
   try {
-    const workouts = await client.getRecentWorkouts();
-    const items = await getQueueItems(env.DB, userId);
+    const [workouts, items] = await Promise.all([
+      client.getRecentWorkouts(),
+      getQueueItems(env.DB, userId),
+    ]);
     const pendingItems = items.filter((i) => i.status === "pending" && i.hevy_routine_id);
 
-    // Build a name→routine_id lookup from pending items
     const nameToRoutineId = new Map<string, string>();
     for (const item of pendingItems) {
-      const routine = program.routines.find((r) => r.id === item.routine_id);
+      const routine = routineMap.get(item.routine_id);
       if (routine && item.hevy_routine_id) {
         nameToRoutineId.set(routine.title, item.hevy_routine_id);
       }

@@ -34,9 +34,9 @@ describe("computeUpcoming", () => {
 
     const upcoming = computeUpcoming(pending, template, routines, 5);
     const types = upcoming.map((u) => u.type);
-    expect(types[0]).toBe("session");   // b
+    expect(types[0]).toBe("routine");   // b
     expect(types[1]).toBe("spacer");    // CARs-only
-    expect(types[2]).toBe("session");   // c
+    expect(types[2]).toBe("routine");   // c
   });
 
   it("limits to requested count of main sessions", () => {
@@ -46,7 +46,7 @@ describe("computeUpcoming", () => {
       hevy_routine_id: null, hevy_workout_id: null,
     }));
     const upcoming = computeUpcoming(pending, template, routines, 3);
-    const sessionCount = upcoming.filter((u) => u.type === "session").length;
+    const sessionCount = upcoming.filter((u) => u.type === "routine").length;
     expect(sessionCount).toBe(3);
   });
 });
