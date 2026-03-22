@@ -41,13 +41,21 @@ export interface Exercise {
   sets?: number | string;
   reps?: string;
   notes?: string;
+  videoURL?: string;
+  searchTerms?: string;
+  tags?: string[];
+  subtitle?: string;
+  description?: string;
 }
 
 export interface Session {
   id: string;
   title: string;
+  subtitle?: string;
+  description?: string;
   color?: string;
   isDaily?: boolean;
+  sortOrder?: number;
   exercises: Exercise[];
 }
 
@@ -60,5 +68,71 @@ export interface TemplateDay {
 export interface WeekTemplate {
   id: string;
   name: string;
+  description?: string;
+  sortOrder?: number;
   days: TemplateDay[];
+}
+
+// ──────────────────────────────────────────────────────────────────
+// Extended program types — used by fragments for rendering
+// ──────────────────────────────────────────────────────────────────
+
+export interface Program {
+  meta: { title: string; subtitle?: string; description?: string; durationWeeks?: number };
+  sessions: Session[];
+  weekTemplates: WeekTemplate[];
+  progressions: Progression[];
+  roadmap?: RoadmapPhase[];
+  skills?: Skill[];
+  benchmarks?: Benchmark[];
+  foundations?: Foundation[];
+}
+
+export interface Progression {
+  id: string;
+  phaseName: string;
+  weekRange: string;
+  focus?: string;
+  details?: string[];
+  weekStart?: number;
+  weekEnd?: number;
+}
+
+export interface RoadmapPhase {
+  id: string;
+  name: string;
+  weeks?: string;
+  status?: "current" | "future" | "completed";
+  summary?: string;
+  gateTests?: string[];
+  sortOrder?: number;
+}
+
+export interface Skill {
+  id: string;
+  name: string;
+  priority?: number;
+  icon?: string;
+  color?: string;
+  currentState?: string;
+  requirements?: string;
+  gapAnalysis?: string;
+  timeline?: string;
+  milestones?: Array<{ name: string; description?: string; targetWeek?: number }>;
+}
+
+export interface Benchmark {
+  id: string;
+  name: string;
+  howTo: string;
+  target?: string;
+  frequency?: string;
+}
+
+export interface Foundation {
+  id: string;
+  title: string;
+  description?: string;
+  steps?: Array<{ name: string; instructions: string }>;
+  practice?: string;
 }
