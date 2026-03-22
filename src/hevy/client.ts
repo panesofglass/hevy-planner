@@ -20,7 +20,8 @@ export interface HevyRoutineExercise {
 export interface HevySet {
   type: "normal" | "warmup" | "dropset" | "failure";
   weight_kg?: number;
-  reps?: number;
+  reps: number | null;
+  repRange: { start: number | null; end: number | null };
   duration_seconds?: number;
 }
 
@@ -63,6 +64,8 @@ export class HevyClient {
     }
 
     if (!res.ok) {
+      const errorBody = await res.text().catch(() => "");
+      console.error(`Hevy API ${res.status} ${res.statusText}: ${errorBody}`);
       throw new Error(`Hevy API error: ${res.status} ${res.statusText}`);
     }
 
@@ -93,7 +96,7 @@ export class HevyClient {
   async createRoutine(routine: { title: string; exercises: HevyRoutineExercise[] }): Promise<HevyRoutine> {
     const data = await this.request<{ routine: HevyRoutine }>("/routines", {
       method: "POST",
-      body: JSON.stringify({ routine }),
+      body: JSON.stringify(routine),
     });
     return data.routine;
   }
@@ -101,7 +104,7 @@ export class HevyClient {
   async updateRoutine(routineId: string, routine: { title: string; exercises: HevyRoutineExercise[] }): Promise<HevyRoutine> {
     const data = await this.request<{ routine: HevyRoutine }>(`/routines/${routineId}`, {
       method: "PUT",
-      body: JSON.stringify({ routine }),
+      body: JSON.stringify({ ...routine, routineId }),
     });
     return data.routine;
   }

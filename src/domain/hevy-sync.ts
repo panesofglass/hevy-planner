@@ -20,7 +20,7 @@ function parseSetsString(setsStr: string): HevySet[] {
   const match = normalised.match(/^(\d+)\s*x\s*(\d+(?:\.\d+)?)\s*(sec|min)?/i);
   if (!match) {
     // Fallback: return a single normal set with no values
-    return [{ type: "normal" }];
+    return [{ type: "normal", reps: null, repRange: { start: null, end: null } }];
   }
 
   const count = parseInt(match[1], 10);
@@ -37,9 +37,10 @@ function parseSetsString(setsStr: string): HevySet[] {
   const sets: HevySet[] = [];
   for (let i = 0; i < count; i++) {
     if (isDuration) {
-      sets.push({ type: "normal", duration_seconds });
+      sets.push({ type: "normal", reps: null, repRange: { start: null, end: null }, duration_seconds });
     } else {
-      sets.push({ type: "normal", reps: Math.round(value) });
+      const reps = Math.round(value);
+      sets.push({ type: "normal", reps, repRange: { start: reps, end: reps } });
     }
   }
   return sets;
@@ -84,9 +85,9 @@ export function buildRoutinePayload(
       sets = parseSetsString(exercise.sets);
     } else if (typeof exercise.sets === "number") {
       // Only a count provided — default to 1 rep per set
-      sets = Array.from({ length: exercise.sets }, () => ({ type: "normal" as const, reps: 1 }));
+      sets = Array.from({ length: exercise.sets }, () => ({ type: "normal" as const, reps: 1, repRange: { start: 1, end: 1 } }));
     } else {
-      sets = [{ type: "normal" }];
+      sets = [{ type: "normal", reps: null, repRange: { start: null, end: null } }];
     }
 
     exercises.push({
