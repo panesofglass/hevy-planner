@@ -76,7 +76,7 @@ export function sessionDetailPage(
 
   // Sticky Push to Hevy
   parts.push(`<div class="sticky-footer">
-  <button class="btn btn-blue btn-block" data-on-click="$$post('/api/push-hevy/${escapeAttr(session.id)}')">Push to Hevy</button>
+  <button class="btn btn-blue btn-block" data-on:click="@post('/api/push-hevy/${escapeAttr(session.id)}')">Push to Hevy</button>
 </div>`);
 
   return parts.join("\n");

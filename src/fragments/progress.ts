@@ -36,8 +36,8 @@ export function skillCards(skills: Skill[]): string {
             .join("")}</ul>`
         : "";
 
-    return `<div class="skill-card" data-signals-${signalName}="${expanded}">
-  <div class="skill-header" data-on-click="$${signalName} = !$${signalName}">
+    return `<div class="skill-card" data-signals:${signalName}="${expanded}">
+  <div class="skill-header" data-on:click="$${signalName} = !$${signalName}">
     <div class="skill-icon" style="${iconBg}; color:${iconColor}">${skill.icon ?? ""}</div>
     <span class="skill-name">${escapeHtml(skill.name)}</span>
     ${priorityLabel ? `<span class="skill-priority">${escapeHtml(priorityLabel)}</span>` : ""}

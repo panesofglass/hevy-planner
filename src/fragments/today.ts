@@ -18,7 +18,7 @@ export function carsCard(session: Session): string {
   <div class="card-title">${escapeHtml(session.title)}</div>
   <div class="card-subtitle">${escapeHtml(subtitle)}</div>
   <div style="display:flex; gap:8px; margin-top:14px">
-    <button class="btn btn-blue" data-on-click="$$post('/api/push-hevy/daily')">Push to Hevy</button>
+    <button class="btn btn-blue" data-on:click="@post('/api/push-hevy/daily')">Push to Hevy</button>
     <a href="/session/daily" class="btn btn-ghost">Details</a>
   </div>
 </div>`;
@@ -41,7 +41,7 @@ export function heroSessionCard(session: Session, queueItem: QueueItemRow): stri
   <div class="card-subtitle">${escapeHtml(subtitle)}</div>
   ${desc}
   <div style="display:flex; gap:8px; margin-top:14px">
-    <button class="btn btn-blue" data-on-click="$$post('/api/push-hevy/${escapeAttr(queueItem.session_id)}')">Push to Hevy</button>
+    <button class="btn btn-blue" data-on:click="@post('/api/push-hevy/${escapeAttr(queueItem.session_id)}')">Push to Hevy</button>
     <a href="/session/${escapeAttr(session.id)}" class="btn btn-ghost">Details</a>
   </div>
 </div>`;

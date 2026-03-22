@@ -15,7 +15,7 @@ export interface HtmlShellOptions {
 export function htmlShell(opts: HtmlShellOptions): string {
   const activeTab = opts.activeTab ?? "today";
   const sseAttr = opts.ssePath
-    ? ` data-on-load="$$get('${opts.ssePath}')"`
+    ? ` data-on:load="@get('${opts.ssePath}')"`
     : "";
 
   const bodyContent = opts.body
