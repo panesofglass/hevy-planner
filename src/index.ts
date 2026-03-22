@@ -331,6 +331,21 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
     return new Response("Invalid template ID", { status: 400 });
   }
 
+  // Validate API key against Hevy before proceeding
+  if (apiKey) {
+    try {
+      const client = new HevyClient(apiKey);
+      await client.getExerciseTemplates(1, 1);
+    } catch {
+      return sseResponse(
+        patchElements(
+          `<div class="card"><p style="color:var(--orange)">Invalid Hevy API key. Check your key in Hevy Settings &gt; Developer and try again.</p></div>`,
+          { selector: "#content", mode: "prepend" }
+        )
+      );
+    }
+  }
+
   // Upsert user
   await upsertUser(env.DB, {
     id: userId,
