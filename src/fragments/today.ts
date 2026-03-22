@@ -2,24 +2,24 @@
 // Today page fragments — CARs card, hero session, completed, upcoming
 // ──────────────────────────────────────────────────────────────────
 
-import type { Session, QueueItemRow } from "../types";
+import type { Routine, QueueItemRow } from "../types";
 import type { UpcomingItem } from "../domain/reflow";
 
 /**
  * Daily CARs card — always shown at the top of Today.
  * Green accent label, exercise count, Push to Hevy + Details.
  */
-export function carsCard(session: Session): string {
-  const count = session.exercises.length;
-  const subtitle = session.subtitle ?? `${count} exercises`;
+export function carsCard(routine: Routine): string {
+  const count = routine.exercises.length;
+  const subtitle = routine.subtitle ?? `${count} exercises`;
 
   return `<div class="card">
   <div class="card-label" style="color: var(--green)">Daily</div>
-  <div class="card-title">${escapeHtml(session.title)}</div>
+  <div class="card-title">${escapeHtml(routine.title)}</div>
   <div class="card-subtitle">${escapeHtml(subtitle)}</div>
   <div style="display:flex; gap:8px; margin-top:14px">
     <button class="btn btn-blue" data-on:click="@post('/api/push-hevy/daily')">Push to Hevy</button>
-    <a href="/session/daily" class="btn btn-ghost">Details</a>
+    <a href="/routine/daily" class="btn btn-ghost">Details</a>
   </div>
 </div>`;
 }
@@ -28,21 +28,21 @@ export function carsCard(session: Session): string {
  * Hero session card — the next main session from the queue.
  * Blue accent label, description preview, Push to Hevy + Details.
  */
-export function heroSessionCard(session: Session, queueItem: QueueItemRow): string {
-  const count = session.exercises.length;
-  const subtitle = session.subtitle ?? `${count} exercises`;
-  const desc = session.description
-    ? `<div class="card-desc">${escapeHtml(truncate(session.description, 120))}</div>`
+export function heroSessionCard(routine: Routine, queueItem: QueueItemRow): string {
+  const count = routine.exercises.length;
+  const subtitle = routine.subtitle ?? `${count} exercises`;
+  const desc = routine.description
+    ? `<div class="card-desc">${escapeHtml(truncate(routine.description, 120))}</div>`
     : "";
 
   return `<div class="card">
   <div class="card-label" style="color: var(--blue)">Next Session</div>
-  <div class="card-title">${escapeHtml(session.title)}</div>
+  <div class="card-title">${escapeHtml(routine.title)}</div>
   <div class="card-subtitle">${escapeHtml(subtitle)}</div>
   ${desc}
   <div style="display:flex; gap:8px; margin-top:14px">
-    <button class="btn btn-blue" data-on:click="@post('/api/push-hevy/${escapeAttr(queueItem.session_id)}')">Push to Hevy</button>
-    <a href="/session/${escapeAttr(session.id)}" class="btn btn-ghost">Details</a>
+    <button class="btn btn-blue" data-on:click="@post('/api/push-hevy/${escapeAttr(queueItem.routine_id)}')">Push to Hevy</button>
+    <a href="/routine/${escapeAttr(routine.id)}" class="btn btn-ghost">Details</a>
   </div>
 </div>`;
 }

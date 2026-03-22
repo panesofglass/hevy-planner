@@ -18,8 +18,8 @@ import {
   markQueueItemCompleted,
   markQueueItemCompletedForUser,
   updateQueueItemHevyRoutineId,
-  getExerciseMappings,
-  upsertExerciseMapping,
+  getExerciseTemplateMappings,
+  upsertExerciseTemplateMapping,
 } from "./storage/queries";
 import { generatePlaylist, getNextSession, getCompletedSessions } from "./domain/queue";
 import { computeUpcoming } from "./domain/reflow";
@@ -27,7 +27,7 @@ import { buildRoutinePayload, matchCompletions, autoMatchExercises } from "./dom
 import { HevyClient } from "./hevy/client";
 import { htmlShell } from "./fragments/layout";
 import { carsCard, heroSessionCard, completedSection, upcomingSection } from "./fragments/today";
-import { sessionDetailPage } from "./fragments/session-detail";
+import { routineDetailPage } from "./fragments/routine-detail";
 import { skillCards, roadmapSection, benchmarksSection } from "./fragments/progress";
 import { setupPage } from "./fragments/setup";
 import type { Program, Progression } from "./types";
@@ -145,20 +145,20 @@ export default {
         );
       }
 
-      // ── GET /session/:id ───────────────────────────────────────
-      const sessionMatch = path.match(/^\/session\/([^/]+)$/);
-      if (method === "GET" && sessionMatch) {
-        const sessionId = decodeURIComponent(sessionMatch[1]);
+      // ── GET /routine/:id ──────────────────────────────────────
+      const routineMatch = path.match(/^\/routine\/([^/]+)$/);
+      if (method === "GET" && routineMatch) {
+        const routineId = decodeURIComponent(routineMatch[1]);
 
         if (isSSERequest(request)) {
-          return await handleSessionSSE(env, auth.userId, sessionId);
+          return await handleRoutineSSE(env, auth.userId, routineId);
         }
 
         return htmlResponse(
           htmlShell({
-            title: "Session",
+            title: "Routine",
             activeTab: "today",
-            ssePath: `/session/${encodeURIComponent(sessionId)}`,
+            ssePath: `/routine/${encodeURIComponent(routineId)}`,
           })
         );
       }
@@ -173,8 +173,8 @@ export default {
       // ── POST /api/push-hevy/:id ────────────────────────────────
       const pushMatch = path.match(/^\/api\/push-hevy\/([^/]+)$/);
       if (method === "POST" && pushMatch) {
-        const sessionId = decodeURIComponent(pushMatch[1]);
-        return await handlePush(env, auth.userId, sessionId);
+        const routineId = decodeURIComponent(pushMatch[1]);
+        return await handlePush(env, auth.userId, routineId);
       }
 
       // ── POST /api/pull ─────────────────────────────────────────
@@ -214,23 +214,23 @@ async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
 
   const items = await getQueueItems(env.DB, userId);
   const today = todayString();
-  const sessionMap = new Map(program.sessions.map((s) => [s.id, s]));
+  const routineMap = new Map(program.routines.map((r) => [r.id, r]));
 
   const fragments: string[] = [];
 
-  // CARs card (daily session)
-  const dailySession = program.sessions.find((s) => s.isDaily);
-  if (dailySession) {
-    fragments.push(patchElements(carsCard(dailySession), { selector: "#content", mode: "inner" }));
+  // CARs card (daily routine)
+  const dailyRoutine = program.routines.find((r) => r.isDaily);
+  if (dailyRoutine) {
+    fragments.push(patchElements(carsCard(dailyRoutine), { selector: "#content", mode: "inner" }));
   }
 
   // Hero session card — next pending
   const nextItem = getNextSession(items);
   if (nextItem) {
-    const session = sessionMap.get(nextItem.session_id);
-    if (session) {
+    const routine = routineMap.get(nextItem.routine_id);
+    if (routine) {
       fragments.push(
-        patchElements(heroSessionCard(session, nextItem), { selector: "#content", mode: "append" })
+        patchElements(heroSessionCard(routine, nextItem), { selector: "#content", mode: "append" })
       );
     }
   }
@@ -239,7 +239,7 @@ async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
   const completed = getCompletedSessions(items, today);
   if (completed.length > 0) {
     const completedData = completed.map((item) => ({
-      title: sessionMap.get(item.session_id)?.title ?? item.session_id,
+      title: routineMap.get(item.routine_id)?.title ?? item.routine_id,
     }));
     fragments.push(
       patchElements(completedSection(completedData), { selector: "#content", mode: "append" })
@@ -252,7 +252,7 @@ async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
     const pendingItems = items.filter((i) => i.status === "pending").sort((a, b) => a.position - b.position);
     // Skip the first pending (already shown as hero) for upcoming
     const upcomingPending = pendingItems.slice(1);
-    const upcoming = computeUpcoming(upcomingPending, template, program.sessions, 5);
+    const upcoming = computeUpcoming(upcomingPending, template, program.routines, 5);
     if (upcoming.length > 0) {
       fragments.push(
         patchElements(upcomingSection(upcoming), { selector: "#content", mode: "append" })
@@ -288,12 +288,12 @@ function handleProgressSSE(): Response {
   return sseResponse(mergeFragments(fragments));
 }
 
-/** SSE: Session detail — exercise list with coaching context */
-async function handleSessionSSE(env: Env, userId: string, sessionId: string): Promise<Response> {
-  const session = program.sessions.find((s) => s.id === sessionId);
-  if (!session) {
+/** SSE: Routine detail — exercise list with coaching context */
+async function handleRoutineSSE(env: Env, userId: string, routineId: string): Promise<Response> {
+  const routine = program.routines.find((r) => r.id === routineId);
+  if (!routine) {
     return sseResponse(
-      patchElements(`<p>Session not found.</p>`, { selector: "#content", mode: "inner" })
+      patchElements(`<p>Routine not found.</p>`, { selector: "#content", mode: "inner" })
     );
   }
 
@@ -303,7 +303,7 @@ async function handleSessionSSE(env: Env, userId: string, sessionId: string): Pr
     ? getCurrentProgression(user.start_date, program.progressions)
     : program.progressions[0];
 
-  const html = sessionDetailPage(session, currentProgression);
+  const html = routineDetailPage(routine, program.exerciseTemplates, currentProgression);
   return sseResponse(
     patchElements(html, { selector: "#content", mode: "inner" })
   );
@@ -357,7 +357,7 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
 
   // Generate queue playlist
   const weeks = program.meta.durationWeeks || 8;
-  const playlist = generatePlaylist(template, program.sessions, weeks);
+  const playlist = generatePlaylist(template, program.routines, weeks);
   if (playlist.length > 0) {
     await insertQueueItems(env.DB, userId, playlist);
   }
@@ -366,8 +366,8 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
   return sseResponse(executeScript("window.location.href = '/'"));
 }
 
-/** POST /api/push-hevy/:id — push session to Hevy as routine */
-async function handlePush(env: Env, userId: string, sessionId: string): Promise<Response> {
+/** POST /api/push-hevy/:id — push routine to Hevy */
+async function handlePush(env: Env, userId: string, routineId: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user || !user.hevy_api_key) {
     return sseResponse(
@@ -378,45 +378,42 @@ async function handlePush(env: Env, userId: string, sessionId: string): Promise<
     );
   }
 
-  const session = program.sessions.find((s) => s.id === sessionId);
-  if (!session) {
-    return new Response("Session not found", { status: 404 });
+  const routine = program.routines.find((r) => r.id === routineId);
+  if (!routine) {
+    return new Response("Routine not found", { status: 404 });
   }
 
   const client = new HevyClient(user.hevy_api_key);
 
-  // Get or auto-create exercise mappings
-  let mappings = await getExerciseMappings(env.DB, userId);
+  // Get or auto-create exercise template mappings
+  let mappings = await getExerciseTemplateMappings(env.DB, userId);
   if (mappings.length === 0) {
-    // First push: auto-match exercises
+    // First push: auto-match exercise templates
     try {
-      const templates = await client.getAllExerciseTemplates();
-      const programNames = program.sessions.flatMap((s) =>
-        s.exercises.map((e) => e.name)
-      );
-      const autoMatched = autoMatchExercises(programNames, templates);
+      const hevyTemplates = await client.getAllExerciseTemplates();
+      const autoMatched = autoMatchExercises(program.exerciseTemplates, hevyTemplates);
 
-      for (const [name, hevyId] of autoMatched) {
-        await upsertExerciseMapping(env.DB, {
+      for (const [programTemplateId, hevyTemplateId] of autoMatched) {
+        await upsertExerciseTemplateMapping(env.DB, {
           user_id: userId,
-          program_exercise_name: name,
-          hevy_exercise_id: hevyId,
-          confirmed_by_user: 0,
+          program_template_id: programTemplateId,
+          hevy_template_id: hevyTemplateId,
+          is_custom: 0,
         });
       }
-      mappings = await getExerciseMappings(env.DB, userId);
+      mappings = await getExerciseTemplateMappings(env.DB, userId);
     } catch {
       // If auto-match fails, continue with empty mappings
     }
   }
 
-  const payload = buildRoutinePayload(session, mappings);
+  const payload = buildRoutinePayload(routine, mappings);
 
   try {
     // Find existing queue item to update
     const items = await getQueueItems(env.DB, userId);
     const queueItem = items.find(
-      (i) => i.session_id === sessionId && i.status === "pending"
+      (i) => i.routine_id === routineId && i.status === "pending"
     );
 
     let routineId: string;
@@ -485,9 +482,9 @@ async function handlePull(env: Env, userId: string): Promise<Response> {
     // Build a name→routine_id lookup from pending items
     const nameToRoutineId = new Map<string, string>();
     for (const item of pendingItems) {
-      const session = program.sessions.find((s) => s.id === item.session_id);
-      if (session && item.hevy_routine_id) {
-        nameToRoutineId.set(session.title, item.hevy_routine_id);
+      const routine = program.routines.find((r) => r.id === item.routine_id);
+      if (routine && item.hevy_routine_id) {
+        nameToRoutineId.set(routine.title, item.hevy_routine_id);
       }
     }
 

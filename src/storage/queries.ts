@@ -1,4 +1,4 @@
-import type { UserRow, QueueItemRow, ExerciseMappingRow } from "../types";
+import type { UserRow, QueueItemRow, ExerciseTemplateMappingRow, RoutineMappingRow } from "../types";
 
 export async function getUser(db: D1Database, userId: string): Promise<UserRow | null> {
   return db.prepare("SELECT * FROM users WHERE id = ?").bind(userId).first<UserRow>();
@@ -33,12 +33,12 @@ export async function getQueueItems(db: D1Database, userId: string): Promise<Que
 export async function insertQueueItems(
   db: D1Database,
   userId: string,
-  items: Array<{ session_id: string; position: number }>
+  items: Array<{ routine_id: string; position: number }>
 ): Promise<void> {
   const stmt = db.prepare(
-    "INSERT INTO queue_items (user_id, session_id, position) VALUES (?, ?, ?)"
+    "INSERT INTO queue_items (user_id, routine_id, position) VALUES (?, ?, ?)"
   );
-  const batch = items.map((item) => stmt.bind(userId, item.session_id, item.position));
+  const batch = items.map((item) => stmt.bind(userId, item.routine_id, item.position));
   await db.batch(batch);
 }
 
@@ -82,29 +82,70 @@ export async function updateQueueItemHevyRoutineId(
     .run();
 }
 
-export async function getExerciseMappings(
+export async function getExerciseTemplateMappings(
   db: D1Database,
   userId: string
-): Promise<ExerciseMappingRow[]> {
+): Promise<ExerciseTemplateMappingRow[]> {
   const result = await db
-    .prepare("SELECT * FROM exercise_mappings WHERE user_id = ?")
+    .prepare("SELECT * FROM exercise_template_mappings WHERE user_id = ?")
     .bind(userId)
-    .all<ExerciseMappingRow>();
+    .all<ExerciseTemplateMappingRow>();
   return result.results;
 }
 
-export async function upsertExerciseMapping(
+export async function upsertExerciseTemplateMapping(
   db: D1Database,
-  mapping: ExerciseMappingRow
+  mapping: ExerciseTemplateMappingRow
 ): Promise<void> {
   await db
     .prepare(
-      `INSERT INTO exercise_mappings (user_id, program_exercise_name, hevy_exercise_id, confirmed_by_user)
+      `INSERT INTO exercise_template_mappings (user_id, program_template_id, hevy_template_id, is_custom)
        VALUES (?, ?, ?, ?)
-       ON CONFLICT(user_id, program_exercise_name) DO UPDATE SET
-         hevy_exercise_id = excluded.hevy_exercise_id,
-         confirmed_by_user = excluded.confirmed_by_user`
+       ON CONFLICT(user_id, program_template_id) DO UPDATE SET
+         hevy_template_id = excluded.hevy_template_id,
+         is_custom = excluded.is_custom`
     )
-    .bind(mapping.user_id, mapping.program_exercise_name, mapping.hevy_exercise_id, mapping.confirmed_by_user)
+    .bind(mapping.user_id, mapping.program_template_id, mapping.hevy_template_id, mapping.is_custom)
     .run();
+}
+
+export async function getRoutineMappings(
+  db: D1Database,
+  userId: string
+): Promise<RoutineMappingRow[]> {
+  const result = await db
+    .prepare("SELECT * FROM routine_mappings WHERE user_id = ?")
+    .bind(userId)
+    .all<RoutineMappingRow>();
+  return result.results;
+}
+
+export async function upsertRoutineMapping(
+  db: D1Database,
+  mapping: RoutineMappingRow
+): Promise<void> {
+  await db
+    .prepare(
+      `INSERT INTO routine_mappings (user_id, program_routine_id, hevy_routine_id)
+       VALUES (?, ?, ?)
+       ON CONFLICT(user_id, program_routine_id) DO UPDATE SET
+         hevy_routine_id = excluded.hevy_routine_id`
+    )
+    .bind(mapping.user_id, mapping.program_routine_id, mapping.hevy_routine_id)
+    .run();
+}
+
+export async function bulkSetQueueItemRoutineIds(
+  db: D1Database,
+  userId: string,
+  routineIdMap: Map<string, string>
+): Promise<void> {
+  if (routineIdMap.size === 0) return;
+  const stmt = db.prepare(
+    "UPDATE queue_items SET hevy_routine_id = ? WHERE user_id = ? AND routine_id = ?"
+  );
+  const batch = [...routineIdMap.entries()].map(([programRoutineId, hevyRoutineId]) =>
+    stmt.bind(hevyRoutineId, userId, programRoutineId)
+  );
+  await db.batch(batch);
 }

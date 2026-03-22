@@ -6,10 +6,552 @@
     "description": "8-week joint restoration program with 12-month skills roadmap. Rebuilds shoulder stability, knee resilience, Achilles health, core strength, and thoracic mobility — then progresses to muscle-ups, tuck planche, pistol squats, and handstands.",
     "author": "AI Coach",
     "durationWeeks": 0,
-    "tags": ["mobility", "joint-health", "rehabilitation", "calisthenics", "skills"]
+    "tags": [
+      "mobility",
+      "joint-health",
+      "rehabilitation",
+      "calisthenics",
+      "skills"
+    ]
   },
-
-  "sessions": [
+  "exerciseTemplates": [
+    {
+      "id": "neck-cars",
+      "title": "Neck CARs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "neck",
+      "notes": "Slow, controlled circles. Keep shoulders still. If you find a sticky spot, spend extra time there.",
+      "videoURL": "https://www.youtube.com/results?search_query=neck+CARs+controlled+articular+rotations+tutorial",
+      "searchTerms": "Neck CARs FRC tutorial"
+    },
+    {
+      "id": "shoulder-cars",
+      "title": "Shoulder CARs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "shoulders",
+      "notes": "CRITICAL for you. Make fist, lock elbow straight, trace the biggest circle possible. Go SLOW — 10 seconds per rotation minimum. Pain-free range only, expand it over weeks.",
+      "videoURL": "https://www.youtube.com/results?search_query=shoulder+CARs+controlled+articular+rotations",
+      "searchTerms": "Shoulder CARs FRC"
+    },
+    {
+      "id": "hip-cars",
+      "title": "Hip CARs (Standing)",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "glutes",
+      "secondaryMuscleGroups": [
+        "hip_flexors"
+      ],
+      "notes": "Hold a wall for balance. Drive knee up, open out, extend back, return. Keep pelvis still — the rotation happens at the hip socket only.",
+      "videoURL": "https://www.youtube.com/results?search_query=standing+hip+CARs+FRC+tutorial",
+      "searchTerms": "Standing hip CARs FRC"
+    },
+    {
+      "id": "ankle-cars",
+      "title": "Ankle CARs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "calves",
+      "notes": "CRITICAL — especially right side (Achilles repair). Seated, lift foot off ground, make slow full circles. Note any clicking or restriction without forcing through it.",
+      "videoURL": "https://www.youtube.com/results?search_query=ankle+CARs+controlled+articular+rotations",
+      "searchTerms": "Ankle CARs FRC"
+    },
+    {
+      "id": "spine-cars",
+      "title": "Spine CARs (Segmental Cat-Cow)",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "lower_back",
+      "secondaryMuscleGroups": [
+        "abdominals"
+      ],
+      "notes": "On all fours, roll through flexion and extension one vertebra at a time. Don't rush. This decompresses the spine after desk work.",
+      "videoURL": "https://www.youtube.com/results?search_query=segmental+cat+cow+spine+CARs",
+      "searchTerms": "Segmental cat-cow spine CARs"
+    },
+    {
+      "id": "wrist-cars",
+      "title": "Wrist CARs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "forearms",
+      "notes": "Make a fist, trace slow full circles at the wrist. You're doing planks, bear crawls, and bench pressing — your wrists take a beating. These also help you identify early warning signs of overuse before they become problems.",
+      "videoURL": "https://www.youtube.com/results?search_query=wrist+CARs+controlled+articular+rotations",
+      "searchTerms": "Wrist CARs FRC"
+    },
+    {
+      "id": "tspine-rotation-quadruped",
+      "title": "T-Spine Rotation (Quadruped)",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "upper_back",
+      "secondaryMuscleGroups": [
+        "shoulders"
+      ],
+      "notes": "On all fours, place one hand behind your head. Rotate that elbow toward the ceiling, then down toward the opposite wrist. Follow your elbow with your eyes. This is the single most important addition for you — your desk-locked thoracic spine is the upstream bottleneck for your shoulders. If this doesn't rotate, your shoulder compensates during every press.",
+      "videoURL": "https://www.youtube.com/results?search_query=quadruped+thoracic+rotation+mobility+drill",
+      "searchTerms": "Quadruped thoracic rotation"
+    },
+    {
+      "id": "dead-hangs",
+      "title": "Dead Hangs",
+      "type": "duration",
+      "equipmentCategory": "pull_up_bar",
+      "primaryMuscleGroup": "lats",
+      "secondaryMuscleGroups": [
+        "forearms",
+        "shoulders"
+      ],
+      "notes": "Use your pull-up bar. Passive hang, let your shoulders stretch toward your ears. This decompresses the shoulder joint and builds grip. If 30s is easy, progress to active hangs (pull shoulders down while hanging).",
+      "videoURL": "https://www.youtube.com/results?search_query=dead+hang+shoulder+mobility+progression",
+      "searchTerms": "Dead hang shoulder health"
+    },
+    {
+      "id": "tspine-extension-foam-roller",
+      "title": "T-Spine Extension Over Foam Roller",
+      "type": "reps_only",
+      "equipmentCategory": "foam_roller",
+      "primaryMuscleGroup": "upper_back",
+      "notes": "Place foam roller across your mid-back. Support your head with hands, elbows pointed forward. Extend back over the roller, then crunch forward — 10 reps. Then hold the extended position for 30 seconds. Move the roller up or down one vertebra and repeat. This directly unlocks the thoracic extension your shoulders need for overhead pressing and front rack position.",
+      "videoURL": "https://www.youtube.com/results?search_query=thoracic+extension+foam+roller+mobility",
+      "searchTerms": "T-spine extension foam roller",
+      "tags": [
+        "tspine-integration"
+      ]
+    },
+    {
+      "id": "open-book",
+      "title": "Open Book (Thread the Needle)",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "upper_back",
+      "secondaryMuscleGroups": [
+        "shoulders"
+      ],
+      "notes": "Lie on your side, knees stacked and bent at 90°. Top arm opens toward the ceiling and behind you while keeping knees together. Follow your hand with your eyes. The rotation should come from your mid-back, NOT your lower back — keeping your knees stacked prevents lumbar rotation. This is the movement pattern that lets you actually rotate during daily life without shoulder or low back compensation.",
+      "videoURL": "https://www.youtube.com/results?search_query=open+book+thoracic+rotation+mobility+drill",
+      "searchTerms": "Open book thoracic rotation",
+      "tags": [
+        "tspine-integration"
+      ]
+    },
+    {
+      "id": "scapular-pushups",
+      "title": "Scapular Push-ups",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "chest",
+      "secondaryMuscleGroups": [
+        "shoulders"
+      ],
+      "notes": "Plank position, arms locked straight. Only your shoulder blades move — protract (spread apart) and retract (squeeze together). This trains serratus anterior, which is likely weak and causing your plank shoulder pain.",
+      "videoURL": "https://www.youtube.com/results?search_query=scapular+push+ups+tutorial+serratus",
+      "searchTerms": "Scapular push-ups serratus"
+    },
+    {
+      "id": "banded-external-rotation",
+      "title": "Banded External Rotation at 90°",
+      "type": "reps_only",
+      "equipmentCategory": "resistance_band",
+      "primaryMuscleGroup": "shoulders",
+      "notes": "Elbow at 90°, upper arm at shoulder height. Rotate forearm up against band resistance. Slow eccentric (3 sec lowering). This directly strengthens the rotator cuff in the position where it fails during pressing.",
+      "videoURL": "https://www.youtube.com/results?search_query=banded+external+rotation+90+degrees+rotator+cuff",
+      "searchTerms": "Banded external rotation 90 degrees"
+    },
+    {
+      "id": "prone-ytw-raises",
+      "title": "Prone Y-T-W Raises",
+      "type": "reps_only",
+      "equipmentCategory": "dumbbell",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": [
+        "upper_back"
+      ],
+      "notes": "Lie face down on bench, light dumbbells (3-5 lb to start). Y = arms overhead in a V. T = arms straight out. W = elbows bent, squeeze shoulder blades. If 5 lb is too much, start bodyweight. These are humbling.",
+      "videoURL": "https://www.youtube.com/results?search_query=prone+Y+T+W+raises+shoulder+rehab",
+      "searchTerms": "Prone Y-T-W raises"
+    },
+    {
+      "id": "wall-slides",
+      "title": "Wall Slides",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": [
+        "upper_back"
+      ],
+      "notes": "Back and arms flat against wall. Slide arms up overhead keeping everything in contact with the wall. If your lower back arches off the wall, that's a mobility restriction — only go as high as you can maintain contact.",
+      "videoURL": "https://www.youtube.com/results?search_query=wall+slides+shoulder+mobility+exercise",
+      "searchTerms": "Wall slides shoulder mobility"
+    },
+    {
+      "id": "shoulder-sleeper-stretch",
+      "title": "Shoulder Sleeper Stretch with PAILs/RAILs",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "shoulders",
+      "notes": "Lie on your side, bottom arm at 90°. Use top hand to gently press into internal rotation. Hold 60s passive. Then PAILs: push bottom hand INTO the floor (10s, 20% effort building to 70%). Then RAILs: try to rotate hand UP without moving (10s same ramp). Re-stretch — you'll gain range.",
+      "videoURL": "https://www.youtube.com/results?search_query=shoulder+PAILs+RAILs+sleeper+stretch+FRC",
+      "searchTerms": "PAILs RAILs shoulder sleeper stretch"
+    },
+    {
+      "id": "hollow-body-hold",
+      "title": "Hollow Body Hold",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "abdominals",
+      "secondaryMuscleGroups": [
+        "hip_flexors"
+      ],
+      "notes": "Lie on your back, arms overhead, legs extended. Press lower back INTO the floor and lift shoulders and feet slightly off the ground. If your low back peels off the floor, bend your knees or bring arms to your sides to regress. This is the missing link behind your plank shoulder pain — when your core can't hold position, your shoulders compensate. Build this, and planks and pressing improve.",
+      "videoURL": "https://www.youtube.com/results?search_query=hollow+body+hold+tutorial+progression",
+      "searchTerms": "Hollow body hold progression",
+      "tags": [
+        "core-integration"
+      ]
+    },
+    {
+      "id": "ninety-ninety-hip-switches",
+      "title": "90/90 Hip Switches",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "glutes",
+      "secondaryMuscleGroups": [
+        "hip_flexors"
+      ],
+      "notes": "Sit with both legs at 90°. Rotate from one side to the other. Keep spine tall. If you can't get your knees to the floor, that's fine — work the range you have. This is your hip mobility barometer.",
+      "videoURL": "https://www.youtube.com/results?search_query=90+90+hip+switches+mobility+tutorial",
+      "searchTerms": "90/90 hip switches mobility"
+    },
+    {
+      "id": "glute-bridge",
+      "title": "Glute Bridge with 3-sec Hold",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "glutes",
+      "secondaryMuscleGroups": [
+        "hamstrings"
+      ],
+      "notes": "Lie on back, knees bent, feet flat. Drive through heels, squeeze glutes HARD at the top, hold 3 seconds. Lower slowly. If you feel this in your hamstrings more than your glutes, bring your feet closer to your butt. This wakes up the glutes so they fire properly during squats, lunges, and walking. At 46 with desk work, your glutes are almost certainly underperforming — this fixes that.",
+      "videoURL": "https://www.youtube.com/results?search_query=glute+bridge+hold+activation+tutorial",
+      "searchTerms": "Glute bridge activation hold",
+      "tags": [
+        "glute-activation"
+      ]
+    },
+    {
+      "id": "banded-clamshells",
+      "title": "Banded Clamshells",
+      "type": "reps_only",
+      "equipmentCategory": "resistance_band",
+      "primaryMuscleGroup": "glutes",
+      "notes": "Lie on your side, knees bent, band around knees. Open top knee against band resistance while keeping feet together. Slow and controlled — don't let the band snap your knee back down. This targets the gluteus medius, which stabilizes your pelvis and directly protects your knees during lateral movements. If your Cossack squats and side lunges hurt, weak glute med is likely a big contributor.",
+      "videoURL": "https://www.youtube.com/results?search_query=banded+clamshell+glute+medius+activation",
+      "searchTerms": "Banded clamshell glute medius",
+      "tags": [
+        "glute-activation"
+      ]
+    },
+    {
+      "id": "tibialis-raises",
+      "title": "Tibialis Anterior Raises",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "calves",
+      "notes": "Stand with back against wall, feet ~12 inches out. Pull toes up toward shins, lower slowly. This strengthens the front of your shin and protects the knee. The Knees Over Toes Guy made this famous for good reason.",
+      "videoURL": "https://www.youtube.com/results?search_query=tibialis+raises+knees+over+toes+tutorial",
+      "searchTerms": "Tibialis raises Knees Over Toes"
+    },
+    {
+      "id": "banded-tke",
+      "title": "Banded Terminal Knee Extensions",
+      "type": "reps_only",
+      "equipmentCategory": "resistance_band",
+      "primaryMuscleGroup": "quadriceps",
+      "notes": "Attach band behind your knee to a low anchor. Stand facing away, slight bend. Squeeze to full lockout against band resistance. This isolates the VMO — the inner quad muscle that stabilizes the kneecap.",
+      "videoURL": "https://www.youtube.com/results?search_query=banded+terminal+knee+extension+VMO",
+      "searchTerms": "Banded TKE VMO strengthening"
+    },
+    {
+      "id": "atg-split-squat",
+      "title": "ATG Split Squat (Regressed)",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "quadriceps",
+      "secondaryMuscleGroups": [
+        "glutes",
+        "calves"
+      ],
+      "notes": "Start with hands on bench/chair for support. Back knee tracks all the way down and forward. ONLY go as deep as you can control without pain. Weeks 1-2: use support. Weeks 3-4: reduce support. This is the single best knee bulletproofing exercise.",
+      "videoURL": "https://www.youtube.com/results?search_query=ATG+split+squat+regression+beginner+knees+over+toes",
+      "searchTerms": "ATG split squat beginner regression",
+      "progressionByPhase": {
+        "Foundation": {
+          "sets": "3×8 each leg",
+          "notes": "Use bench support, partial depth only."
+        },
+        "Build": {
+          "sets": "3×8 each leg",
+          "notes": "Reduce bench support, increase depth."
+        },
+        "Load": {
+          "sets": "3×8 each leg",
+          "notes": "Light dumbbells, no support."
+        }
+      }
+    },
+    {
+      "id": "cossack-squat",
+      "title": "Cossack Squat (Partial ROM)",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "quadriceps",
+      "secondaryMuscleGroups": [
+        "glutes",
+        "hamstrings"
+      ],
+      "notes": "Bodyweight only. Start with a small range — you do NOT need to go ass-to-grass. Hold a doorframe or rack for balance. This directly trains the lateral movement pattern that's giving your knees trouble. Depth will come with consistency.",
+      "videoURL": "https://www.youtube.com/results?search_query=cossack+squat+beginner+progression+mobility",
+      "searchTerms": "Cossack squat progression beginner",
+      "progressionByPhase": {
+        "Foundation": {
+          "sets": "3×6 each side",
+          "notes": "Hold doorframe, go only as deep as comfortable."
+        },
+        "Build": {
+          "sets": "3×6 each side",
+          "notes": "Less support, aim for parallel thigh depth."
+        },
+        "Load": {
+          "sets": "3×6 each side",
+          "notes": "Goblet Cossack Squats with light dumbbell."
+        }
+      }
+    },
+    {
+      "id": "active-frog-stretch",
+      "title": "Active Frog Stretch",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "adductors",
+      "secondaryMuscleGroups": [
+        "hip_flexors"
+      ],
+      "notes": "On all fours, knees wide, rock forward and back. Keep spine neutral. This opens the adductors (inner thigh) which are contributing to both your lateral lunge pain and cross-legged sitting difficulty. Active rocking > static hold.",
+      "videoURL": "https://www.youtube.com/results?search_query=active+frog+stretch+hip+adductor+mobility",
+      "searchTerms": "Active frog stretch adductors"
+    },
+    {
+      "id": "copenhagen-plank",
+      "title": "Copenhagen Plank",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "abdominals",
+      "secondaryMuscleGroups": [
+        "adductors"
+      ],
+      "notes": "Side plank position with top leg on a bench, bottom leg hanging free. This is a two-for-one — it trains lateral core strength AND adductor strength simultaneously. Directly addresses your lateral lunge knee pain. Regress by using bottom knee on the floor or shortening the hold. These are brutally hard at first — 10 seconds is fine to start.",
+      "videoURL": "https://www.youtube.com/results?search_query=copenhagen+plank+tutorial+regression+progression",
+      "searchTerms": "Copenhagen plank tutorial progression",
+      "tags": [
+        "core-integration"
+      ]
+    },
+    {
+      "id": "extended-ankle-cars",
+      "title": "Extended Ankle CARs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "calves",
+      "notes": "Slower and more deliberate than your daily CARs. Spend 5+ seconds per rotation on the right ankle. Map out the full range, note where it catches. Over weeks, the circle should get bigger.",
+      "videoURL": "https://www.youtube.com/results?search_query=ankle+CARs+FRC+detailed+tutorial",
+      "searchTerms": "Ankle CARs detailed FRC"
+    },
+    {
+      "id": "eccentric-calf-raises",
+      "title": "Eccentric Calf Raises (Alfredson Protocol)",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "calves",
+      "notes": "CRITICAL for your Achilles. Stand on step edge, raise up on BOTH feet, then lower slowly (3-4 sec) on ONE foot. Do both straight-knee (gastroc) and bent-knee (soleus) versions. The right side may feel tight — stay in a pain-free range. This is the gold standard for Achilles tendon health.",
+      "videoURL": "https://www.youtube.com/results?search_query=eccentric+calf+raises+achilles+alfredson+protocol",
+      "searchTerms": "Eccentric calf raises Alfredson Achilles",
+      "progressionByPhase": {
+        "Foundation": {
+          "notes": "Both-leg lower if single-leg is too intense on the right."
+        },
+        "Build": {
+          "notes": "Full single-leg protocol."
+        }
+      }
+    },
+    {
+      "id": "wall-dorsiflexion",
+      "title": "Wall Dorsiflexion Mobilization",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "calves",
+      "notes": "Face wall, foot ~4 inches away. Drive knee forward over toes, keeping heel DOWN. Measure progress by how far from the wall you can get your foot while still touching knee to wall. Your right side will be tighter — that's the Achilles repair limiting dorsiflexion.",
+      "videoURL": "https://www.youtube.com/results?search_query=wall+ankle+dorsiflexion+mobilization+test",
+      "searchTerms": "Wall dorsiflexion ankle mobilization"
+    },
+    {
+      "id": "single-leg-balance",
+      "title": "Single-Leg Balance (Eyes Closed)",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "calves",
+      "secondaryMuscleGroups": [
+        "glutes"
+      ],
+      "notes": "Start with eyes open if needed. Bare feet on firm surface. The goal is rebuilding proprioception in the repaired ankle. If 30s is easy with eyes closed, try it on a folded towel for an unstable surface.",
+      "videoURL": "https://www.youtube.com/results?search_query=single+leg+balance+proprioception+ankle+rehab",
+      "searchTerms": "Single leg balance proprioception",
+      "progressionByPhase": {
+        "Load": {
+          "notes": "Single-leg balance on unstable surface (folded towel or pillow)."
+        }
+      }
+    },
+    {
+      "id": "supported-deep-squat",
+      "title": "Supported Deep Squat Hold",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "quadriceps",
+      "secondaryMuscleGroups": [
+        "glutes",
+        "calves"
+      ],
+      "notes": "Hold a doorframe, squat rack, or heavy dumbbell as counterbalance. Sink as deep as comfortable, heels down. Let your hips open and spine lengthen. This integrates ankle, knee, and hip mobility into one functional position. If heels lift, elevate them on a plate or book.",
+      "videoURL": "https://www.youtube.com/results?search_query=deep+squat+hold+mobility+assisted+progression",
+      "searchTerms": "Deep squat hold assisted mobility",
+      "progressionByPhase": {
+        "Load": {
+          "notes": "Weighted deep squat holds (goblet position)."
+        }
+      }
+    },
+    {
+      "id": "dead-bugs",
+      "title": "Dead Bugs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "abdominals",
+      "secondaryMuscleGroups": [
+        "hip_flexors"
+      ],
+      "notes": "Lie on your back, arms up, knees at 90°. Press lower back into floor. Slowly extend opposite arm and leg while maintaining ZERO low back movement. If your back arches, you've gone too far — shorten the range. This trains anti-extension and hip dissociation, directly improving your squat and overhead positions.",
+      "videoURL": "https://www.youtube.com/results?search_query=dead+bug+exercise+tutorial+anti+extension",
+      "searchTerms": "Dead bug exercise anti-extension",
+      "tags": [
+        "core-integration"
+      ]
+    },
+    {
+      "id": "bear-crawl",
+      "title": "Bear Crawl",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": [
+        "abdominals",
+        "quadriceps"
+      ],
+      "notes": "Hands and feet on ground, knees hovering ~2 inches off floor. Crawl forward and backward slowly. This integrates shoulder stability, hip mobility, and ankle mobility under load in a way that mimics real-world movement. Keep breathing.",
+      "videoURL": "https://www.youtube.com/results?search_query=bear+crawl+exercise+mobility+tutorial",
+      "searchTerms": "Bear crawl exercise mobility"
+    },
+    {
+      "id": "pallof-press",
+      "title": "Pallof Press",
+      "type": "reps_only",
+      "equipmentCategory": "resistance_band",
+      "primaryMuscleGroup": "abdominals",
+      "secondaryMuscleGroups": [
+        "obliques"
+      ],
+      "notes": "Attach band to anchor at chest height. Stand sideways, hold band at chest. Press straight out and hold 2 seconds. The band tries to rotate you — your core resists. This anti-rotation strength directly supports your Cossack squats and lateral lunge stability. Keep hips square, don't let the band pull you.",
+      "videoURL": "https://www.youtube.com/results?search_query=pallof+press+band+anti+rotation+core",
+      "searchTerms": "Pallof press band tutorial"
+    },
+    {
+      "id": "bird-dogs",
+      "title": "Bird Dogs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "lower_back",
+      "secondaryMuscleGroups": [
+        "abdominals",
+        "glutes"
+      ],
+      "notes": "On all fours, extend opposite arm and leg simultaneously. Hold top position for 2 seconds. Keep hips LEVEL — the most common mistake is letting the hip drop on the lifting side. Place a water bottle on your lower back as feedback — if it falls, you're rotating too much. This trains the cross-body stabilization pattern used in walking, running, and all unilateral exercises.",
+      "videoURL": "https://www.youtube.com/results?search_query=bird+dog+exercise+proper+form+tutorial",
+      "searchTerms": "Bird dog exercise proper form"
+    },
+    {
+      "id": "suitcase-carry",
+      "title": "Suitcase Carry",
+      "type": "duration",
+      "equipmentCategory": "dumbbell",
+      "primaryMuscleGroup": "abdominals",
+      "secondaryMuscleGroups": [
+        "forearms",
+        "obliques"
+      ],
+      "notes": "Hold a single dumbbell at your side (moderate weight — 25-40 lb range), walk slowly. Keep your trunk PERFECTLY upright — don't lean away from the weight. This trains anti-lateral-flexion and grip strength simultaneously. You'll feel your obliques and deep stabilizers light up. Walk slowly and deliberately, don't rush.",
+      "videoURL": "https://www.youtube.com/results?search_query=suitcase+carry+exercise+anti+lateral+flexion",
+      "searchTerms": "Suitcase carry anti-lateral flexion"
+    },
+    {
+      "id": "stationary-bike",
+      "title": "Stationary Bike — Easy Spin",
+      "type": "duration",
+      "equipmentCategory": "machine",
+      "primaryMuscleGroup": "quadriceps",
+      "secondaryMuscleGroups": [
+        "calves",
+        "glutes"
+      ],
+      "notes": "Conversational pace. RPE 3-4 out of 10. Slight resistance. This drives blood flow to your knees and ankles without impact stress. Good for Achilles flare-up days too."
+    },
+    {
+      "id": "foam-roll-quads",
+      "title": "Foam Roll — Quads & IT Band",
+      "type": "duration",
+      "equipmentCategory": "foam_roller",
+      "primaryMuscleGroup": "quadriceps",
+      "notes": "Slow passes, pause on tender spots for 30s. Focus on the outer quad / IT band area — this feeds into your lateral lunge knee issue.",
+      "videoURL": "https://www.youtube.com/results?search_query=foam+roll+quads+IT+band+technique",
+      "searchTerms": "Foam roll quads IT band"
+    },
+    {
+      "id": "foam-roll-calves",
+      "title": "Foam Roll — Calves & Peroneals",
+      "type": "duration",
+      "equipmentCategory": "foam_roller",
+      "primaryMuscleGroup": "calves",
+      "notes": "Roll the back AND sides of the calf. Extra attention on the right side around the Achilles area — not directly on the tendon, but the muscle above it.",
+      "videoURL": "https://www.youtube.com/results?search_query=foam+roll+calves+achilles+area",
+      "searchTerms": "Foam roll calves"
+    },
+    {
+      "id": "lacrosse-ball-shoulder",
+      "title": "Lacrosse Ball — Shoulder / Upper Back",
+      "type": "duration",
+      "equipmentCategory": "other",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": [
+        "upper_back"
+      ],
+      "notes": "Pin ball between your back and the wall. Roll around the scapula (shoulder blade) area and posterior deltoid. Find the spots that refer sensation — those are the adhesions limiting your shoulder mobility.",
+      "videoURL": "https://www.youtube.com/results?search_query=lacrosse+ball+shoulder+upper+back+release",
+      "searchTerms": "Lacrosse ball shoulder release"
+    }
+  ],
+  "routines": [
     {
       "id": "daily",
       "title": "Daily CARs",
@@ -20,60 +562,32 @@
       "color": "rgb(96, 165, 224)",
       "exercises": [
         {
-          "id": "neck-cars",
-          "name": "Neck CARs",
-          "sets": "1×5 each direction",
-          "notes": "Slow, controlled circles. Keep shoulders still. If you find a sticky spot, spend extra time there.",
-          "videoURL": "https://www.youtube.com/results?search_query=neck+CARs+controlled+articular+rotations+tutorial",
-          "searchTerms": "Neck CARs FRC tutorial"
+          "exerciseTemplateId": "neck-cars",
+          "sets": "1×5 each direction"
         },
         {
-          "id": "shoulder-cars",
-          "name": "Shoulder CARs",
-          "sets": "1×5 each direction, each arm",
-          "notes": "CRITICAL for you. Make fist, lock elbow straight, trace the biggest circle possible. Go SLOW — 10 seconds per rotation minimum. Pain-free range only, expand it over weeks.",
-          "videoURL": "https://www.youtube.com/results?search_query=shoulder+CARs+controlled+articular+rotations",
-          "searchTerms": "Shoulder CARs FRC"
+          "exerciseTemplateId": "shoulder-cars",
+          "sets": "1×5 each direction, each arm"
         },
         {
-          "id": "hip-cars",
-          "name": "Hip CARs (Standing)",
-          "sets": "1×5 each direction, each leg",
-          "notes": "Hold a wall for balance. Drive knee up, open out, extend back, return. Keep pelvis still — the rotation happens at the hip socket only.",
-          "videoURL": "https://www.youtube.com/results?search_query=standing+hip+CARs+FRC+tutorial",
-          "searchTerms": "Standing hip CARs FRC"
+          "exerciseTemplateId": "hip-cars",
+          "sets": "1×5 each direction, each leg"
         },
         {
-          "id": "ankle-cars",
-          "name": "Ankle CARs",
-          "sets": "1×5 each direction, each foot",
-          "notes": "CRITICAL — especially right side (Achilles repair). Seated, lift foot off ground, make slow full circles. Note any clicking or restriction without forcing through it.",
-          "videoURL": "https://www.youtube.com/results?search_query=ankle+CARs+controlled+articular+rotations",
-          "searchTerms": "Ankle CARs FRC"
+          "exerciseTemplateId": "ankle-cars",
+          "sets": "1×5 each direction, each foot"
         },
         {
-          "id": "spine-cars",
-          "name": "Spine CARs (Segmental Cat-Cow)",
-          "sets": "1×8 slow reps",
-          "notes": "On all fours, roll through flexion and extension one vertebra at a time. Don't rush. This decompresses the spine after desk work.",
-          "videoURL": "https://www.youtube.com/results?search_query=segmental+cat+cow+spine+CARs",
-          "searchTerms": "Segmental cat-cow spine CARs"
+          "exerciseTemplateId": "spine-cars",
+          "sets": "1×8 slow reps"
         },
         {
-          "id": "wrist-cars",
-          "name": "Wrist CARs",
-          "sets": "1×5 each direction, each wrist",
-          "notes": "Make a fist, trace slow full circles at the wrist. You're doing planks, bear crawls, and bench pressing — your wrists take a beating. These also help you identify early warning signs of overuse before they become problems.",
-          "videoURL": "https://www.youtube.com/results?search_query=wrist+CARs+controlled+articular+rotations",
-          "searchTerms": "Wrist CARs FRC"
+          "exerciseTemplateId": "wrist-cars",
+          "sets": "1×5 each direction, each wrist"
         },
         {
-          "id": "tspine-rotation-quadruped",
-          "name": "T-Spine Rotation (Quadruped)",
-          "sets": "1×5 each side",
-          "notes": "On all fours, place one hand behind your head. Rotate that elbow toward the ceiling, then down toward the opposite wrist. Follow your elbow with your eyes. This is the single most important addition for you — your desk-locked thoracic spine is the upstream bottleneck for your shoulders. If this doesn't rotate, your shoulder compensates during every press.",
-          "videoURL": "https://www.youtube.com/results?search_query=quadruped+thoracic+rotation+mobility+drill",
-          "searchTerms": "Quadruped thoracic rotation"
+          "exerciseTemplateId": "tspine-rotation-quadruped",
+          "sets": "1×5 each side"
         }
       ]
     },
@@ -86,79 +600,40 @@
       "color": "rgb(224, 134, 96)",
       "exercises": [
         {
-          "id": "dead-hangs",
-          "name": "Dead Hangs",
-          "sets": "3×20-30 sec",
-          "notes": "Use your pull-up bar. Passive hang, let your shoulders stretch toward your ears. This decompresses the shoulder joint and builds grip. If 30s is easy, progress to active hangs (pull shoulders down while hanging).",
-          "videoURL": "https://www.youtube.com/results?search_query=dead+hang+shoulder+mobility+progression",
-          "searchTerms": "Dead hang shoulder health"
+          "exerciseTemplateId": "dead-hangs",
+          "sets": "3×20-30 sec"
         },
         {
-          "id": "tspine-extension-foam-roller",
-          "name": "T-Spine Extension Over Foam Roller",
-          "sets": "2×10 reps + 30 sec hold",
-          "notes": "Place foam roller across your mid-back. Support your head with hands, elbows pointed forward. Extend back over the roller, then crunch forward — 10 reps. Then hold the extended position for 30 seconds. Move the roller up or down one vertebra and repeat. This directly unlocks the thoracic extension your shoulders need for overhead pressing and front rack position.",
-          "videoURL": "https://www.youtube.com/results?search_query=thoracic+extension+foam+roller+mobility",
-          "searchTerms": "T-spine extension foam roller",
-          "tags": ["tspine-integration"]
+          "exerciseTemplateId": "tspine-extension-foam-roller",
+          "sets": "2×10 reps + 30 sec hold"
         },
         {
-          "id": "open-book",
-          "name": "Open Book (Thread the Needle)",
-          "sets": "2×8 each side",
-          "notes": "Lie on your side, knees stacked and bent at 90°. Top arm opens toward the ceiling and behind you while keeping knees together. Follow your hand with your eyes. The rotation should come from your mid-back, NOT your lower back — keeping your knees stacked prevents lumbar rotation. This is the movement pattern that lets you actually rotate during daily life without shoulder or low back compensation.",
-          "videoURL": "https://www.youtube.com/results?search_query=open+book+thoracic+rotation+mobility+drill",
-          "searchTerms": "Open book thoracic rotation",
-          "tags": ["tspine-integration"]
+          "exerciseTemplateId": "open-book",
+          "sets": "2×8 each side"
         },
         {
-          "id": "scapular-pushups",
-          "name": "Scapular Push-ups",
-          "sets": "3×10",
-          "notes": "Plank position, arms locked straight. Only your shoulder blades move — protract (spread apart) and retract (squeeze together). This trains serratus anterior, which is likely weak and causing your plank shoulder pain.",
-          "videoURL": "https://www.youtube.com/results?search_query=scapular+push+ups+tutorial+serratus",
-          "searchTerms": "Scapular push-ups serratus"
+          "exerciseTemplateId": "scapular-pushups",
+          "sets": "3×10"
         },
         {
-          "id": "banded-external-rotation",
-          "name": "Banded External Rotation at 90°",
-          "sets": "3×12 each side",
-          "notes": "Elbow at 90°, upper arm at shoulder height. Rotate forearm up against band resistance. Slow eccentric (3 sec lowering). This directly strengthens the rotator cuff in the position where it fails during pressing.",
-          "videoURL": "https://www.youtube.com/results?search_query=banded+external+rotation+90+degrees+rotator+cuff",
-          "searchTerms": "Banded external rotation 90 degrees"
+          "exerciseTemplateId": "banded-external-rotation",
+          "sets": "3×12 each side"
         },
         {
-          "id": "prone-ytw-raises",
-          "name": "Prone Y-T-W Raises",
-          "sets": "2×8 each position",
-          "notes": "Lie face down on bench, light dumbbells (3-5 lb to start). Y = arms overhead in a V. T = arms straight out. W = elbows bent, squeeze shoulder blades. If 5 lb is too much, start bodyweight. These are humbling.",
-          "videoURL": "https://www.youtube.com/results?search_query=prone+Y+T+W+raises+shoulder+rehab",
-          "searchTerms": "Prone Y-T-W raises"
+          "exerciseTemplateId": "prone-ytw-raises",
+          "sets": "2×8 each position"
         },
         {
-          "id": "wall-slides",
-          "name": "Wall Slides",
-          "sets": "3×10",
-          "notes": "Back and arms flat against wall. Slide arms up overhead keeping everything in contact with the wall. If your lower back arches off the wall, that's a mobility restriction — only go as high as you can maintain contact.",
-          "videoURL": "https://www.youtube.com/results?search_query=wall+slides+shoulder+mobility+exercise",
-          "searchTerms": "Wall slides shoulder mobility"
+          "exerciseTemplateId": "wall-slides",
+          "sets": "3×10"
         },
         {
-          "id": "shoulder-sleeper-stretch",
-          "name": "Shoulder Sleeper Stretch with PAILs/RAILs",
-          "sets": "2 min each side",
-          "notes": "Lie on your side, bottom arm at 90°. Use top hand to gently press into internal rotation. Hold 60s passive. Then PAILs: push bottom hand INTO the floor (10s, 20% effort building to 70%). Then RAILs: try to rotate hand UP without moving (10s same ramp). Re-stretch — you'll gain range.",
-          "videoURL": "https://www.youtube.com/results?search_query=shoulder+PAILs+RAILs+sleeper+stretch+FRC",
-          "searchTerms": "PAILs RAILs shoulder sleeper stretch"
+          "exerciseTemplateId": "shoulder-sleeper-stretch",
+          "sets": "2 min each side"
         },
         {
-          "id": "hollow-body-hold-a",
-          "name": "Hollow Body Hold",
-          "sets": "3×20-30 sec",
-          "notes": "Lie on your back, arms overhead, legs extended. Press lower back INTO the floor and lift shoulders and feet slightly off the ground. If your low back peels off the floor, bend your knees or bring arms to your sides to regress. This is the missing link behind your plank shoulder pain — when your core can't hold position, your shoulders compensate. Build this, and planks and pressing improve.",
-          "videoURL": "https://www.youtube.com/results?search_query=hollow+body+hold+tutorial+progression",
-          "searchTerms": "Hollow body hold progression",
-          "tags": ["core-integration"]
+          "exerciseTemplateId": "hollow-body-hold",
+          "sets": "3×20-30 sec"
         }
       ]
     },
@@ -171,89 +646,40 @@
       "color": "rgb(96, 200, 140)",
       "exercises": [
         {
-          "id": "ninety-ninety-hip-switches",
-          "name": "90/90 Hip Switches",
-          "sets": "3×8 each side",
-          "notes": "Sit with both legs at 90°. Rotate from one side to the other. Keep spine tall. If you can't get your knees to the floor, that's fine — work the range you have. This is your hip mobility barometer.",
-          "videoURL": "https://www.youtube.com/results?search_query=90+90+hip+switches+mobility+tutorial",
-          "searchTerms": "90/90 hip switches mobility"
+          "exerciseTemplateId": "ninety-ninety-hip-switches",
+          "sets": "3×8 each side"
         },
         {
-          "id": "glute-bridge",
-          "name": "Glute Bridge with 3-sec Hold",
-          "sets": "3×12",
-          "notes": "Lie on back, knees bent, feet flat. Drive through heels, squeeze glutes HARD at the top, hold 3 seconds. Lower slowly. If you feel this in your hamstrings more than your glutes, bring your feet closer to your butt. This wakes up the glutes so they fire properly during squats, lunges, and walking. At 46 with desk work, your glutes are almost certainly underperforming — this fixes that.",
-          "videoURL": "https://www.youtube.com/results?search_query=glute+bridge+hold+activation+tutorial",
-          "searchTerms": "Glute bridge activation hold",
-          "tags": ["glute-activation"]
+          "exerciseTemplateId": "glute-bridge",
+          "sets": "3×12"
         },
         {
-          "id": "banded-clamshells",
-          "name": "Banded Clamshells",
-          "sets": "3×15 each side",
-          "notes": "Lie on your side, knees bent, band around knees. Open top knee against band resistance while keeping feet together. Slow and controlled — don't let the band snap your knee back down. This targets the gluteus medius, which stabilizes your pelvis and directly protects your knees during lateral movements. If your Cossack squats and side lunges hurt, weak glute med is likely a big contributor.",
-          "videoURL": "https://www.youtube.com/results?search_query=banded+clamshell+glute+medius+activation",
-          "searchTerms": "Banded clamshell glute medius",
-          "tags": ["glute-activation"]
+          "exerciseTemplateId": "banded-clamshells",
+          "sets": "3×15 each side"
         },
         {
-          "id": "tibialis-raises",
-          "name": "Tibialis Anterior Raises",
-          "sets": "3×15",
-          "notes": "Stand with back against wall, feet ~12 inches out. Pull toes up toward shins, lower slowly. This strengthens the front of your shin and protects the knee. The Knees Over Toes Guy made this famous for good reason.",
-          "videoURL": "https://www.youtube.com/results?search_query=tibialis+raises+knees+over+toes+tutorial",
-          "searchTerms": "Tibialis raises Knees Over Toes"
+          "exerciseTemplateId": "tibialis-raises",
+          "sets": "3×15"
         },
         {
-          "id": "banded-tke",
-          "name": "Banded Terminal Knee Extensions",
-          "sets": "3×15 each leg",
-          "notes": "Attach band behind your knee to a low anchor. Stand facing away, slight bend. Squeeze to full lockout against band resistance. This isolates the VMO — the inner quad muscle that stabilizes the kneecap.",
-          "videoURL": "https://www.youtube.com/results?search_query=banded+terminal+knee+extension+VMO",
-          "searchTerms": "Banded TKE VMO strengthening"
+          "exerciseTemplateId": "banded-tke",
+          "sets": "3×15 each leg"
         },
         {
-          "id": "atg-split-squat",
-          "name": "ATG Split Squat (Regressed)",
-          "sets": "3×8 each leg",
-          "notes": "Start with hands on bench/chair for support. Back knee tracks all the way down and forward. ONLY go as deep as you can control without pain. Weeks 1-2: use support. Weeks 3-4: reduce support. This is the single best knee bulletproofing exercise.",
-          "videoURL": "https://www.youtube.com/results?search_query=ATG+split+squat+regression+beginner+knees+over+toes",
-          "searchTerms": "ATG split squat beginner regression",
-          "progressionByPhase": {
-            "Foundation": { "sets": "3×8 each leg", "notes": "Use bench support, partial depth only." },
-            "Build": { "sets": "3×8 each leg", "notes": "Reduce bench support, increase depth." },
-            "Load": { "sets": "3×8 each leg", "notes": "Light dumbbells, no support." }
-          }
+          "exerciseTemplateId": "atg-split-squat",
+          "sets": "3×8 each leg"
         },
         {
-          "id": "cossack-squat",
-          "name": "Cossack Squat (Partial ROM)",
-          "sets": "3×6 each side",
-          "notes": "Bodyweight only. Start with a small range — you do NOT need to go ass-to-grass. Hold a doorframe or rack for balance. This directly trains the lateral movement pattern that's giving your knees trouble. Depth will come with consistency.",
-          "videoURL": "https://www.youtube.com/results?search_query=cossack+squat+beginner+progression+mobility",
-          "searchTerms": "Cossack squat progression beginner",
-          "progressionByPhase": {
-            "Foundation": { "sets": "3×6 each side", "notes": "Hold doorframe, go only as deep as comfortable." },
-            "Build": { "sets": "3×6 each side", "notes": "Less support, aim for parallel thigh depth." },
-            "Load": { "sets": "3×6 each side", "notes": "Goblet Cossack Squats with light dumbbell." }
-          }
+          "exerciseTemplateId": "cossack-squat",
+          "sets": "3×6 each side"
         },
         {
-          "id": "active-frog-stretch",
-          "name": "Active Frog Stretch",
-          "sets": "2×45 sec",
-          "notes": "On all fours, knees wide, rock forward and back. Keep spine neutral. This opens the adductors (inner thigh) which are contributing to both your lateral lunge pain and cross-legged sitting difficulty. Active rocking > static hold.",
-          "videoURL": "https://www.youtube.com/results?search_query=active+frog+stretch+hip+adductor+mobility",
-          "searchTerms": "Active frog stretch adductors"
+          "exerciseTemplateId": "active-frog-stretch",
+          "sets": "2×45 sec"
         },
         {
-          "id": "copenhagen-plank-b",
-          "name": "Copenhagen Plank",
-          "sets": "3×15-20 sec each side",
-          "notes": "Side plank position with top leg on a bench, bottom leg hanging free. This is a two-for-one — it trains lateral core strength AND adductor strength simultaneously. Directly addresses your lateral lunge knee pain. Regress by using bottom knee on the floor or shortening the hold. These are brutally hard at first — 10 seconds is fine to start.",
-          "videoURL": "https://www.youtube.com/results?search_query=copenhagen+plank+tutorial+regression+progression",
-          "searchTerms": "Copenhagen plank tutorial progression",
-          "tags": ["core-integration"]
+          "exerciseTemplateId": "copenhagen-plank",
+          "sets": "3×15-20 sec each side"
         }
       ]
     },
@@ -266,71 +692,32 @@
       "color": "rgb(180, 140, 224)",
       "exercises": [
         {
-          "id": "extended-ankle-cars",
-          "name": "Extended Ankle CARs",
-          "sets": "2×8 each direction, each foot",
-          "notes": "Slower and more deliberate than your daily CARs. Spend 5+ seconds per rotation on the right ankle. Map out the full range, note where it catches. Over weeks, the circle should get bigger.",
-          "videoURL": "https://www.youtube.com/results?search_query=ankle+CARs+FRC+detailed+tutorial",
-          "searchTerms": "Ankle CARs detailed FRC"
+          "exerciseTemplateId": "extended-ankle-cars",
+          "sets": "2×8 each direction, each foot"
         },
         {
-          "id": "eccentric-calf-raises",
-          "name": "Eccentric Calf Raises (Alfredson Protocol)",
-          "sets": "3×15 each leg",
-          "notes": "CRITICAL for your Achilles. Stand on step edge, raise up on BOTH feet, then lower slowly (3-4 sec) on ONE foot. Do both straight-knee (gastroc) and bent-knee (soleus) versions. The right side may feel tight — stay in a pain-free range. This is the gold standard for Achilles tendon health.",
-          "videoURL": "https://www.youtube.com/results?search_query=eccentric+calf+raises+achilles+alfredson+protocol",
-          "searchTerms": "Eccentric calf raises Alfredson Achilles",
-          "progressionByPhase": {
-            "Foundation": { "notes": "Both-leg lower if single-leg is too intense on the right." },
-            "Build": { "notes": "Full single-leg protocol." }
-          }
+          "exerciseTemplateId": "eccentric-calf-raises",
+          "sets": "3×15 each leg"
         },
         {
-          "id": "wall-dorsiflexion",
-          "name": "Wall Dorsiflexion Mobilization",
-          "sets": "3×30 sec each side",
-          "notes": "Face wall, foot ~4 inches away. Drive knee forward over toes, keeping heel DOWN. Measure progress by how far from the wall you can get your foot while still touching knee to wall. Your right side will be tighter — that's the Achilles repair limiting dorsiflexion.",
-          "videoURL": "https://www.youtube.com/results?search_query=wall+ankle+dorsiflexion+mobilization+test",
-          "searchTerms": "Wall dorsiflexion ankle mobilization"
+          "exerciseTemplateId": "wall-dorsiflexion",
+          "sets": "3×30 sec each side"
         },
         {
-          "id": "single-leg-balance",
-          "name": "Single-Leg Balance (Eyes Closed)",
-          "sets": "3×30 sec each leg",
-          "notes": "Start with eyes open if needed. Bare feet on firm surface. The goal is rebuilding proprioception in the repaired ankle. If 30s is easy with eyes closed, try it on a folded towel for an unstable surface.",
-          "videoURL": "https://www.youtube.com/results?search_query=single+leg+balance+proprioception+ankle+rehab",
-          "searchTerms": "Single leg balance proprioception",
-          "progressionByPhase": {
-            "Load": { "notes": "Single-leg balance on unstable surface (folded towel or pillow)." }
-          }
+          "exerciseTemplateId": "single-leg-balance",
+          "sets": "3×30 sec each leg"
         },
         {
-          "id": "supported-deep-squat",
-          "name": "Supported Deep Squat Hold",
-          "sets": "3×30-45 sec",
-          "notes": "Hold a doorframe, squat rack, or heavy dumbbell as counterbalance. Sink as deep as comfortable, heels down. Let your hips open and spine lengthen. This integrates ankle, knee, and hip mobility into one functional position. If heels lift, elevate them on a plate or book.",
-          "videoURL": "https://www.youtube.com/results?search_query=deep+squat+hold+mobility+assisted+progression",
-          "searchTerms": "Deep squat hold assisted mobility",
-          "progressionByPhase": {
-            "Load": { "notes": "Weighted deep squat holds (goblet position)." }
-          }
+          "exerciseTemplateId": "supported-deep-squat",
+          "sets": "3×30-45 sec"
         },
         {
-          "id": "dead-bugs-c",
-          "name": "Dead Bugs",
-          "sets": "3×8 each side",
-          "notes": "Lie on your back, arms up, knees at 90°. Press lower back into floor. Slowly extend opposite arm and leg while maintaining ZERO low back movement. If your back arches, you've gone too far — shorten the range. This trains anti-extension and hip dissociation, directly improving your squat and overhead positions.",
-          "videoURL": "https://www.youtube.com/results?search_query=dead+bug+exercise+tutorial+anti+extension",
-          "searchTerms": "Dead bug exercise anti-extension",
-          "tags": ["core-integration"]
+          "exerciseTemplateId": "dead-bugs",
+          "sets": "3×8 each side"
         },
         {
-          "id": "bear-crawl",
-          "name": "Bear Crawl",
-          "sets": "2×30 sec",
-          "notes": "Hands and feet on ground, knees hovering ~2 inches off floor. Crawl forward and backward slowly. This integrates shoulder stability, hip mobility, and ankle mobility under load in a way that mimics real-world movement. Keep breathing.",
-          "videoURL": "https://www.youtube.com/results?search_query=bear+crawl+exercise+mobility+tutorial",
-          "searchTerms": "Bear crawl exercise mobility"
+          "exerciseTemplateId": "bear-crawl",
+          "sets": "2×30 sec"
         }
       ]
     },
@@ -338,57 +725,36 @@
       "id": "core-stability",
       "title": "Session D: Core Stability",
       "subtitle": "15-20 min — Do 1-2x per week",
-      "description": "Your shoulders, knees, and ankles all depend on a stable trunk. When the core can't hold position, your joints compensate — that's a big part of why you keep getting injured. This session trains anti-extension, anti-rotation, and anti-lateral-flexion — the three pillars of functional core stability. These aren't crunches; they teach your core to resist unwanted movement so your limbs can move freely. Exercises marked with \u25c6 in other sessions are drawn from here.",
+      "description": "Your shoulders, knees, and ankles all depend on a stable trunk. When the core can't hold position, your joints compensate — that's a big part of why you keep getting injured. This session trains anti-extension, anti-rotation, and anti-lateral-flexion — the three pillars of functional core stability. These aren't crunches; they teach your core to resist unwanted movement so your limbs can move freely. Exercises marked with ◆ in other sessions are drawn from here.",
       "sortOrder": 5,
       "color": "rgb(224, 120, 150)",
       "exercises": [
         {
-          "id": "dead-bugs-d",
-          "name": "Dead Bugs",
+          "exerciseTemplateId": "dead-bugs",
           "sets": "3×10 each side",
-          "notes": "The king of core exercises for your situation. Lie on back, arms up, knees at 90°. Press lower back into floor — this is the cue that matters. Extend opposite arm and leg while maintaining ZERO low back movement. Slow and controlled — 3 seconds out, 3 seconds back. If your back arches, shorten the range. Progress by holding a light dumbbell overhead or adding a band around your feet.",
-          "videoURL": "https://www.youtube.com/results?search_query=dead+bug+exercise+tutorial+progression",
-          "searchTerms": "Dead bug exercise progression"
+          "notes": "The king of core exercises for your situation. Lie on back, arms up, knees at 90°. Press lower back into floor — this is the cue that matters. Extend opposite arm and leg while maintaining ZERO low back movement. Slow and controlled — 3 seconds out, 3 seconds back. If your back arches, shorten the range. Progress by holding a light dumbbell overhead or adding a band around your feet."
         },
         {
-          "id": "pallof-press",
-          "name": "Pallof Press",
-          "sets": "3×10 each side",
-          "notes": "Attach band to anchor at chest height. Stand sideways, hold band at chest. Press straight out and hold 2 seconds. The band tries to rotate you — your core resists. This anti-rotation strength directly supports your Cossack squats and lateral lunge stability. Keep hips square, don't let the band pull you.",
-          "videoURL": "https://www.youtube.com/results?search_query=pallof+press+band+anti+rotation+core",
-          "searchTerms": "Pallof press band tutorial"
+          "exerciseTemplateId": "pallof-press",
+          "sets": "3×10 each side"
         },
         {
-          "id": "bird-dogs",
-          "name": "Bird Dogs",
-          "sets": "3×8 each side",
-          "notes": "On all fours, extend opposite arm and leg simultaneously. Hold top position for 2 seconds. Keep hips LEVEL — the most common mistake is letting the hip drop on the lifting side. Place a water bottle on your lower back as feedback — if it falls, you're rotating too much. This trains the cross-body stabilization pattern used in walking, running, and all unilateral exercises.",
-          "videoURL": "https://www.youtube.com/results?search_query=bird+dog+exercise+proper+form+tutorial",
-          "searchTerms": "Bird dog exercise proper form"
+          "exerciseTemplateId": "bird-dogs",
+          "sets": "3×8 each side"
         },
         {
-          "id": "hollow-body-hold-d",
-          "name": "Hollow Body Hold",
+          "exerciseTemplateId": "hollow-body-hold",
           "sets": "3×30 sec",
-          "notes": "Arms overhead, legs extended, low back pressed into floor, shoulders and feet lifted. Scale it: bent knees with arms at sides (easiest) \u2192 straight legs with arms at sides \u2192 straight legs with arms overhead (hardest). If you can hold 30s at the hardest version, you can progress to hollow body rocks.",
-          "videoURL": "https://www.youtube.com/results?search_query=hollow+body+hold+tutorial+progression+beginner",
-          "searchTerms": "Hollow body hold progression"
+          "notes": "Arms overhead, legs extended, low back pressed into floor, shoulders and feet lifted. Scale it: bent knees with arms at sides (easiest) → straight legs with arms at sides → straight legs with arms overhead (hardest). If you can hold 30s at the hardest version, you can progress to hollow body rocks."
         },
         {
-          "id": "copenhagen-plank-d",
-          "name": "Copenhagen Plank",
+          "exerciseTemplateId": "copenhagen-plank",
           "sets": "3×20-30 sec each side",
-          "notes": "Side plank with top leg on bench, bottom leg free. Trains lateral core and adductors simultaneously. Regression: bend bottom knee to floor, or use a shorter bench so you're supporting from the knee instead of the foot. Progression: add hip dips (lower and lift hips while holding). This exercise alone can fix a lot of your lateral movement issues.",
-          "videoURL": "https://www.youtube.com/results?search_query=copenhagen+plank+tutorial+regression+progression",
-          "searchTerms": "Copenhagen plank tutorial"
+          "notes": "Side plank with top leg on bench, bottom leg free. Trains lateral core and adductors simultaneously. Regression: bend bottom knee to floor, or use a shorter bench so you're supporting from the knee instead of the foot. Progression: add hip dips (lower and lift hips while holding). This exercise alone can fix a lot of your lateral movement issues."
         },
         {
-          "id": "suitcase-carry",
-          "name": "Suitcase Carry",
-          "sets": "3×30 sec each side",
-          "notes": "Hold a single dumbbell at your side (moderate weight — 25-40 lb range), walk slowly. Keep your trunk PERFECTLY upright — don't lean away from the weight. This trains anti-lateral-flexion and grip strength simultaneously. You'll feel your obliques and deep stabilizers light up. Walk slowly and deliberately, don't rush.",
-          "videoURL": "https://www.youtube.com/results?search_query=suitcase+carry+exercise+anti+lateral+flexion",
-          "searchTerms": "Suitcase carry anti-lateral flexion"
+          "exerciseTemplateId": "suitcase-carry",
+          "sets": "3×30 sec each side"
         }
       ]
     },
@@ -401,89 +767,187 @@
       "color": "rgb(200, 196, 120)",
       "exercises": [
         {
-          "id": "stationary-bike",
-          "name": "Stationary Bike \u2014 Easy Spin",
-          "sets": "15-20 min",
-          "notes": "Conversational pace. RPE 3-4 out of 10. Slight resistance. This drives blood flow to your knees and ankles without impact stress. Good for Achilles flare-up days too.",
-          "videoURL": null,
-          "searchTerms": null
+          "exerciseTemplateId": "stationary-bike",
+          "sets": "15-20 min"
         },
         {
-          "id": "foam-roll-quads",
-          "name": "Foam Roll \u2014 Quads & IT Band",
-          "sets": "2 min each leg",
-          "notes": "Slow passes, pause on tender spots for 30s. Focus on the outer quad / IT band area — this feeds into your lateral lunge knee issue.",
-          "videoURL": "https://www.youtube.com/results?search_query=foam+roll+quads+IT+band+technique",
-          "searchTerms": "Foam roll quads IT band"
+          "exerciseTemplateId": "foam-roll-quads",
+          "sets": "2 min each leg"
         },
         {
-          "id": "foam-roll-calves",
-          "name": "Foam Roll \u2014 Calves & Peroneals",
-          "sets": "2 min each leg",
-          "notes": "Roll the back AND sides of the calf. Extra attention on the right side around the Achilles area — not directly on the tendon, but the muscle above it.",
-          "videoURL": "https://www.youtube.com/results?search_query=foam+roll+calves+achilles+area",
-          "searchTerms": "Foam roll calves"
+          "exerciseTemplateId": "foam-roll-calves",
+          "sets": "2 min each leg"
         },
         {
-          "id": "lacrosse-ball-shoulder",
-          "name": "Lacrosse Ball \u2014 Shoulder / Upper Back",
-          "sets": "2 min each side",
-          "notes": "Pin ball between your back and the wall. Roll around the scapula (shoulder blade) area and posterior deltoid. Find the spots that refer sensation — those are the adhesions limiting your shoulder mobility.",
-          "videoURL": "https://www.youtube.com/results?search_query=lacrosse+ball+shoulder+upper+back+release",
-          "searchTerms": "Lacrosse ball shoulder release"
+          "exerciseTemplateId": "lacrosse-ball-shoulder",
+          "sets": "2 min each side"
         }
       ]
     }
   ],
-
   "weekTemplates": [
     {
       "id": "4-day",
       "name": "4-Day (Minimum Effective)",
-      "description": "For busy weeks. Prioritizes the daily CARs habit and hits each problem area once. Core is covered by the \u25c6 exercises integrated into each session.",
+      "description": "For busy weeks. Prioritizes the daily CARs habit and hits each problem area once. Core is covered by the ◆ exercises integrated into each session.",
       "sortOrder": 1,
       "days": [
-        { "dayOfWeek": 0, "sessionIDs": ["daily", "shoulder-rehab"] },
-        { "dayOfWeek": 1, "sessionIDs": [], "note": "CARs only or rest" },
-        { "dayOfWeek": 2, "sessionIDs": ["daily", "knee-hip-mobility"] },
-        { "dayOfWeek": 3, "sessionIDs": [], "note": "Strength training day \u2014 do CARs as warmup" },
-        { "dayOfWeek": 4, "sessionIDs": ["daily", "ankle-integration"] },
-        { "dayOfWeek": 5, "sessionIDs": ["active-recovery"] },
-        { "dayOfWeek": 6, "sessionIDs": [], "note": "Full rest" }
+        {
+          "dayOfWeek": 0,
+          "routineIDs": [
+            "daily",
+            "shoulder-rehab"
+          ]
+        },
+        {
+          "dayOfWeek": 1,
+          "note": "CARs only or rest",
+          "routineIDs": []
+        },
+        {
+          "dayOfWeek": 2,
+          "routineIDs": [
+            "daily",
+            "knee-hip-mobility"
+          ]
+        },
+        {
+          "dayOfWeek": 3,
+          "note": "Strength training day — do CARs as warmup",
+          "routineIDs": []
+        },
+        {
+          "dayOfWeek": 4,
+          "routineIDs": [
+            "daily",
+            "ankle-integration"
+          ]
+        },
+        {
+          "dayOfWeek": 5,
+          "routineIDs": [
+            "active-recovery"
+          ]
+        },
+        {
+          "dayOfWeek": 6,
+          "note": "Full rest",
+          "routineIDs": []
+        }
       ]
     },
     {
       "id": "5-day",
       "name": "5-Day (Recommended)",
-      "description": "Optimal balance. Each focus area gets proper attention plus a dedicated core session. Core exercises marked \u25c6 in other sessions give you additional core volume throughout the week.",
+      "description": "Optimal balance. Each focus area gets proper attention plus a dedicated core session. Core exercises marked ◆ in other sessions give you additional core volume throughout the week.",
       "sortOrder": 2,
       "days": [
-        { "dayOfWeek": 0, "sessionIDs": ["daily", "shoulder-rehab"] },
-        { "dayOfWeek": 1, "sessionIDs": ["daily", "core-stability"], "note": "Core + strength training \u2014 CARs as warmup, Session D, then your lifting" },
-        { "dayOfWeek": 2, "sessionIDs": ["daily", "knee-hip-mobility"] },
-        { "dayOfWeek": 3, "sessionIDs": ["daily"], "note": "Strength training \u2014 CARs as warmup + add 2-3 Session B exercises as prehab" },
-        { "dayOfWeek": 4, "sessionIDs": ["daily", "ankle-integration"] },
-        { "dayOfWeek": 5, "sessionIDs": ["active-recovery"] },
-        { "dayOfWeek": 6, "sessionIDs": [], "note": "Full rest" }
+        {
+          "dayOfWeek": 0,
+          "routineIDs": [
+            "daily",
+            "shoulder-rehab"
+          ]
+        },
+        {
+          "dayOfWeek": 1,
+          "note": "Core + strength training — CARs as warmup, Session D, then your lifting",
+          "routineIDs": [
+            "daily",
+            "core-stability"
+          ]
+        },
+        {
+          "dayOfWeek": 2,
+          "routineIDs": [
+            "daily",
+            "knee-hip-mobility"
+          ]
+        },
+        {
+          "dayOfWeek": 3,
+          "note": "Strength training — CARs as warmup + add 2-3 Session B exercises as prehab",
+          "routineIDs": [
+            "daily"
+          ]
+        },
+        {
+          "dayOfWeek": 4,
+          "routineIDs": [
+            "daily",
+            "ankle-integration"
+          ]
+        },
+        {
+          "dayOfWeek": 5,
+          "routineIDs": [
+            "active-recovery"
+          ]
+        },
+        {
+          "dayOfWeek": 6,
+          "note": "Full rest",
+          "routineIDs": []
+        }
       ]
     },
     {
       "id": "6-day",
       "name": "6-Day (Accelerated)",
-      "description": "For when you're in a groove. Dedicated core session plus \u25c6 exercises throughout the week give you 3-4 core hits total.",
+      "description": "For when you're in a groove. Dedicated core session plus ◆ exercises throughout the week give you 3-4 core hits total.",
       "sortOrder": 3,
       "days": [
-        { "dayOfWeek": 0, "sessionIDs": ["daily", "shoulder-rehab"] },
-        { "dayOfWeek": 1, "sessionIDs": ["daily", "knee-hip-mobility"] },
-        { "dayOfWeek": 2, "sessionIDs": ["daily", "core-stability"], "note": "Core day \u2014 pair with strength training if time allows" },
-        { "dayOfWeek": 3, "sessionIDs": ["daily", "ankle-integration"] },
-        { "dayOfWeek": 4, "sessionIDs": ["daily", "shoulder-rehab"], "note": "Second shoulder session" },
-        { "dayOfWeek": 5, "sessionIDs": ["active-recovery"] },
-        { "dayOfWeek": 6, "sessionIDs": [], "note": "Full rest" }
+        {
+          "dayOfWeek": 0,
+          "routineIDs": [
+            "daily",
+            "shoulder-rehab"
+          ]
+        },
+        {
+          "dayOfWeek": 1,
+          "routineIDs": [
+            "daily",
+            "knee-hip-mobility"
+          ]
+        },
+        {
+          "dayOfWeek": 2,
+          "note": "Core day — pair with strength training if time allows",
+          "routineIDs": [
+            "daily",
+            "core-stability"
+          ]
+        },
+        {
+          "dayOfWeek": 3,
+          "routineIDs": [
+            "daily",
+            "ankle-integration"
+          ]
+        },
+        {
+          "dayOfWeek": 4,
+          "note": "Second shoulder session",
+          "routineIDs": [
+            "daily",
+            "shoulder-rehab"
+          ]
+        },
+        {
+          "dayOfWeek": 5,
+          "routineIDs": [
+            "active-recovery"
+          ]
+        },
+        {
+          "dayOfWeek": 6,
+          "note": "Full rest",
+          "routineIDs": []
+        }
       ]
     }
   ],
-
   "progressions": [
     {
       "id": "foundation",
@@ -494,7 +958,7 @@
       "weekEnd": 2,
       "sortOrder": 1,
       "details": [
-        "CARs: 70% effort \u2014 find your current range, don't push past it",
+        "CARs: 70% effort — find your current range, don't push past it",
         "All exercises at bodyweight or lightest band/dumbbell",
         "ATG Split Squat: use bench support, partial depth only",
         "Cossack Squat: hold doorframe, go only as deep as comfortable",
@@ -512,7 +976,7 @@
       "weekEnd": 4,
       "sortOrder": 2,
       "details": [
-        "CARs: 85% effort \u2014 actively push into end ranges",
+        "CARs: 85% effort — actively push into end ranges",
         "Increase band resistance one level on external rotations and TKEs",
         "ATG Split Squat: reduce bench support, increase depth",
         "Cossack Squat: less support, aim for parallel thigh depth",
@@ -542,14 +1006,13 @@
       ]
     }
   ],
-
   "roadmap": [
     {
       "id": "phase1",
       "name": "Phase 1: Joint Restoration",
       "weeks": "Weeks 1-8",
       "status": "current",
-      "summary": "This is the program you're in now. Rebuild shoulder stability, knee resilience, Achilles health, core strength, and thoracic mobility. No skill work yet \u2014 your joints aren't ready.",
+      "summary": "This is the program you're in now. Rebuild shoulder stability, knee resilience, Achilles health, core strength, and thoracic mobility. No skill work yet — your joints aren't ready.",
       "keyFocus": "The temptation will be to start skill work early. Don't. Every week of foundation you invest here saves you months of plateau and re-injury later. If you fail any gate test at week 8, extend Phase 1 by 2-week increments until you pass.",
       "gateTests": [
         "pain-free-planks",
@@ -570,7 +1033,7 @@
       "weeks": "Weeks 9-20 (12 weeks)",
       "status": "future",
       "summary": "Build the raw strength and positions your skills require. Shoulder strength, straight-arm conditioning, single-leg loading, and wrist preparation. Daily CARs and core work continue as maintenance.",
-      "keyFocus": "This phase is dominated by pull-up volume, dip volume, and straight-arm conditioning. If you're doing BODi, use it for lower body days and replace upper body BODi with the skill-prep work. The false grip and straight-arm work will feel completely foreign \u2014 your tendons need time to adapt.",
+      "keyFocus": "This phase is dominated by pull-up volume, dip volume, and straight-arm conditioning. If you're doing BODi, use it for lower body days and replace upper body BODi with the skill-prep work. The false grip and straight-arm work will feel completely foreign — your tendons need time to adapt.",
       "gateTests": [
         "strict-pullups-12",
         "parallel-dips-15",
@@ -590,7 +1053,7 @@
       "weeks": "Weeks 21-36 (16 weeks)",
       "status": "future",
       "summary": "Active skill practice begins. Muscle-up transition training, planche lean progressions, pistol squat depth development, and handstand balance work. This is as much neurological as physical.",
-      "keyFocus": "Skill days replace some strength days. You're now practicing 3-4 skills per week alongside maintenance mobility and strength. The muscle-up will likely click before the planche \u2014 the transition is a technique breakthrough moment. Film every attempt.",
+      "keyFocus": "Skill days replace some strength days. You're now practicing 3-4 skills per week alongside maintenance mobility and strength. The muscle-up will likely click before the planche — the transition is a technique breakthrough moment. Film every attempt.",
       "gateTests": [
         "muscle-ups-1-3",
         "tuck-planche-5s",
@@ -608,7 +1071,7 @@
       "weeks": "Weeks 37-52+ (ongoing)",
       "status": "future",
       "summary": "Polish skill quality, add reps, and begin harder progressions. Multiple clean muscle-ups, advanced planche variations, loaded pistol squats, freestanding handstand confidence.",
-      "keyFocus": "This becomes your ongoing training life. Rotate focus between skills based on interest and progress. The planche journey continues well beyond a year \u2014 enjoy the process. The muscle-up becomes a warm-up exercise you can rep out.",
+      "keyFocus": "This becomes your ongoing training life. Rotate focus between skills based on interest and progress. The planche journey continues well beyond a year — enjoy the process. The muscle-up becomes a warm-up exercise you can rep out.",
       "gateTests": [
         "consecutive-muscle-ups-3-5",
         "tuck-planche-10s",
@@ -620,92 +1083,186 @@
       "sortOrder": 4
     }
   ],
-
   "skills": [
     {
       "id": "muscle-up",
       "name": "Muscle Up",
       "priority": 1,
-      "icon": "\u2605",
+      "icon": "★",
       "color": "rgb(224, 134, 96)",
       "currentState": "3-5 pull-ups (previously 7-10 before shoulder issues). No muscle-up experience. Shoulder pain during planks and pressing.",
       "requirements": "12+ strict pull-ups, 15+ dips, false grip strength, explosive pulling power, deep shoulder extension under load, and the transition technique.",
-      "gapAnalysis": "Your pulling strength base exists but is suppressed by shoulder instability. Once shoulders stabilize (Phase 1), pull-up numbers will rebound quickly since the muscle memory is there. The false grip and transition are completely new skills. The deep shoulder extension required at the transition point is the riskiest part given your shoulder history \u2014 this is why we must not rush.",
+      "gapAnalysis": "Your pulling strength base exists but is suppressed by shoulder instability. Once shoulders stabilize (Phase 1), pull-up numbers will rebound quickly since the muscle memory is there. The false grip and transition are completely new skills. The deep shoulder extension required at the transition point is the riskiest part given your shoulder history — this is why we must not rush.",
       "timeline": "First muscle-up: 6-9 months (weeks 24-36). Confident reps: 9-12 months.",
       "milestones": [
-        { "name": "8-10 strict pull-ups", "description": "Rebuild pulling base after shoulder stabilization", "targetWeek": 8 },
-        { "name": "12-15 strict pull-ups", "description": "Strength prerequisite for explosive pulling", "targetWeek": 20 },
-        { "name": "False grip hang 20+ sec", "description": "Wrist and forearm conditioning for transition", "targetWeek": 16 },
-        { "name": "High pull-ups to sternum", "description": "Explosive pulling height needed for transition", "targetWeek": 20 },
-        { "name": "Negative muscle-up (5 sec descent)", "description": "Eccentric control through the transition", "targetWeek": 24 },
-        { "name": "First muscle-up", "description": "Bar or rings, any style", "targetWeek": 30 },
-        { "name": "3-5 consecutive muscle-ups", "description": "Confident, repeatable reps", "targetWeek": 44 }
+        {
+          "name": "8-10 strict pull-ups",
+          "description": "Rebuild pulling base after shoulder stabilization",
+          "targetWeek": 8
+        },
+        {
+          "name": "12-15 strict pull-ups",
+          "description": "Strength prerequisite for explosive pulling",
+          "targetWeek": 20
+        },
+        {
+          "name": "False grip hang 20+ sec",
+          "description": "Wrist and forearm conditioning for transition",
+          "targetWeek": 16
+        },
+        {
+          "name": "High pull-ups to sternum",
+          "description": "Explosive pulling height needed for transition",
+          "targetWeek": 20
+        },
+        {
+          "name": "Negative muscle-up (5 sec descent)",
+          "description": "Eccentric control through the transition",
+          "targetWeek": 24
+        },
+        {
+          "name": "First muscle-up",
+          "description": "Bar or rings, any style",
+          "targetWeek": 30
+        },
+        {
+          "name": "3-5 consecutive muscle-ups",
+          "description": "Confident, repeatable reps",
+          "targetWeek": 44
+        }
       ]
     },
     {
       "id": "tuck-planche",
       "name": "Tuck Planche",
       "priority": 2,
-      "icon": "\u25c6",
+      "icon": "◆",
       "color": "rgb(180, 140, 224)",
       "currentState": "No planche training history. Shoulder pain limits plank position. Scapular stabilizer weakness identified.",
-      "requirements": "Strong scapular protraction, straight-arm pressing strength, progressive lean tolerance, conditioned wrists. The tuck planche is the most achievable planche variation and still looks impressive \u2014 hips level with shoulders, knees tucked to chest, body floating on hands.",
+      "requirements": "Strong scapular protraction, straight-arm pressing strength, progressive lean tolerance, conditioned wrists. The tuck planche is the most achievable planche variation and still looks impressive — hips level with shoulders, knees tucked to chest, body floating on hands.",
       "gapAnalysis": "The tuck planche requires straight-arm pressing with protracted scapulae that standard lifting doesn't build. Your shoulders need to be fully stable before you start leaning. The good news: tuck planche is a realistic 9-15 month goal, well within the same timeline as your muscle-up. Advanced tuck (legs partially extended) is the stretch goal beyond that.",
       "timeline": "Planche lean: 4-6 months. Frog stand: 3-4 months. Tuck planche (2-3 sec): 9-12 months. Tuck planche (5-10 sec): 12-15 months. Advanced tuck planche: 15-24 months (stretch goal).",
       "milestones": [
-        { "name": "Pain-free plank 60+ sec", "description": "Baseline pressing endurance", "targetWeek": 8 },
-        { "name": "Frog stand hold", "description": "Balance and wrist conditioning", "targetWeek": 14 },
-        { "name": "Planche lean 20+ degrees", "description": "Progressive forward lean tolerance", "targetWeek": 20 },
-        { "name": "Tuck planche 2-3 sec", "description": "First hold with hips level", "targetWeek": 36 },
-        { "name": "Tuck planche 5-10 sec", "description": "Solid, repeatable hold", "targetWeek": 48 },
-        { "name": "Advanced tuck planche 3-5 sec", "description": "Legs partially extended", "targetWeek": 60 }
+        {
+          "name": "Pain-free plank 60+ sec",
+          "description": "Baseline pressing endurance",
+          "targetWeek": 8
+        },
+        {
+          "name": "Frog stand hold",
+          "description": "Balance and wrist conditioning",
+          "targetWeek": 14
+        },
+        {
+          "name": "Planche lean 20+ degrees",
+          "description": "Progressive forward lean tolerance",
+          "targetWeek": 20
+        },
+        {
+          "name": "Tuck planche 2-3 sec",
+          "description": "First hold with hips level",
+          "targetWeek": 36
+        },
+        {
+          "name": "Tuck planche 5-10 sec",
+          "description": "Solid, repeatable hold",
+          "targetWeek": 48
+        },
+        {
+          "name": "Advanced tuck planche 3-5 sec",
+          "description": "Legs partially extended",
+          "targetWeek": 60
+        }
       ]
     },
     {
       "id": "pistol-squat",
       "name": "Pistol Squat",
       "priority": 3,
-      "icon": "\u25cf",
+      "icon": "●",
       "color": "rgb(96, 200, 140)",
       "currentState": "Limited depth on pistol squats. Lateral lunge knee pain. Surgically repaired right Achilles limiting dorsiflexion. Tight hips.",
       "requirements": "Full ankle dorsiflexion (especially right side), strong VMO and quad, hip flexor strength to hold the non-working leg extended, single-leg balance, and hip mobility to sit deep without butt wink.",
-      "gapAnalysis": "Your three limiters are exactly what Phase 1 targets: ankle dorsiflexion, knee stability, and hip mobility. The specific gap is single-leg strength and hip flexor endurance. Your right side will always be harder due to the Achilles \u2014 accept asymmetry and work both sides to their respective maximums.",
+      "gapAnalysis": "Your three limiters are exactly what Phase 1 targets: ankle dorsiflexion, knee stability, and hip mobility. The specific gap is single-leg strength and hip flexor endurance. Your right side will always be harder due to the Achilles — accept asymmetry and work both sides to their respective maximums.",
       "timeline": "Pistol to box (16 inch): 8-12 weeks. Pistol to box (8 inch): 16-20 weeks. Full-depth pistol (both legs): 5-8 months. Right leg may lag 2-4 weeks behind left.",
       "milestones": [
-        { "name": "Full Cossack squat, no support", "description": "Lateral mobility prerequisite", "targetWeek": 8 },
-        { "name": "Pistol to 16-inch box", "description": "Partial-depth single-leg squat", "targetWeek": 12 },
-        { "name": "Pistol to 8-inch box", "description": "Deeper single-leg squat", "targetWeek": 20 },
-        { "name": "Full pistol with counterbalance", "description": "Complete depth, assisted balance", "targetWeek": 28 },
-        { "name": "Full pistol, no counterbalance", "description": "Clean, controlled single-leg squat", "targetWeek": 36 },
-        { "name": "Weighted pistol squat", "description": "Loaded single-leg squat", "targetWeek": 44 }
+        {
+          "name": "Full Cossack squat, no support",
+          "description": "Lateral mobility prerequisite",
+          "targetWeek": 8
+        },
+        {
+          "name": "Pistol to 16-inch box",
+          "description": "Partial-depth single-leg squat",
+          "targetWeek": 12
+        },
+        {
+          "name": "Pistol to 8-inch box",
+          "description": "Deeper single-leg squat",
+          "targetWeek": 20
+        },
+        {
+          "name": "Full pistol with counterbalance",
+          "description": "Complete depth, assisted balance",
+          "targetWeek": 28
+        },
+        {
+          "name": "Full pistol, no counterbalance",
+          "description": "Clean, controlled single-leg squat",
+          "targetWeek": 36
+        },
+        {
+          "name": "Weighted pistol squat",
+          "description": "Loaded single-leg squat",
+          "targetWeek": 44
+        }
       ]
     },
     {
       "id": "handstand",
       "name": "Handstand",
       "priority": 4,
-      "icon": "\u25b2",
+      "icon": "▲",
       "color": "rgb(200, 196, 120)",
       "currentState": "Never achieved a handstand. Shoulder pain during overhead loading. Limited thoracic extension. Core work developing.",
       "requirements": "Full overhead shoulder mobility, conditioned wrists, scapular elevation strength, proprioceptive balance, and extensive wall practice before going freestanding.",
-      "gapAnalysis": "Your t-spine restriction and shoulder instability are the current blockers. Once those resolve (Phase 1-2), the handstand becomes primarily a balance skill. At 46, balance adaptation is slower but absolutely happens \u2014 expect more time in wall-supported positions. Your core strength from Session D will transfer directly.",
+      "gapAnalysis": "Your t-spine restriction and shoulder instability are the current blockers. Once those resolve (Phase 1-2), the handstand becomes primarily a balance skill. At 46, balance adaptation is slower but absolutely happens — expect more time in wall-supported positions. Your core strength from Session D will transfer directly.",
       "timeline": "Wall handstand 30 sec: 3-4 months. Wall handstand 60 sec with controlled entry: 5-6 months. Freestanding 5-10 sec: 6-9 months. Freestanding 15-30 sec: 9-15 months.",
       "milestones": [
-        { "name": "Overhead wall test pass", "description": "Full shoulder range without compensation", "targetWeek": 8 },
-        { "name": "Wall handstand 30 sec", "description": "Stomach-to-wall hold", "targetWeek": 14 },
-        { "name": "Wall handstand 60 sec", "description": "Extended hold with controlled entry", "targetWeek": 22 },
-        { "name": "Freestanding 5-10 sec", "description": "Brief balance holds", "targetWeek": 30 },
-        { "name": "Freestanding 15-30 sec", "description": "Confident freestanding balance", "targetWeek": 44 }
+        {
+          "name": "Overhead wall test pass",
+          "description": "Full shoulder range without compensation",
+          "targetWeek": 8
+        },
+        {
+          "name": "Wall handstand 30 sec",
+          "description": "Stomach-to-wall hold",
+          "targetWeek": 14
+        },
+        {
+          "name": "Wall handstand 60 sec",
+          "description": "Extended hold with controlled entry",
+          "targetWeek": 22
+        },
+        {
+          "name": "Freestanding 5-10 sec",
+          "description": "Brief balance holds",
+          "targetWeek": 30
+        },
+        {
+          "name": "Freestanding 15-30 sec",
+          "description": "Confident freestanding balance",
+          "targetWeek": 44
+        }
       ]
     }
   ],
-
   "benchmarks": [
     {
       "id": "wall-dorsiflexion",
       "name": "Wall Dorsiflexion Test",
       "howTo": "Face wall, foot back from wall. Drive knee forward keeping heel down. Measure max distance (inches) where knee touches wall and heel stays down.",
-      "target": "Left: 4-5 inches. Right (Achilles): will start lower \u2014 track improvement, don't compare sides.",
+      "target": "Left: 4-5 inches. Right (Achilles): will start lower — track improvement, don't compare sides.",
       "frequency": "Test day 1, then every 2 weeks",
       "unit": "inches"
     },
@@ -713,7 +1270,7 @@
       "id": "single-leg-balance-test",
       "name": "Single-Leg Balance (Eyes Closed)",
       "howTo": "Stand on one foot, close eyes, time how long before you touch down or open eyes.",
-      "target": "30 seconds each side. Right ankle will lag \u2014 that's expected.",
+      "target": "30 seconds each side. Right ankle will lag — that's expected.",
       "frequency": "Test day 1, then every 2 weeks",
       "unit": "seconds"
     },
@@ -736,13 +1293,13 @@
       "id": "deep-squat-test",
       "name": "Deep Squat Assessment",
       "howTo": "Feet shoulder width, squat as deep as possible without any support. Note: heels lifting, excessive forward lean, knees caving, inability to keep chest up.",
-      "target": "Hips below parallel, heels down, chest up, no pain. Use a phone to film yourself \u2014 you'll miss compensations otherwise.",
+      "target": "Hips below parallel, heels down, chest up, no pain. Use a phone to film yourself — you'll miss compensations otherwise.",
       "frequency": "Test day 1, film it. Re-film every 4 weeks."
     },
     {
       "id": "ninety-ninety-hip-test",
       "name": "90/90 Hip Test",
-      "howTo": "Sit in 90/90 position (both legs at 90\u00b0). Can you sit tall with both knees touching or near the floor?",
+      "howTo": "Sit in 90/90 position (both legs at 90°). Can you sit tall with both knees touching or near the floor?",
       "target": "Both knees within 3-4 inches of floor, spine upright without hands for support.",
       "frequency": "Test day 1, then every 3 weeks"
     },
@@ -750,7 +1307,7 @@
       "id": "cross-body-shoulder-reach",
       "name": "Cross-Body Shoulder Reach",
       "howTo": "Reach right hand behind your back from below, left hand from above. How close can your fingertips get? Repeat on the other side.",
-      "target": "Fingers touching or overlapping. Note the difference between sides \u2014 your tighter side is the priority.",
+      "target": "Fingers touching or overlapping. Note the difference between sides — your tighter side is the priority.",
       "frequency": "Test day 1, then every 4 weeks"
     },
     {
@@ -854,7 +1411,7 @@
       "id": "scapular-pullups-3x8",
       "name": "Scapular Pull-ups",
       "howTo": "From dead hang, depress shoulders (pull shoulder blades down), return to passive hang.",
-      "target": "3\u00d78 full range on bar."
+      "target": "3×8 full range on bar."
     },
     {
       "id": "muscle-ups-1-3",
@@ -928,7 +1485,6 @@
       "unit": "seconds"
     }
   ],
-
   "foundations": [
     {
       "id": "breathing-bracing",
@@ -938,7 +1494,7 @@
         {
           "step": 1,
           "name": "Find Your Diaphragm",
-          "instructions": "Lie on your back, knees bent. Place one hand on your chest, one on your belly. Breathe in through your nose \u2014 ONLY the belly hand should rise. Practice until you can take 10 breaths where only your belly moves.",
+          "instructions": "Lie on your back, knees bent. Place one hand on your chest, one on your belly. Breathe in through your nose — ONLY the belly hand should rise. Practice until you can take 10 breaths where only your belly moves.",
           "videoSearch": "diaphragmatic breathing tutorial lying"
         },
         {
@@ -955,21 +1511,41 @@
         }
       ],
       "practice": "Do 10 diaphragmatic breaths before daily CARs for the first 2 weeks.",
-      "activeDuringWeeks": { "start": 1, "end": 4 }
+      "activeDuringWeeks": {
+        "start": 1,
+        "end": 4
+      }
     }
   ],
-
   "theme": {
     "backgroundColor": "#141210",
     "textColor": "#e8e4df",
     "accentColor": "rgb(96, 165, 224)",
-    "sessionColors": {
-      "daily": { "background": "rgb(30, 58, 82)", "accent": "rgb(96, 165, 224)" },
-      "shoulder-rehab": { "background": "rgb(82, 40, 30)", "accent": "rgb(224, 134, 96)" },
-      "knee-hip-mobility": { "background": "rgb(30, 72, 52)", "accent": "rgb(96, 200, 140)" },
-      "ankle-integration": { "background": "rgb(72, 52, 82)", "accent": "rgb(180, 140, 224)" },
-      "active-recovery": { "background": "rgb(62, 62, 42)", "accent": "rgb(200, 196, 120)" },
-      "core-stability": { "background": "rgb(72, 32, 42)", "accent": "rgb(224, 120, 150)" }
+    "routineColors": {
+      "daily": {
+        "background": "rgb(30, 58, 82)",
+        "accent": "rgb(96, 165, 224)"
+      },
+      "shoulder-rehab": {
+        "background": "rgb(82, 40, 30)",
+        "accent": "rgb(224, 134, 96)"
+      },
+      "knee-hip-mobility": {
+        "background": "rgb(30, 72, 52)",
+        "accent": "rgb(96, 200, 140)"
+      },
+      "ankle-integration": {
+        "background": "rgb(72, 52, 82)",
+        "accent": "rgb(180, 140, 224)"
+      },
+      "active-recovery": {
+        "background": "rgb(62, 62, 42)",
+        "accent": "rgb(200, 196, 120)"
+      },
+      "core-stability": {
+        "background": "rgb(72, 32, 42)",
+        "accent": "rgb(224, 120, 150)"
+      }
     }
   }
 }

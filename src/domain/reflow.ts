@@ -1,9 +1,9 @@
-import type { QueueItemRow, WeekTemplate, Session } from "../types";
+import type { QueueItemRow, WeekTemplate, Routine } from "../types";
 
 
 export interface UpcomingItem {
   type: "session" | "spacer";
-  sessionId?: string;
+  routineId?: string;
   title: string;
   exerciseCount?: number;
   color?: string;
@@ -12,23 +12,23 @@ export interface UpcomingItem {
 export function computeUpcoming(
   pendingItems: QueueItemRow[],
   template: WeekTemplate,
-  sessions: Session[],
+  routines: Routine[],
   maxSessions: number
 ): UpcomingItem[] {
-  const sessionMap = new Map(sessions.map((s) => [s.id, s]));
+  const routineMap = new Map(routines.map((r) => [r.id, r]));
 
-  // Build the template rhythm: which day indices are spacers vs sessions
-  const templateRhythm: Array<{ type: "session" | "spacer"; sessionId?: string }> = [];
+  // Build the template rhythm: which day indices are spacers vs routines
+  const templateRhythm: Array<{ type: "session" | "spacer"; routineId?: string }> = [];
   for (const day of template.days) {
-    const mainIds = (day.sessionIDs ?? []).filter((sid) => {
-      const s = sessionMap.get(sid);
-      return s && !s.isDaily;
+    const mainIds = (day.routineIDs ?? []).filter((rid) => {
+      const r = routineMap.get(rid);
+      return r && !r.isDaily;
     });
-    if (mainIds.length === 0 && (day.sessionIDs ?? []).length > 0) {
+    if (mainIds.length === 0 && (day.routineIDs ?? []).length > 0) {
       templateRhythm.push({ type: "spacer" });
     } else if (mainIds.length > 0) {
-      for (const sid of mainIds) {
-        templateRhythm.push({ type: "session", sessionId: sid });
+      for (const rid of mainIds) {
+        templateRhythm.push({ type: "session", routineId: rid });
       }
     }
   }
@@ -40,7 +40,7 @@ export function computeUpcoming(
   const firstPending = pendingItems[0];
   if (firstPending) {
     for (let i = 0; i < templateRhythm.length; i++) {
-      if (templateRhythm[i].sessionId === firstPending.session_id) {
+      if (templateRhythm[i].routineId === firstPending.routine_id) {
         rhythmIndex = i;
         break;
       }
@@ -55,13 +55,13 @@ export function computeUpcoming(
       result.push({ type: "spacer", title: "CARs only" });
     } else {
       const item = pendingItems[pendingIdx];
-      const session = sessionMap.get(item.session_id);
+      const routine = routineMap.get(item.routine_id);
       result.push({
         type: "session",
-        sessionId: item.session_id,
-        title: session?.title ?? item.session_id,
-        exerciseCount: session?.exercises.length,
-        color: session?.color,
+        routineId: item.routine_id,
+        title: routine?.title ?? item.routine_id,
+        exerciseCount: routine?.exercises.length,
+        color: routine?.color,
       });
       pendingIdx++;
       sessionCount++;

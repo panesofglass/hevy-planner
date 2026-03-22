@@ -1,33 +1,33 @@
-import type { WeekTemplate, Session, QueueItemRow } from "../types";
+import type { WeekTemplate, Routine, QueueItemRow } from "../types";
 
 interface PlaylistItem {
-  session_id: string;
+  routine_id: string;
   position: number;
 }
 
 export function generatePlaylist(
   template: WeekTemplate,
-  sessions: Session[],
+  routines: Routine[],
   weeks: number
 ): PlaylistItem[] {
-  const sessionMap = new Map(sessions.map((s) => [s.id, s]));
-  const mainSessionOrder: string[] = [];
+  const routineMap = new Map(routines.map((r) => [r.id, r]));
+  const mainRoutineOrder: string[] = [];
 
   for (const day of template.days) {
-    if (!day.sessionIDs) continue;
-    for (const sid of day.sessionIDs) {
-      const session = sessionMap.get(sid);
-      if (session && !session.isDaily) {
-        mainSessionOrder.push(sid);
+    if (!day.routineIDs) continue;
+    for (const rid of day.routineIDs) {
+      const routine = routineMap.get(rid);
+      if (routine && !routine.isDaily) {
+        mainRoutineOrder.push(rid);
       }
     }
   }
 
   const playlist: PlaylistItem[] = [];
   for (let week = 0; week < weeks; week++) {
-    for (const sid of mainSessionOrder) {
+    for (const rid of mainRoutineOrder) {
       playlist.push({
-        session_id: sid,
+        routine_id: rid,
         position: playlist.length,
       });
     }

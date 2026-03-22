@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { computeUpcoming } from "../../src/domain/reflow";
-import type { QueueItemRow, WeekTemplate, Session } from "../../src/types";
+import type { QueueItemRow, WeekTemplate, Routine } from "../../src/types";
 
-const sessions: Session[] = [
+const routines: Routine[] = [
   { id: "daily", title: "CARs", isDaily: true, exercises: [] },
-  { id: "a", title: "Session A", exercises: [] },
-  { id: "b", title: "Session B", exercises: [] },
-  { id: "c", title: "Session C", exercises: [] },
+  { id: "a", title: "Routine A", exercises: [] },
+  { id: "b", title: "Routine B", exercises: [] },
+  { id: "c", title: "Routine C", exercises: [] },
   { id: "recovery", title: "Recovery", exercises: [] },
 ];
 
@@ -14,25 +14,25 @@ const template: WeekTemplate = {
   id: "5day",
   name: "5-Day",
   days: [
-    { dayOfWeek: 0, sessionIDs: ["daily", "a"] },
-    { dayOfWeek: 1, sessionIDs: ["daily", "b"] },
-    { dayOfWeek: 2, sessionIDs: ["daily"] },
-    { dayOfWeek: 3, sessionIDs: ["daily", "c"] },
-    { dayOfWeek: 4, sessionIDs: ["daily", "recovery"] },
-    { dayOfWeek: 5, sessionIDs: [] },
-    { dayOfWeek: 6, sessionIDs: [] },
+    { dayOfWeek: 0, routineIDs: ["daily", "a"] },
+    { dayOfWeek: 1, routineIDs: ["daily", "b"] },
+    { dayOfWeek: 2, routineIDs: ["daily"] },
+    { dayOfWeek: 3, routineIDs: ["daily", "c"] },
+    { dayOfWeek: 4, routineIDs: ["daily", "recovery"] },
+    { dayOfWeek: 5, routineIDs: [] },
+    { dayOfWeek: 6, routineIDs: [] },
   ],
 };
 
 describe("computeUpcoming", () => {
-  it("interleaves spacer days between main sessions based on template rhythm", () => {
+  it("interleaves spacer days between main routines based on template rhythm", () => {
     const pending: QueueItemRow[] = [
-      { id: 2, user_id: "u", session_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
-      { id: 3, user_id: "u", session_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
-      { id: 4, user_id: "u", session_id: "recovery", position: 3, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
+      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
+      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
+      { id: 4, user_id: "u", routine_id: "recovery", position: 3, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
     ];
 
-    const upcoming = computeUpcoming(pending, template, sessions, 5);
+    const upcoming = computeUpcoming(pending, template, routines, 5);
     const types = upcoming.map((u) => u.type);
     expect(types[0]).toBe("session");   // b
     expect(types[1]).toBe("spacer");    // CARs-only
@@ -41,11 +41,11 @@ describe("computeUpcoming", () => {
 
   it("limits to requested count of main sessions", () => {
     const pending: QueueItemRow[] = Array.from({ length: 10 }, (_, i) => ({
-      id: i, user_id: "u", session_id: "a", position: i,
+      id: i, user_id: "u", routine_id: "a", position: i,
       status: "pending" as const, completed_date: null,
       hevy_routine_id: null, hevy_workout_id: null,
     }));
-    const upcoming = computeUpcoming(pending, template, sessions, 3);
+    const upcoming = computeUpcoming(pending, template, routines, 3);
     const sessionCount = upcoming.filter((u) => u.type === "session").length;
     expect(sessionCount).toBe(3);
   });

@@ -1,5 +1,5 @@
 // ──────────────────────────────────────────────────────────────────
-// D1 row types — mirror the schema in migrations/0001_initial.sql
+// D1 row types — mirror the schema in migrations/
 // ──────────────────────────────────────────────────────────────────
 
 export interface UserRow {
@@ -14,7 +14,7 @@ export interface UserRow {
 export interface QueueItemRow {
   readonly id: number;
   readonly user_id: string;
-  readonly session_id: string;
+  readonly routine_id: string;
   readonly position: number;
   readonly status: "pending" | "completed";
   readonly completed_date: string | null;
@@ -22,33 +22,48 @@ export interface QueueItemRow {
   readonly hevy_workout_id: string | null;
 }
 
-export interface ExerciseMappingRow {
+export interface ExerciseTemplateMappingRow {
   readonly user_id: string;
-  readonly program_exercise_name: string;
-  readonly hevy_exercise_id: string;
-  /** SQLite boolean: 0 = false, 1 = true */
-  readonly confirmed_by_user: number;
+  readonly program_template_id: string;
+  readonly hevy_template_id: string;
+  readonly is_custom: number;
+}
+
+export interface RoutineMappingRow {
+  readonly user_id: string;
+  readonly program_routine_id: string;
+  readonly hevy_routine_id: string;
 }
 
 // ──────────────────────────────────────────────────────────────────
 // Program domain types — used by queue and reflow logic
 // ──────────────────────────────────────────────────────────────────
 
-export interface Exercise {
+export interface ExerciseTemplate {
   id: string;
-  name: string;
-  /** Either a count (e.g. 3) or a sets×reps/duration string (e.g. "3×30 sec") */
-  sets?: number | string;
-  reps?: string;
+  title: string;
+  /** Hevy exercise type */
+  type: "duration" | "reps_only" | "bodyweight_reps" | "weight_reps" | "weight_duration";
+  equipmentCategory: string;
+  primaryMuscleGroup: string;
+  secondaryMuscleGroups?: string[];
+  /** Coaching fields — not in Hevy */
   notes?: string;
   videoURL?: string;
   searchTerms?: string;
   tags?: string[];
-  subtitle?: string;
-  description?: string;
+  progressionByPhase?: Record<string, { sets?: string; notes?: string }>;
 }
 
-export interface Session {
+export interface RoutineExercise {
+  exerciseTemplateId: string;
+  /** The prescription for this routine context */
+  sets: string;
+  /** Override of template notes, if needed */
+  notes?: string;
+}
+
+export interface Routine {
   id: string;
   title: string;
   subtitle?: string;
@@ -56,13 +71,13 @@ export interface Session {
   color?: string;
   isDaily?: boolean;
   sortOrder?: number;
-  exercises: Exercise[];
+  exercises: RoutineExercise[];
 }
 
 export interface TemplateDay {
   dayOfWeek: number;
   label?: string;
-  sessionIDs?: string[];
+  routineIDs?: string[];
 }
 
 export interface WeekTemplate {
@@ -79,7 +94,8 @@ export interface WeekTemplate {
 
 export interface Program {
   meta: { title: string; subtitle?: string; description?: string; durationWeeks?: number };
-  sessions: Session[];
+  exerciseTemplates: ExerciseTemplate[];
+  routines: Routine[];
   weekTemplates: WeekTemplate[];
   progressions: Progression[];
   roadmap?: RoadmapPhase[];

@@ -10,7 +10,7 @@ CREATE TABLE users (
 CREATE TABLE queue_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id TEXT NOT NULL REFERENCES users(id),
-  session_id TEXT NOT NULL,
+  routine_id TEXT NOT NULL,
   position INTEGER NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending',
   completed_date TEXT,
@@ -28,10 +28,17 @@ CREATE TABLE skill_progress (
   UNIQUE(user_id, skill_id)
 );
 
-CREATE TABLE exercise_mappings (
+CREATE TABLE exercise_template_mappings (
   user_id TEXT NOT NULL REFERENCES users(id),
-  program_exercise_name TEXT NOT NULL,
-  hevy_exercise_id TEXT NOT NULL,
-  confirmed_by_user INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (user_id, program_exercise_name)
+  program_template_id TEXT NOT NULL,
+  hevy_template_id TEXT NOT NULL,
+  is_custom INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, program_template_id)
+);
+
+CREATE TABLE routine_mappings (
+  user_id TEXT NOT NULL REFERENCES users(id),
+  program_routine_id TEXT NOT NULL,
+  hevy_routine_id TEXT NOT NULL,
+  PRIMARY KEY (user_id, program_routine_id)
 );

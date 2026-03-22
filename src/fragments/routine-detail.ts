@@ -1,28 +1,32 @@
 // ──────────────────────────────────────────────────────────────────
-// Session detail page — full exercise list with coaching context
+// Routine detail page — full exercise list with coaching context
 // ──────────────────────────────────────────────────────────────────
 
-import type { Session, Progression } from "../types";
+import type { Routine, ExerciseTemplate, Progression } from "../types";
 
 /**
- * Full session detail page content — exercise list with numbered items,
+ * Full routine detail page content — exercise list with numbered items,
  * sets in blue, coaching notes, video links, integration tags,
  * and a sticky Push to Hevy button.
  */
-export function sessionDetailPage(
-  session: Session,
+export function routineDetailPage(
+  routine: Routine,
+  exerciseTemplates: ExerciseTemplate[],
   currentProgression?: Progression
 ): string {
   const parts: string[] = [];
 
+  // Build a lookup map for O(1) template access
+  const templateMap = new Map(exerciseTemplates.map((t) => [t.id, t]));
+
   // Back nav
   parts.push(`<a href="/" class="back-nav">&#8249; Today</a>`);
 
-  // Session header
+  // Routine header
   parts.push(`<div style="margin-bottom:16px">
-  <h2 class="card-title" style="font-size:22px">${escapeHtml(session.title)}</h2>
-  ${session.subtitle ? `<p class="card-subtitle">${escapeHtml(session.subtitle)}</p>` : ""}
-  ${session.description ? `<p class="card-desc">${escapeHtml(session.description)}</p>` : ""}
+  <h2 class="card-title" style="font-size:22px">${escapeHtml(routine.title)}</h2>
+  ${routine.subtitle ? `<p class="card-subtitle">${escapeHtml(routine.subtitle)}</p>` : ""}
+  ${routine.description ? `<p class="card-desc">${escapeHtml(routine.description)}</p>` : ""}
 </div>`);
 
   // Phase coaching callout (no border-left accent)
@@ -39,33 +43,37 @@ export function sessionDetailPage(
   }
 
   // Exercise list
-  parts.push(`<div class="section-header">Exercises (${session.exercises.length})</div>`);
+  parts.push(`<div class="section-header">Exercises (${routine.exercises.length})</div>`);
 
-  session.exercises.forEach((exercise, index) => {
-    const setsDisplay =
-      typeof exercise.sets === "string"
-        ? exercise.sets
-        : typeof exercise.sets === "number"
-          ? `${exercise.sets} sets`
-          : "";
+  routine.exercises.forEach((routineExercise, index) => {
+    const template = templateMap.get(routineExercise.exerciseTemplateId);
 
-    const videoLink = exercise.videoURL
-      ? `<a href="${escapeAttr(exercise.videoURL)}" target="_blank" rel="noopener" class="exercise-video">&#9654; Watch tutorial</a>`
+    // Title always comes from the template; fall back to ID if template missing
+    const title = template?.title ?? routineExercise.exerciseTemplateId;
+
+    // Sets always a string on RoutineExercise
+    const setsDisplay = routineExercise.sets;
+
+    // Notes: routine exercise override takes priority, then template default
+    const notes = routineExercise.notes ?? template?.notes;
+
+    const videoLink = template?.videoURL
+      ? `<a href="${escapeAttr(template.videoURL)}" target="_blank" rel="noopener" class="exercise-video">&#9654; Watch tutorial</a>`
       : "";
 
     const tagsHtml =
-      exercise.tags && exercise.tags.length > 0
-        ? `<div class="exercise-tags">${exercise.tags.map((t) => `<span class="exercise-tag">${escapeHtml(formatTag(t))}</span>`).join("")}</div>`
+      template?.tags && template.tags.length > 0
+        ? `<div class="exercise-tags">${template.tags.map((t) => `<span class="exercise-tag">${escapeHtml(formatTag(t))}</span>`).join("")}</div>`
         : "";
 
-    const notesHtml = exercise.notes
-      ? `<div class="exercise-notes">${escapeHtml(exercise.notes)}</div>`
+    const notesHtml = notes
+      ? `<div class="exercise-notes">${escapeHtml(notes)}</div>`
       : "";
 
     parts.push(`<div class="exercise-item">
   <div class="exercise-header">
     <span class="exercise-number">${index + 1}</span>
-    <span class="exercise-name">${escapeHtml(exercise.name)}</span>
+    <span class="exercise-name">${escapeHtml(title)}</span>
     ${setsDisplay ? `<span class="exercise-sets">${escapeHtml(setsDisplay)}</span>` : ""}
   </div>
   ${notesHtml}
@@ -76,7 +84,7 @@ export function sessionDetailPage(
 
   // Sticky Push to Hevy
   parts.push(`<div class="sticky-footer">
-  <button class="btn btn-blue btn-block" data-on:click="@post('/api/push-hevy/${escapeAttr(session.id)}')">Push to Hevy</button>
+  <button class="btn btn-blue btn-block" data-on:click="@post('/api/push-hevy/${escapeAttr(routine.id)}')">Push to Hevy</button>
 </div>`);
 
   return parts.join("\n");
