@@ -106,7 +106,6 @@ export default {
       if (method === "GET" && path === "/") {
         const user = await getUser(env.DB, auth.userId);
         if (!user) {
-          // First-run: show setup page
           return htmlResponse(
             htmlShell({
               title: APP_NAME,
@@ -116,52 +115,56 @@ export default {
           );
         }
 
-        if (isSSERequest(request)) {
-          return await handleTodaySSE(env, auth.userId);
-        }
-
         return htmlResponse(
           htmlShell({
             title: APP_NAME,
             subtitle: program.meta.subtitle,
             activeTab: "today",
-            ssePath: "/",
+            ssePath: "/sse/today",
           })
         );
       }
 
+      // ── GET /sse/today ────────────────────────────────────────
+      if (method === "GET" && path === "/sse/today") {
+        return await handleTodaySSE(env, auth.userId);
+      }
+
       // ── GET /progress ──────────────────────────────────────────
       if (method === "GET" && path === "/progress") {
-        if (isSSERequest(request)) {
-          return handleProgressSSE();
-        }
-
         return htmlResponse(
           htmlShell({
             title: "Progress",
             subtitle: program.meta.subtitle,
             activeTab: "progress",
-            ssePath: "/progress",
+            ssePath: "/sse/progress",
           })
         );
+      }
+
+      // ── GET /sse/progress ─────────────────────────────────────
+      if (method === "GET" && path === "/sse/progress") {
+        return handleProgressSSE();
       }
 
       // ── GET /session/:id ───────────────────────────────────────
       const sessionMatch = path.match(/^\/session\/([^/]+)$/);
       if (method === "GET" && sessionMatch) {
         const sessionId = decodeURIComponent(sessionMatch[1]);
-
-        if (isSSERequest(request)) {
-          return await handleSessionSSE(env, auth.userId, sessionId);
-        }
-
         return htmlResponse(
           htmlShell({
             title: "Session",
             activeTab: "today",
-            ssePath: `/session/${encodeURIComponent(sessionId)}`,
+            ssePath: `/sse/session/${encodeURIComponent(sessionId)}`,
           })
         );
+      }
+
+      // ── GET /sse/session/:id ──────────────────────────────────
+      const sseSessionMatch = path.match(/^\/sse\/session\/([^/]+)$/);
+      if (method === "GET" && sseSessionMatch) {
+        const sessionId = decodeURIComponent(sseSessionMatch[1]);
+        return await handleSessionSSE(env, auth.userId, sessionId);
       }
 
       // ── POST /api/setup/:templateId ─────────────────────────────
