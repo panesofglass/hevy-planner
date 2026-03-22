@@ -9,8 +9,8 @@ export function patchElements(html: string, opts?: PatchOptions): string {
   if (opts?.selector) lines += `data: selector ${opts.selector}\n`;
   if (opts?.mode) lines += `data: mode ${opts.mode}\n`;
   if (opts?.useViewTransition) lines += `data: useViewTransition true\n`;
-  // SSE spec: each line of a multi-line value must be prefixed with "data: "
-  const htmlLines = html.replace(/\n/g, "\ndata: ");
+  // Datastar v1: each continuation line must repeat "data: elements "
+  const htmlLines = html.replace(/\n/g, "\ndata: elements ");
   lines += `data: elements ${htmlLines}\n\n`;
   return lines;
 }
