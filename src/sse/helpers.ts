@@ -37,11 +37,7 @@ export function executeScript(script: string): string {
   return `event: datastar-execute-script\ndata: script ${script}\n\n`;
 }
 
-export function isDatastarRequest(request: Request): boolean {
-  return request.headers.get("datastar-request") === "true";
-}
-
 export function isSSERequest(request: Request): boolean {
   const accept = request.headers.get("accept") || "";
-  return accept.includes("text/event-stream") || isDatastarRequest(request);
+  return accept.includes("text/event-stream");
 }
