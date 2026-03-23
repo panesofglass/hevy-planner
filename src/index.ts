@@ -29,21 +29,20 @@ import {
 import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "./domain/queue";
 import { computeUpcoming } from "./domain/reflow";
 import { buildRoutinePayload, matchCompletions, autoMatchExercises } from "./domain/hevy-sync";
+import { mapToHevyEnums } from "./domain/hevy-enums";
+import { validateProgram } from "./domain/validate-program";
 import { HevyClient } from "./hevy/client";
 import { htmlShell } from "./fragments/layout";
 import { carsCard, heroRoutineCard, completedSection, upcomingSection } from "./fragments/today";
 import { routineDetailPage } from "./fragments/routine-detail";
 import { skillCards, roadmapSection, benchmarksSection } from "./fragments/progress";
-import { setupPage } from "./fragments/setup";
+import { setupPage, templateSelectionFragment } from "./fragments/setup";
 import type { Program, Progression } from "./types";
 import { escapeHtml } from "./utils/html";
 
-import programJson from "../programs/mobility-joint-restoration.json";
+import defaultProgramJson from "../programs/mobility-joint-restoration.json";
 
-const program = programJson as unknown as Program;
 const APP_NAME = "Hevy Planner";
-const routineMap = new Map(program.routines.map((r) => [r.id, r]));
-const dailyRoutine = program.routines.find((r) => r.isDaily);
 
 export interface Env {
   DB: D1Database;
@@ -77,6 +76,13 @@ function getCurrentProgression(
   );
 }
 
+/** Load the active program from D1 for a given user. */
+async function loadProgram(db: D1Database, userId: string): Promise<Program> {
+  const row = await getActiveProgram(db, userId);
+  if (!row) throw new Error("No active program found");
+  return JSON.parse(row.json_data) as Program;
+}
+
 function htmlResponse(body: string): Response {
   return new Response(body, {
     headers: { "content-type": "text/html; charset=utf-8" },
@@ -106,6 +112,16 @@ export default {
       const path = url.pathname;
       const method = request.method;
 
+      // ── GET /programs/default.json ─────────────────────────────
+      if (method === "GET" && path === "/programs/default.json") {
+        return new Response(JSON.stringify(defaultProgramJson, null, 2), {
+          headers: {
+            "content-type": "application/json",
+            "content-disposition": 'attachment; filename="default-program.json"',
+          },
+        });
+      }
+
       // ── GET / ──────────────────────────────────────────────────
       if (method === "GET" && path === "/") {
         const user = await getUser(env.DB, auth.userId);
@@ -114,7 +130,7 @@ export default {
             htmlShell({
               title: APP_NAME,
               subtitle: "Setup",
-              body: `<div id="content">${setupPage(program.weekTemplates)}</div>`,
+              body: `<div id="content">${setupPage()}</div>`,
             })
           );
         }
@@ -123,10 +139,18 @@ export default {
           return await handleTodaySSE(env, auth.userId);
         }
 
+        let subtitle: string | undefined;
+        try {
+          const prog = await loadProgram(env.DB, auth.userId);
+          subtitle = prog.meta.subtitle;
+        } catch {
+          // No active program — fallback to no subtitle
+        }
+
         return htmlResponse(
           htmlShell({
             title: APP_NAME,
-            subtitle: program.meta.subtitle,
+            subtitle,
             activeTab: "today",
             ssePath: "/",
           })
@@ -136,13 +160,21 @@ export default {
       // ── GET /progress ──────────────────────────────────────────
       if (method === "GET" && path === "/progress") {
         if (isSSERequest(request)) {
-          return handleProgressSSE();
+          return await handleProgressSSE(env, auth.userId);
+        }
+
+        let subtitle: string | undefined;
+        try {
+          const prog = await loadProgram(env.DB, auth.userId);
+          subtitle = prog.meta.subtitle;
+        } catch {
+          // fallback
         }
 
         return htmlResponse(
           htmlShell({
             title: "Progress",
-            subtitle: program.meta.subtitle,
+            subtitle,
             activeTab: "progress",
             ssePath: "/progress",
           })
@@ -165,6 +197,11 @@ export default {
             ssePath: `/routine/${encodeURIComponent(routineId)}`,
           })
         );
+      }
+
+      // ── POST /api/validate-program ─────────────────────────────
+      if (method === "POST" && path === "/api/validate-program") {
+        return await handleValidateProgram(request);
       }
 
       // ── POST /api/setup/:templateId ─────────────────────────────
@@ -207,14 +244,65 @@ export default {
 // Route handlers
 // ──────────────────────────────────────────────────────────────────
 
+/** POST /api/validate-program — validate uploaded JSON, return template cards */
+async function handleValidateProgram(request: Request): Promise<Response> {
+  const body = (await request.json()) as Record<string, unknown>;
+  const programJsonStr = body.programJson as string | undefined;
+
+  if (!programJsonStr) {
+    return sseResponse(
+      patchElements(
+        `<div class="card"><p style="color:var(--orange)">No program file selected.</p></div>`,
+        { selector: "#validation-result", mode: "inner" }
+      )
+    );
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(programJsonStr);
+  } catch {
+    return sseResponse(
+      patchElements(
+        `<div class="card"><p style="color:var(--orange)">Invalid JSON file.</p></div>`,
+        { selector: "#validation-result", mode: "inner" }
+      )
+    );
+  }
+
+  const result = validateProgram(parsed);
+  if (!result.valid) {
+    const errorList = result.errors
+      .map((e) => `<li>${escapeHtml(e)}</li>`)
+      .join("");
+    return sseResponse(
+      patchElements(
+        `<div class="card"><p style="color:var(--orange)">Validation errors:</p><ul style="margin:8px 0 0 16px;font-size:13px;color:var(--text-secondary)">${errorList}</ul></div>`,
+        { selector: "#validation-result", mode: "inner" }
+      )
+    );
+  }
+
+  return sseResponse(
+    patchElements(templateSelectionFragment(result.program.weekTemplates), {
+      selector: "#validation-result",
+      mode: "inner",
+    })
+  );
+}
+
 /** SSE: Today page — CARs card, hero session, completed, upcoming */
 async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user) {
     return sseResponse(
-      patchElements(setupPage(program.weekTemplates), { selector: "#content", mode: "inner" })
+      patchElements(setupPage(), { selector: "#content", mode: "inner" })
     );
   }
+
+  const program = await loadProgram(env.DB, userId);
+  const routineMap = new Map(program.routines.map((r) => [r.id, r]));
+  const dailyRoutine = program.routines.find((r) => r.isDaily);
 
   const items = await getQueueItems(env.DB, userId);
   const today = todayString();
@@ -265,7 +353,8 @@ async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
 }
 
 /** SSE: Progress page — skills, roadmap, benchmarks */
-function handleProgressSSE(): Response {
+async function handleProgressSSE(env: Env, userId: string): Promise<Response> {
+  const program = await loadProgram(env.DB, userId);
   const fragments: string[] = [];
   let isFirst = true;
 
@@ -291,6 +380,7 @@ function handleProgressSSE(): Response {
 
 /** SSE: Routine detail — exercise list with coaching context */
 async function handleRoutineSSE(env: Env, userId: string, routineId: string): Promise<Response> {
+  const program = await loadProgram(env.DB, userId);
   const routine = program.routines.find((r) => r.id === routineId);
   if (!routine) {
     return sseResponse(
@@ -310,11 +400,11 @@ async function handleRoutineSSE(env: Env, userId: string, routineId: string): Pr
   );
 }
 
-/** POST /api/setup — create user, generate queue, navigate to today */
+/** POST /api/setup — store program, sync Hevy, create user, generate queue */
 async function handleSetup(request: Request, env: Env, userId: string, urlTemplateId?: string): Promise<Response> {
-  let body: { apiKey?: string; startDate?: string; templateId?: string } = {};
+  let body: { apiKey?: string; startDate?: string; templateId?: string; programJson?: string } = {};
   try {
-    body = await request.json() as typeof body;
+    body = (await request.json()) as typeof body;
   } catch {
     // Body may be empty — that's OK, template ID comes from URL
   }
@@ -322,9 +412,27 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
   const templateId = urlTemplateId ?? body.templateId;
   const startDate = body.startDate || todayString();
   const apiKey = body.apiKey || undefined;
+  const programJsonStr = body.programJson;
 
   if (!templateId) {
     return new Response("Template ID is required", { status: 400 });
+  }
+
+  if (!programJsonStr) {
+    return new Response("Program data is required", { status: 400 });
+  }
+
+  // Parse and validate program
+  let program: Program;
+  try {
+    const parsed = JSON.parse(programJsonStr);
+    const result = validateProgram(parsed);
+    if (!result.valid) {
+      return new Response(`Invalid program: ${result.errors.join(", ")}`, { status: 400 });
+    }
+    program = result.program;
+  } catch {
+    return new Response("Invalid program JSON", { status: 400 });
   }
 
   const template = program.weekTemplates.find((t) => t.id === templateId);
@@ -347,7 +455,7 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
     }
   }
 
-  // Upsert user
+  // h. Upsert user (must exist before program insert due to FK constraint)
   await upsertUser(env.DB, {
     id: userId,
     active_program: program.meta.title,
@@ -356,14 +464,85 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
     hevy_api_key: apiKey,
   });
 
-  // Generate queue playlist
+  // a. Store program in D1
+  await insertProgram(env.DB, userId, programJsonStr);
+
+  // b-g. Hevy exercise template & routine creation (only with API key)
+  if (apiKey) {
+    const client = new HevyClient(apiKey);
+
+    // b. Fetch all Hevy exercise templates
+    const hevyTemplates = await client.getAllExerciseTemplates();
+
+    // c. Auto-match our templates to Hevy's by normalized title
+    const matched = autoMatchExercises(program.exerciseTemplates, hevyTemplates);
+
+    // d. Create custom Hevy exercise templates for unmatched
+    const customCreated = new Set<string>();
+    for (const et of program.exerciseTemplates) {
+      if (!matched.has(et.id)) {
+        const enums = mapToHevyEnums(et);
+        const created = await client.createExerciseTemplate({
+          title: et.title,
+          exercise_type: enums.exerciseType,
+          equipment_category: enums.equipmentCategory,
+          primary_muscle_group: enums.primaryMuscleGroup,
+          other_muscles: enums.secondaryMuscleGroups,
+        });
+        matched.set(et.id, created.id);
+        customCreated.add(et.id);
+      }
+    }
+
+    // e. Save all exercise template mappings
+    for (const [programTemplateId, hevyTemplateId] of matched) {
+      await upsertExerciseTemplateMapping(env.DB, {
+        user_id: userId,
+        program_template_id: programTemplateId,
+        hevy_template_id: hevyTemplateId,
+        is_custom: customCreated.has(programTemplateId) ? 1 : 0,
+      });
+    }
+
+    // f. Create one Hevy routine per program routine
+    const allMappings = await getExerciseTemplateMappings(env.DB, userId);
+    const routineIdMap = new Map<string, string>();
+    for (const routine of program.routines) {
+      const payload = buildRoutinePayload(routine, allMappings);
+      const created = await client.createRoutine({
+        title: payload.title,
+        exercises: payload.exercises,
+      });
+      routineIdMap.set(routine.id, created.id);
+    }
+
+    // g. Save all routine mappings
+    for (const [programRoutineId, hevyRoutineId] of routineIdMap) {
+      await upsertRoutineMapping(env.DB, {
+        user_id: userId,
+        program_routine_id: programRoutineId,
+        hevy_routine_id: hevyRoutineId,
+      });
+    }
+  }
+
+  // i. Generate queue playlist
   const weeks = program.meta.durationWeeks || 8;
   const playlist = generatePlaylist(template, program.routines, weeks);
   if (playlist.length > 0) {
     await insertQueueItems(env.DB, userId, playlist);
   }
 
-  // Redirect to Today page via script injection (Datastar v1 pattern)
+  // j. Bulk-set hevy_routine_id on queue items via routine_mappings
+  if (apiKey) {
+    const routineMappings = await getRoutineMappings(env.DB, userId);
+    const routineIdMap = new Map(
+      routineMappings.map((m) => [m.program_routine_id, m.hevy_routine_id])
+    );
+    await bulkSetQueueItemRoutineIds(env.DB, userId, routineIdMap);
+  }
+
+  // k. Redirect to Today
   return sseResponse(executeScript("window.location.href = '/'"));
 }
 
@@ -379,6 +558,7 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
     );
   }
 
+  const program = await loadProgram(env.DB, userId);
   const routine = program.routines.find((r) => r.id === routineId);
   if (!routine) {
     return new Response("Routine not found", { status: 404 });
@@ -470,6 +650,8 @@ async function handlePull(env: Env, userId: string): Promise<Response> {
     );
   }
 
+  const program = await loadProgram(env.DB, userId);
+  const routineMap = new Map(program.routines.map((r) => [r.id, r]));
   const client = new HevyClient(user.hevy_api_key);
 
   try {
