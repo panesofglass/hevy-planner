@@ -134,15 +134,37 @@
         },
         "equipmentCategory": {
           "type": "string",
-          "description": "Equipment required (e.g., 'Bodyweight', 'Barbell', 'Dumbbell', 'Kettlebell', 'Cable')."
+          "enum": [
+            "barbell", "dumbbell", "machine", "cable", "bodyweight",
+            "band", "kettlebell", "other", "weighted_bodyweight",
+            "assisted_bodyweight", "cardio", "duration", "resistance_band", "none",
+            "foam_roller", "pull_up_bar"
+          ],
+          "description": "Equipment required. Hevy-native values sync directly; program-specific values (foam_roller, pull_up_bar) are mapped to 'other' at sync time."
         },
         "primaryMuscleGroup": {
           "type": "string",
-          "description": "Primary muscle group targeted (e.g., 'Glutes', 'Hamstrings', 'Core')."
+          "enum": [
+            "abdominals", "abductors", "adductors", "biceps", "calves",
+            "cardio", "chest", "forearms", "full_body", "glutes",
+            "hamstrings", "lats", "lower_back", "neck", "other",
+            "quadriceps", "shoulders", "triceps", "traps", "upper_back",
+            "hip_flexors", "obliques"
+          ],
+          "description": "Primary muscle group targeted. Hevy-native values sync directly; program-specific values (hip_flexors, obliques) are mapped at sync time."
         },
         "secondaryMuscleGroups": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string",
+            "enum": [
+              "abdominals", "abductors", "adductors", "biceps", "calves",
+              "cardio", "chest", "forearms", "full_body", "glutes",
+              "hamstrings", "lats", "lower_back", "neck", "other",
+              "quadriceps", "shoulders", "triceps", "traps", "upper_back",
+              "hip_flexors", "obliques"
+            ]
+          },
           "description": "Additional muscle groups involved."
         },
         "notes": {
