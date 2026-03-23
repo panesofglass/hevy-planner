@@ -32,6 +32,15 @@ Desktop.ini
 # TypeScript
 *.tsbuildinfo
 
+# Worktrees
+.worktrees/
+
+# Superpowers
+.superpowers/
+
+# Entire
+.entire/
+
 # Logs
 *.log
 npm-debug.log*

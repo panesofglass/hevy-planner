@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/ryanriley/mobility-tracker/schema/program.schema.json",
   "title": "Training Program",
-  "description": "Schema for defining a training program. Programs contain sessions, exercises, weekly schedule templates, progression phases, optional skill goals, benchmarks, and a long-term roadmap.",
+  "description": "Schema for defining a training program. Programs contain exercise templates, routines, weekly schedule templates, progression phases, optional skill goals, benchmarks, and a long-term roadmap.",
   "type": "object",
-  "required": ["meta", "sessions", "weekTemplates", "progressions"],
+  "required": ["meta", "exerciseTemplates", "routines", "weekTemplates", "progressions"],
   "additionalProperties": false,
   "properties": {
 
@@ -46,10 +46,17 @@
       }
     },
 
-    "sessions": {
+    "exerciseTemplates": {
       "type": "array",
-      "description": "All sessions in the program. A session is a named group of exercises done together.",
-      "items": { "$ref": "#/$defs/session" },
+      "description": "All exercise templates in the program. Each template defines an exercise's identity, category, and optional per-phase progression.",
+      "items": { "$ref": "#/$defs/exerciseTemplate" },
+      "minItems": 1
+    },
+
+    "routines": {
+      "type": "array",
+      "description": "All routines in the program. A routine is a named group of exercise references done together.",
+      "items": { "$ref": "#/$defs/routine" },
       "minItems": 1
     },
 
@@ -90,6 +97,18 @@
       "items": { "$ref": "#/$defs/foundation" }
     },
 
+    "resources": {
+      "type": "array",
+      "description": "Optional reference materials, links, and educational resources.",
+      "items": { "$ref": "#/$defs/resource" }
+    },
+
+    "bodi": {
+      "type": "array",
+      "description": "Optional BODi integration notes for combining with BODi workouts.",
+      "items": { "$ref": "#/$defs/bodiIntegration" }
+    },
+
     "theme": {
       "$ref": "#/$defs/theme",
       "description": "Optional color theme for the program."
@@ -98,59 +117,59 @@
 
   "$defs": {
 
-    "session": {
+    "exerciseTemplate": {
       "type": "object",
-      "required": ["id", "title", "exercises"],
+      "required": ["id", "title", "type", "equipmentCategory", "primaryMuscleGroup"],
       "additionalProperties": false,
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the session within this program."
+          "description": "Unique identifier for the exercise template within this program."
         },
         "title": { "type": "string" },
-        "subtitle": { "type": "string" },
-        "description": {
+        "type": {
           "type": "string",
-          "description": "Coaching context explaining why this session exists and what it targets."
+          "enum": ["duration", "reps_only", "bodyweight_reps", "weight_reps", "weight_duration"],
+          "description": "Exercise type controlling which fields are logged per set."
         },
-        "isDaily": {
-          "type": "boolean",
-          "default": false,
-          "description": "If true, this session resets daily (never reflowed when missed, just dropped and regenerated)."
-        },
-        "sortOrder": {
-          "type": "integer",
-          "description": "Display order in the program view."
-        },
-        "color": {
+        "equipmentCategory": {
           "type": "string",
-          "description": "Optional CSS color string for theming this session (e.g., 'rgb(96, 165, 224)')."
+          "enum": [
+            "barbell", "dumbbell", "machine", "cable", "bodyweight",
+            "band", "kettlebell", "other", "weighted_bodyweight",
+            "assisted_bodyweight", "cardio", "duration", "resistance_band", "none",
+            "foam_roller", "pull_up_bar"
+          ],
+          "description": "Equipment required. Hevy-native values sync directly; program-specific values (foam_roller, pull_up_bar) are mapped to 'other' at sync time."
         },
-        "exercises": {
+        "primaryMuscleGroup": {
+          "type": "string",
+          "enum": [
+            "abdominals", "abductors", "adductors", "biceps", "calves",
+            "cardio", "chest", "forearms", "full_body", "glutes",
+            "hamstrings", "lats", "lower_back", "neck", "other",
+            "quadriceps", "shoulders", "triceps", "traps", "upper_back",
+            "hip_flexors", "obliques"
+          ],
+          "description": "Primary muscle group targeted. Hevy-native values sync directly; program-specific values (hip_flexors, obliques) are mapped at sync time."
+        },
+        "secondaryMuscleGroups": {
           "type": "array",
-          "items": { "$ref": "#/$defs/exercise" },
-          "minItems": 1
-        }
-      }
-    },
-
-    "exercise": {
-      "type": "object",
-      "required": ["id", "name", "sets"],
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the exercise within this program."
-        },
-        "name": { "type": "string" },
-        "sets": {
-          "type": "string",
-          "description": "Human-readable set/rep scheme (e.g., '3×8 each side', '2×45 sec')."
+          "items": {
+            "type": "string",
+            "enum": [
+              "abdominals", "abductors", "adductors", "biceps", "calves",
+              "cardio", "chest", "forearms", "full_body", "glutes",
+              "hamstrings", "lats", "lower_back", "neck", "other",
+              "quadriceps", "shoulders", "triceps", "traps", "upper_back",
+              "hip_flexors", "obliques"
+            ]
+          },
+          "description": "Additional muscle groups involved."
         },
         "notes": {
           "type": "string",
-          "description": "Coaching notes, cues, and progression tips."
+          "description": "Coaching notes, cues, and technique guidance."
         },
         "videoURL": {
           "type": ["string", "null"],
@@ -164,11 +183,11 @@
         "tags": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "Tags indicating cross-cutting concerns (e.g., 'core-integration', 'tspine-integration', 'glute-activation'). Exercises tagged this way originate from a foundational session but appear in other sessions."
+          "description": "Tags indicating cross-cutting concerns (e.g., 'core-integration', 'tspine-integration', 'glute-activation')."
         },
         "progressionByPhase": {
           "type": "object",
-          "description": "Optional per-phase overrides for sets, notes, or cues. Keys are progression phase names.",
+          "description": "Optional per-phase overrides for sets or notes. Keys are progression phase names.",
           "additionalProperties": {
             "type": "object",
             "properties": {
@@ -176,6 +195,61 @@
               "notes": { "type": "string" }
             }
           }
+        }
+      }
+    },
+
+    "routine": {
+      "type": "object",
+      "required": ["id", "title", "exercises"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the routine within this program."
+        },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "description": {
+          "type": "string",
+          "description": "Coaching context explaining why this routine exists and what it targets."
+        },
+        "color": {
+          "type": "string",
+          "description": "Optional CSS color string for theming this routine (e.g., 'rgb(96, 165, 224)')."
+        },
+        "isDaily": {
+          "type": "boolean",
+          "description": "If true, this routine resets daily (never reflowed when missed, just dropped and regenerated)."
+        },
+        "sortOrder": {
+          "type": "integer",
+          "description": "Display order in the program view."
+        },
+        "exercises": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/routineExercise" },
+          "minItems": 1
+        }
+      }
+    },
+
+    "routineExercise": {
+      "type": "object",
+      "required": ["exerciseTemplateId", "sets"],
+      "additionalProperties": false,
+      "properties": {
+        "exerciseTemplateId": {
+          "type": "string",
+          "description": "Reference to an exerciseTemplate id defined in this program."
+        },
+        "sets": {
+          "type": "string",
+          "description": "Human-readable set/rep scheme (e.g., '3×8 each side', '2×45 sec')."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Routine-specific coaching notes or cues for this exercise slot."
         }
       }
     },
@@ -213,11 +287,11 @@
           "maximum": 6,
           "description": "0=Monday, 6=Sunday."
         },
-        "sessionIDs": {
+        "routineIDs": {
           "type": "array",
           "items": { "type": "string" },
           "default": [],
-          "description": "References to session IDs scheduled for this day. Empty = rest or user-directed."
+          "description": "References to routine IDs scheduled for this day. Empty = rest or user-directed."
         },
         "note": {
           "type": ["string", "null"],
@@ -419,6 +493,32 @@
       }
     },
 
+    "resource": {
+      "type": "object",
+      "required": ["id", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "description": { "type": "string" },
+        "category": { "type": "string" }
+      }
+    },
+
+    "bodiIntegration": {
+      "type": "object",
+      "required": ["id", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "schedule": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+
     "theme": {
       "type": "object",
       "description": "Optional visual theme for the program.",
@@ -427,9 +527,9 @@
         "backgroundColor": { "type": "string" },
         "textColor": { "type": "string" },
         "accentColor": { "type": "string" },
-        "sessionColors": {
+        "routineColors": {
           "type": "object",
-          "description": "Per-session color overrides. Keys are session IDs.",
+          "description": "Per-routine color overrides. Keys are routine IDs.",
           "additionalProperties": {
             "type": "object",
             "properties": {
