@@ -1,0 +1,510 @@
+<task-notification>
+<task-id>abf11fa9106410dad</task-id>
+<tool-use-id>toolu_014aqbxNS9AY449SLZjrfdqr</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/abf11fa9106410dad.output</output-file>
+<status>completed</status>
+<summary>Agent "Update domain logic files" completed</summary>
+<result>The only remaining references to `Session` are in the function names `getNextSession` and `getCompletedSessions` — the task explicitly noted "rename is optional" for those — and `maxSessions` / `sessionCount` are local parameter/variable names in `reflow.ts` that are fine to keep (they describe the concept of a session count limit, not the old type). No old type names remain in any import or type annotation.
+
+Here is a summary of all changes made:
+
+---
+
+`/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/domain/queue.ts`
+
+- Import changed from `Session` to `Routine`
+- `PlaylistItem.session_id` renamed to `routine_id`
+- `generatePlaylist` parameter `sessions: Session[]` changed to `routines: Routine[]`
+- Internal: `sessionMap` -> `routineMap`, `mainSessionOrder` -> `mainRoutineOrder`, `sid` -> `rid`, `session` -> `routine`
+- `day.sessionIDs` -> `day.routineIDs`
+- `playlist.push` now uses `routine_id`
+
+---
+
+`/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/domain/reflow.ts`
+
+- Import changed from `Session` to `Routine`
+- `UpcomingItem.sessionId` renamed to `routineId`
+- `computeUpcoming` parameter `sessions: Session[]` changed to `routines: Routine[]`
+- Internal: `sessionMap` -> `routineMap`, `day.sessionIDs` -> `day.routineIDs`, `sid` -> `rid`, `s` -> `r`
+- Template rhythm entries use `routineId` instead of `sessionId`
+- First-pending alignment check uses `firstPending.routine_id`
+- Push uses `routineId: item.routine_id`
+
+---
+
+`/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/domain/hevy-sync.ts`
+
+- Import changed from `Session, ExerciseMappingRow` to `Routine, ExerciseTemplate, ExerciseTemplateMappingRow`
+- `RoutinePayload.unmapped` doc updated to reference template IDs
+- `buildRoutinePayload(session, mappings)` -> `buildRoutinePayload(routine, mappings)` with `ExerciseTemplateMappingRow[]`
+- Mapping key is now `program_template_id -> hevy_template_id`
+- Iteration uses `exercise.exerciseTemplateId` for lookup; unmapped collects that ID string
+- Sets branch simplified: `RoutineExercise.sets` is always a string, so only `parseSetsString` is called (the `number` fallback branch is gone)
+- `autoMatchExercises` signature changed from `(programNames: string[], hevyTemplates)` to `(ourTemplates: ExerciseTemplate[], hevyTemplates)`. Iterates `ourTemplates`, normalizes `template.title`, and maps `template.id -> hevy id`</result>
+<usage><total_tokens>22872</total_tokens><tool_uses>11</tool_uses><duration_ms>81921</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/abf11fa9106410dad.output
+
+---
+
+<task-notification>
+<task-id>a38c2a9290faec036</task-id>
+<tool-use-id>toolu_01TNL7xjst7iVv8G7XxFckGX</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/a38c2a9290faec036.output</output-file>
+<status>completed</status>
+<summary>Agent "Update JSON schema" completed</summary>
+<result>The schema is fully updated. Here is a summary of every change made to `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/schema/program.schema.json`:
+
+**Top-level `required`**
+Changed from `["meta", "sessions", "weekTemplates", "progressions"]` to `["meta", "exerciseTemplates", "routines", "weekTemplates", "progressions"]`.
+
+**Top-level `properties`**
+Removed the `sessions` array property. Added two new array properties in its place:
+- `exerciseTemplates` — references `#/$defs/exerciseTemplate`
+- `routines` — references `#/$defs/routine`
+
+**`$defs` removals**
+Deleted `session` and `exercise` definitions entirely.
+
+**`$defs` additions**
+- `exerciseTemplate` — required fields: `id`, `title`, `type` (enum), `equipmentCategory`, `primaryMuscleGroup`; optional: `secondaryMuscleGroups`, `notes`, `videoURL`, `searchTerms`, `tags`, `progressionByPhase`
+- `routine` — required fields: `id`, `title`, `exercises`; optional: `subtitle`, `description`, `color`, `isDaily`, `sortOrder`; `exercises` array references `#/$defs/routineExercise`
+- `routineExercise` — required fields: `exerciseTemplateId`, `sets`; optional: `notes`
+
+**`daySlot` def**
+Renamed `sessionIDs` to `routineIDs`, updated its description to match.
+
+**`theme` def**
+Renamed `sessionColors` to `routineColors`, updated its description to match.</result>
+<usage><total_tokens>26371</total_tokens><tool_uses>8</tool_uses><duration_ms>57910</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/a38c2a9290faec036.output
+
+---
+
+<task-notification>
+<task-id>a114c8cf9b93d4cae</task-id>
+<tool-use-id>toolu_01SxBhb8R1sLWGbFZrGZtowX</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/a114c8cf9b93d4cae.output</output-file>
+<status>completed</status>
+<summary>Agent "Update fragments for routine model" completed</summary>
+<result>Done. Here is a summary of every change made.
+
+---
+
+### Changes made
+
+**`src/fragments/routine-detail.ts`** (new file, replaces `session-detail.ts`)
+
+- Signature: `routineDetailPage(routine: Routine, exerciseTemplates: ExerciseTemplate[], currentProgression?: Progression)`
+- Builds a `Map<string, ExerciseTemplate>` from the passed templates array for O(1) lookups by `exerciseTemplateId`
+- Per-exercise rendering resolves `title` from the template (fallback: the raw ID), uses `routineExercise.sets` directly (always a string — the number-branch from the old code is gone), computes `notes` as the routine exercise override first then the template default, and reads `videoURL`/`tags` from the template
+- Push to Hevy URL: `/api/push-hevy/${routine.id}`
+- Back-nav and details links use `/routine/` prefix
+
+**`src/fragments/session-detail.ts`** — deleted.
+
+**`src/fragments/today.ts`** — three targeted edits:
+
+- Import changed from `Session` to `Routine`
+- `carsCard(session: Session)` → `carsCard(routine: Routine)`, all internal references updated, `/session/daily` → `/routine/daily`
+- `heroSessionCard(session: Session, queueItem: QueueItemRow)` → `heroSessionCard(routine: Routine, queueItem: QueueItemRow)`, `queueItem.session_id` → `queueItem.routine_id`, `/session/${...}` → `/routine/${...}`
+
+The `upcomingSection` function itself required no edits — it only reads `type`, `title`, `color`, and `exerciseCount` from `UpcomingItem`, none of which are the renamed `sessionId`/`routineId` field.
+
+**Caller note**: `src/index.ts` line 30 still imports `sessionDetailPage` from `./fragments/session-detail` and line 306 calls it with a `Session` — that import will now error and needs to be updated to `routineDetailPage` from `./fragments/routine-detail` as part of the broader `index.ts` migration (which has many pre-existing `session_id`/`.sessions` errors already in flight).</result>
+<usage><total_tokens>27056</total_tokens><tool_uses>16</tool_uses><duration_ms>98983</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/a114c8cf9b93d4cae.output
+
+---
+
+<task-notification>
+<task-id>a036074c6f7f513cd</task-id>
+<tool-use-id>toolu_01UgD71F7KtkBoqyj5qHAYZk</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/a036074c6f7f513cd.output</output-file>
+<status>completed</status>
+<summary>Agent "Update storage queries and migration" completed</summary>
+<result>Everything looks correct. Here is a summary of all changes made.
+
+---
+
+All changes are complete. Here is what was done:
+
+### `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/storage/queries.ts`
+
+- Import updated: `ExerciseMappingRow` replaced with `ExerciseTemplateMappingRow, RoutineMappingRow`
+- `insertQueueItems`: parameter array type changed from `{ session_id }` to `{ routine_id }`, SQL column updated to match
+- `getExerciseMappings` renamed to `getExerciseTemplateMappings`, queries `exercise_template_mappings`, returns `ExerciseTemplateMappingRow[]`
+- `upsertExerciseMapping` renamed to `upsertExerciseTemplateMapping`, upserts into `exercise_template_mappings` with columns `user_id, program_template_id, hevy_template_id, is_custom`, conflict on `(user_id, program_template_id)`
+- Added `getRoutineMappings`: queries `routine_mappings`, returns `RoutineMappingRow[]`
+- Added `upsertRoutineMapping`: upserts into `routine_mappings`, conflict on `(user_id, program_routine_id)`
+- Added `bulkSetQueueItemRoutineIds`: iterates the `Map<programRoutineId, hevyRoutineId>` and issues a `db.batch` of UPDATE statements on `queue_items` keyed by `user_id` and `routine_id`
+
+### `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/migrations/0001_initial.sql`
+
+- `queue_items.session_id` renamed to `routine_id`
+- `exercise_mappings` table replaced with `exercise_template_mappings` (new columns: `program_template_id`, `hevy_template_id`, `is_custom`)
+- Added `routine_mappings` table
+
+### `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/migrations/0002_exercise_template_mappings.sql`
+
+New file. Handles the migration for live databases: drops `exercise_mappings`, creates `exercise_template_mappings` and `routine_mappings`, and rebuilds `queue_items` via the SQLite rename-table approach to rename `session_id` to `routine_id`.
+
+### `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/index.ts` (opportunistic fixes)
+
+The old function names and field names were still in use throughout this file, which would have caused compile errors. Fixed:
+- Import names updated to `getExerciseTemplateMappings` / `upsertExerciseTemplateMapping`
+- All `program.sessions` references replaced with `program.routines`
+- All `item.session_id` / `nextItem.session_id` references replaced with `.routine_id`
+- `handlePush`: auto-match now passes `program.exerciseTemplates` (typed `ExerciseTemplate[]`) instead of a plain string array, and writes mappings with the new field names (`program_template_id`, `hevy_template_id`, `is_custom`)</result>
+<usage><total_tokens>37564</total_tokens><tool_uses>26</tool_uses><duration_ms>129324</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/a036074c6f7f513cd.output
+
+---
+
+2. Commit and push progress so far, then run `/simplify`, then commit and push again to the PR branch
+
+---
+
+<task-notification>
+<task-id>a887d2bea66c3c077</task-id>
+<tool-use-id>toolu_01EbFxdHNkdExexADx3GiVi2</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/a887d2bea66c3c077.output</output-file>
+<status>completed</status>
+<summary>Agent "Efficiency review" completed</summary>
+<result>Now I have a thorough understanding of the diff and all the relevant files. Here is my efficiency review.
+
+---
+
+## Efficiency Review Findings
+
+### 1. N+1 sequential DB writes in `handlePush` (exercise template upserts)
+
+**File**: `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/index.ts:396-403`
+
+```typescript
+for (const [programTemplateId, hevyTemplateId] of autoMatched) {
+  await upsertExerciseTemplateMapping(env.DB, { ... });
+}
+```
+
+Each mapping is upserted with a separate `await` inside a loop. D1 supports `db.batch()` for exactly this pattern. With N exercise templates, this is N sequential round trips instead of one batched write. Refactor to build an array of bound statements and call `db.batch(batch)`, the same pattern already used in `insertQueueItems` and `bulkSetQueueItemRoutineIds`.
+
+### 2. Redundant `getUser` call on `GET /`
+
+**File**: `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/index.ts:107` and `:208`
+
+When an SSE request arrives at `/`, the router calls `getUser` at line 107, checks if the user exists, then calls `handleTodaySSE` which calls `getUser` again at line 208. That is two identical D1 queries per SSE page load. Pass the already-fetched `user` into `handleTodaySSE` instead of re-querying.
+
+### 3. Redundant `getQueueItems` call in `handlePush`
+
+**File**: `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/index.ts:414`
+
+`handlePush` calls `getQueueItems(env.DB, userId)` to find a single pending queue item matching `routineId`. This fetches every queue item for the user just to `.find()` one. For programs of 8+ weeks with 4 routines per week, that is 32+ rows loaded to find one. A targeted query such as `SELECT * FROM queue_items WHERE user_id = ? AND routine_id = ? AND status = 'pending' ORDER BY position LIMIT 1` would be more efficient.
+
+### 4. `handlePull` calls `program.routines.find()` inside a loop
+
+**File**: `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/index.ts:484-489`
+
+```typescript
+for (const item of pendingItems) {
+  const routine = program.routines.find((r) => r.id === item.routine_id);
+  ...
+}
+```
+
+This is O(N*M) where N is pending items and M is routines. Build a `Map` before the loop (like `handleTodaySSE` already does with `routineMap`) and look up in O(1). The program data is static, so a module-level `routineMap` would be even better.
+
+### 5. `getAllExerciseTemplates` uses `pageSize=10` - excessive API round trips
+
+**File**: `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/hevy/client.ts:87`
+
+```typescript
+`/exercise_templates?page=${page}&pageSize=10`
+```
+
+The pagination loop fetches 10 templates per page. Hevy likely has hundreds of exercise templates in the default library. If there are 300, this is 30 sequential HTTP requests. Use the maximum `pageSize` the API allows (likely 100) to reduce round trips by 10x. This is called during `handlePush` on first use, making the first push painfully slow.
+
+### 6. `handleTodaySSE` rebuilds `routineMap` on every SSE request
+
+**File**: `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/index.ts:217`
+
+```typescript
+const routineMap = new Map(program.routines.map((r) => [r.id, r]));
+```
+
+`program` is a module-level constant loaded from JSON at import time. This map is rebuilt identically on every request. Hoist it to module scope alongside `const program = ...` at line 41. Same applies to `program.routines.find((r) => r.isDaily)` at line 222 -- the daily routine never changes.
+
+### 7. Sequential DB calls in `handlePull` that could be parallelized
+
+**File**: `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/index.ts:478-479`
+
+```typescript
+const workouts = await client.getRecentWorkouts();
+const items = await getQueueItems(env.DB, userId);
+```
+
+The Hevy API call and the D1 query are independent. Use `Promise.all([client.getRecentWorkouts(), getQueueItems(env.DB, userId)])` to run them concurrently. The Hevy API call is network-bound (external HTTP), so overlapping it with the D1 query could cut latency meaningfully.
+
+### 8. Sequential `markQueueItemCompleted` calls in `handlePull`
+
+**File**: `/Users/ryanr/Code/hevy-planner/.worktrees/v1-implementation/src/index.ts:498-499`
+
+```typescript
+for (const match of matches) {
+  await markQueueItemCompleted(env.DB, match.queueItemId, today, match.workoutId);
+}
+```
+
+Same N+1 pattern as finding #1. Multiple matches means multiple sequential D1 writes. Batch them with `db.batch()`.
+
+### Summary
+
+| # | Severity | Location | Issue |
+|---|----------|----------|-------|
+| 1 | Medium | `index.ts:396-403` | N+1 sequential upserts; use `db.batch()` |
+| 2 | Low | `index.ts:107,208` | Duplicate `getUser` query on SSE path |
+| 3 | Low | `index.ts:414` | Loads all queue items to find one; use targeted query |
+| 4 | Low | `index.ts:484-489` | O(N*M) linear scan in loop; use a Map |
+| 5 | Medium | `client.ts:87` | `pageSize=10` causes excessive API round trips |
+| 6 | Low | `index.ts:217,222` | Rebuilds static Map/find on every request; hoist to module scope |
+| 7 | Low | `index.ts:478-479` | Sequential independent async calls; use `Promise.all` |
+| 8 | Medium | `index.ts:498-499` | N+1 sequential completion marks; use `db.batch()` |
+
+Items 1, 5, and 8 are the most impactful. The N+1 DB writes (1, 8) are straightforward to batch given that the pattern already exists in `insertQueueItems` and `bulkSetQueueItemRoutineIds`. The `pageSize` fix (5) is a one-character change with potentially 10x fewer HTTP round trips on first push.</result>
+<usage><total_tokens>51092</total_tokens><tool_uses>8</tool_uses><duration_ms>54430</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/a887d2bea66c3c077.output
+
+---
+
+<task-notification>
+<task-id>ac61413c213b19887</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/ac61413c213b19887.output</output-file>
+<status>completed</status>
+<summary>Agent "Code reuse review" completed</summary>
+<result>I have all the data I need. Here is my review.
+
+---
+
+## Code Reuse Review -- Findings
+
+### 1. `escapeHtml` is duplicated 6 times
+
+**Existing utility:** `src/utils/html.ts` exports `escapeHtml` (line 1).
+
+**Duplicates (all identical implementations):**
+- `src/index.ts` line 37 (private function)
+- `src/fragments/layout.ts` line 76 (private function)
+- `src/fragments/today.ts` line 109 (private function)
+- `src/fragments/routine-detail.ts` line 95 (private function)
+- `src/fragments/progress.ts` line 116 (private function)
+- `src/fragments/setup.ts` line 72 (private function)
+
+All six should import from `src/utils/html.ts` instead of defining their own copy.
+
+---
+
+### 2. `escapeAttr` is duplicated 3 times
+
+**Existing utility:** `src/utils/html.ts` exports `escapeAttr` (line 9).
+
+**Duplicates (all identical implementations):**
+- `src/fragments/today.ts` line 117
+- `src/fragments/setup.ts` line 80
+- `src/fragments/routine-detail.ts` line 103
+
+All three should import from `src/utils/html.ts`.
+
+---
+
+### 3. `truncate` is duplicated with a subtly different implementation
+
+**Existing utility:** `src/utils/html.ts` line 22 -- uses `lastIndexOf(" ", max)` to break at the last space, appends `"..."`.
+
+**Duplicate:** `src/fragments/today.ts` line 130 -- uses `replace(/\s+\S*$/, "")` (a regex that strips a trailing partial word), appends `"\u2026"` (ellipsis character).
+
+These are functionally different: the `utils/html.ts` version produces `"..."` (three dots) while `today.ts` produces a Unicode ellipsis `"..."`. The word-break logic also differs. The `today.ts` copy should be removed in favor of importing `truncate` from `src/utils/html.ts`, and if the ellipsis character is preferred, the canonical version should be updated to use it.
+
+---
+
+### 4. `routineMap` construction is repeated 3 times with identical logic
+
+The pattern `new Map(routines.map((r) => [r.id, r]))` appears in:
+- `src/domain/queue.ts` line 13
+- `src/domain/reflow.ts` line 18
+- `src/index.ts` line 217
+
+In `src/index.ts`, the map is built once per SSE request (`handleTodaySSE`), but then separate `program.routines.find(...)` linear scans are used in `handleRoutineSSE` (line 293), `handlePush` (line 381), and `handlePull` (line 485). This is not severe since the array is small and module-scoped, but the repeated `new Map(...)` construction across domain files is a candidate for a shared helper like `toIdMap<T extends { id: string }>(items: T[]): Map<string, T>`.
+
+---
+
+### 5. `formatTag` should be in `src/utils/html.ts`
+
+`src/fragments/routine-detail.ts` line 117 defines `formatTag` as a private function that converts `"core-integration"` to `"Core Integration"`. This is a general-purpose string utility (split on hyphens, title-case each word) that belongs in `src/utils/html.ts` alongside the other HTML/string helpers. Currently it is only used in one file, but extracting it now keeps the pattern consistent and avoids future duplication when other fragments need tag formatting.
+
+---
+
+### Summary
+
+| # | Issue | Severity | Files involved |
+|---|-------|----------|----------------|
+| 1 | `escapeHtml` duplicated 6 times; canonical copy exists in `src/utils/html.ts` | **High** -- 6 copies to maintain | `index.ts`, `layout.ts`, `today.ts`, `routine-detail.ts`, `progress.ts`, `setup.ts` |
+| 2 | `escapeAttr` duplicated 3 times; canonical copy exists in `src/utils/html.ts` | **High** -- 3 copies to maintain | `today.ts`, `setup.ts`, `routine-detail.ts` |
+| 3 | `truncate` duplicated with different behavior; canonical copy exists in `src/utils/html.ts` | **Medium** -- divergent logic, latent bug | `today.ts` vs `utils/html.ts` |
+| 4 | `new Map(routines.map(r => [r.id, r]))` repeated 3 times | **Low** -- boilerplate, not buggy | `queue.ts`, `reflow.ts`, `index.ts` |
+| 5 | `formatTag` is a general utility defined inline | **Low** -- single use today, but should live in utils for consistency | `routine-detail.ts` |
+
+Items 1-3 are the ones worth fixing now. The utility module `src/utils/html.ts` already exists with exported versions of all three functions -- the fragment files and `index.ts` just need to import from it instead of redefining their own private copies.</result>
+<usage><total_tokens>70310</total_tokens><tool_uses>26</tool_uses><duration_ms>83817</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/ac61413c213b19887.output
+
+---
+
+<task-notification>
+<task-id>a9285a59fe4b10d78</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/a9285a59fe4b10d78.output</output-file>
+<status>completed</status>
+<summary>Agent "Code quality review" completed</summary>
+<result>I now have a thorough picture. Here are the findings.
+
+---
+
+## Code Quality Review Findings
+
+### 1. CRITICAL -- Variable shadowing causes a bug
+
+**`src/index.ts:419`** -- `let routineId: string;` shadows the function parameter `routineId` on line 370. This means the `routineId` used in the `items.find()` comparison on line 416 is the _parameter_, but the `routineId` assigned on lines 426/433 and used in `updateQueueItemHevyRoutineId` on line 438 is the _inner_ `let`. Depending on how TypeScript/the bundler handles this, it may work by accident today, but it is a latent correctness hazard and will confuse any reader. The inner variable should be renamed (e.g., `hevyRoutineId`). Additionally, `const routine` on lines 422 and 429 shadows the outer `routine` from line 381.
+
+```
+src/index.ts:419   let routineId: string;          // shadows parameter on :370
+src/index.ts:422   const routine = await client...  // shadows outer routine on :381
+src/index.ts:429   const routine = await client...  // shadows outer routine on :381
+```
+
+### 2. Copy-pasted `escapeHtml` / `escapeAttr` -- 6 duplicate definitions
+
+`escapeHtml` is defined identically in **6 places**, and `escapeAttr` in **4 places**, despite an existing shared module at `src/utils/html.ts` that exports both. None of the fragment files or `index.ts` import from it.
+
+| Function | Locations |
+|---|---|
+| `escapeHtml` | `src/index.ts:37`, `src/fragments/layout.ts:76`, `src/fragments/routine-detail.ts:95`, `src/fragments/today.ts:109`, `src/fragments/progress.ts:116`, `src/fragments/setup.ts:72` |
+| `escapeAttr` | `src/fragments/routine-detail.ts:103`, `src/fragments/today.ts:117`, `src/fragments/setup.ts:80` |
+
+All of these should be replaced with `import { escapeHtml, escapeAttr } from "../utils/html"`.
+
+Additionally, `truncate` exists in both `src/utils/html.ts:22` and `src/fragments/today.ts:130` with slightly different implementations (the util version uses `lastIndexOf(" ", max)` and `"..."`, while today.ts uses a regex `\s+\S*$` and the unicode ellipsis character). Pick one and consolidate.
+
+### 3. Dead code -- exported query functions never imported
+
+**`src/storage/queries.ts:112-151`** -- Three functions added in this diff are never imported or called anywhere in the codebase:
+
+- `getRoutineMappings` (line 112)
+- `upsertRoutineMapping` (line 123)
+- `bulkSetQueueItemRoutineIds` (line 138)
+
+These are either dead code shipped prematurely, or the calling code in `index.ts` was forgotten. If they are planned for a future change, they should not be merged until they have at least one call site (or a test).
+
+### 4. Stringly-typed `"session"` literal surviving the rename
+
+**`src/domain/reflow.ts:5`** -- The `UpcomingItem.type` field still uses the string literal `"session" | "spacer"` despite the domain rename from session to routine. This propagates into tests and the today fragment. It should be `"routine" | "spacer"` for consistency with the new vocabulary, or extracted to a union type alias.
+
+Similarly, the exported function names in `src/domain/queue.ts` still use the old vocabulary:
+
+- `getNextSession` (line 39) -- should be `getNextRoutine`
+- `getCompletedSessions` (line 44) -- should be `getCompletedRoutines`
+
+And in `src/fragments/today.ts`:
+
+- `heroSessionCard` (line 31) -- should be `heroRoutineCard`
+- The file header comment still says "hero session" (line 2)
+- The label text `"Next Session"` (line 39) is user-facing, so that is a product decision, but the function name should match the domain model
+
+### 5. Redundant `routineMap` construction
+
+**`src/index.ts:217`** -- `handleTodaySSE` builds `routineMap` to look up routines by ID, but then only uses it for 3 `.get()` calls against a `program.routines` array that is module-level and never changes. The same map is built in `src/domain/queue.ts:13` and `src/domain/reflow.ts:18` on every invocation. Consider building the map once at module scope (next to `const program = ...` on line 41) and passing it down, or making it a lazy-initialized cached value. This is minor for small programs but is a repeated-allocation pattern.
+
+### 6. Unnecessary comment
+
+**`src/fragments/routine-detail.ts:19-20`**
+
+```typescript
+// Build a lookup map for O(1) template access
+const templateMap = new Map(exerciseTemplates.map((t) => [t.id, t]));
+```
+
+The comment explains _what_ the code does (builds a map), which is self-evident from the variable name `templateMap` and the `new Map(...)` call. Remove it.
+
+Similarly, **`src/fragments/routine-detail.ts:54`**:
+
+```typescript
+// Sets always a string on RoutineExercise
+const setsDisplay = routineExercise.sets;
+```
+
+The type system already enforces this (the `sets` field on `RoutineExercise` is typed as `string`). The comment and the intermediate variable are both unnecessary; `routineExercise.sets` could be used directly in the template.
+
+### 7. Leaky abstraction -- `handlePush` mixes domain, storage, and API concerns
+
+**`src/index.ts:370-461`** -- The `handlePush` function is a 90-line method that:
+1. Loads the user
+2. Finds the routine from the program
+3. Fetches exercise template mappings from D1
+4. Conditionally auto-matches by hitting the Hevy API
+5. Builds the routine payload (domain)
+6. Queries queue items from D1
+7. Creates or updates a Hevy routine via the API
+8. Updates the queue item in D1
+9. Builds an HTML fragment response
+
+This violates the project convention stated in CLAUDE.md: "Do NOT put queue/reflow logic in route handlers -- it belongs in domain/." The push orchestration (steps 3-7) should be extracted into a domain or service function. This is not new to this diff -- it existed before -- but it is growing with the addition of template mapping logic and warrants noting.
+
+### 8. Sequential DB writes in a loop
+
+**`src/index.ts:396-403`** -- The auto-match upserts run `await upsertExerciseTemplateMapping(...)` in a sequential `for` loop. This should use `db.batch()` like `bulkSetQueueItemRoutineIds` already does for queue item updates, reducing round trips from N to 1.
+
+```typescript
+for (const [programTemplateId, hevyTemplateId] of autoMatched) {
+  await upsertExerciseTemplateMapping(env.DB, { ... });  // N sequential writes
+}
+```
+
+### Summary
+
+| # | Severity | File:Line | Issue |
+|---|----------|-----------|-------|
+| 1 | **Critical** | `src/index.ts:419,422,429` | Variable shadowing of `routineId` param and `routine` const |
+| 2 | High | 6 files | `escapeHtml`/`escapeAttr`/`truncate` duplicated instead of importing from `src/utils/html.ts` |
+| 3 | Medium | `src/storage/queries.ts:112-151` | 3 exported functions never imported anywhere (dead code) |
+| 4 | Medium | `src/domain/reflow.ts:5`, `src/domain/queue.ts:39,44`, `src/fragments/today.ts:31` | Incomplete session-to-routine rename in type literals and function names |
+| 5 | Low | `src/index.ts:217`, `src/domain/queue.ts:13`, `src/domain/reflow.ts:18` | `routineMap` rebuilt from the same immutable array on every call |
+| 6 | Low | `src/fragments/routine-detail.ts:19,54` | Comments explaining what, not why |
+| 7 | Low | `src/index.ts:370-461` | Route handler doing domain/storage/API orchestration inline |
+| 8 | Low | `src/index.ts:396-403` | Sequential DB writes in loop; should batch |
+
+Items 1 and 2 should be fixed before merge. Item 1 in particular will cause confusing behavior or outright breakage depending on the runtime's scoping.</result>
+<usage><total_tokens>61418</total_tokens><tool_uses>25</tool_uses><duration_ms>96914</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/6515dc20-bd03-4872-8a70-524d1019c73e/tasks/a9285a59fe4b10d78.output
+
+---
+
+What's in .entire/?
+
+---
+
+Is it just the entire branches that could be committed for team use?
+
+---
+
+What happened to the fourth worktree for the router?
+
+---
+
+Is this plan saved so I can pick it up in a new session?
