@@ -1,5 +1,5 @@
 // @ts-expect-error — generated module has no type declarations
-import validate from "./compiled-validator.mjs";
+import validate from "../domain/compiled-validator.mjs";
 import type { Program } from "../types";
 
 export type ValidationResult =

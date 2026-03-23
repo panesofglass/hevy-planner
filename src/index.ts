@@ -30,14 +30,16 @@ import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "./domain
 import { computeUpcoming } from "./domain/reflow";
 import { buildRoutinePayload, matchCompletions, autoMatchExercises } from "./domain/hevy-sync";
 import { mapToHevyEnums } from "./domain/hevy-enums";
-import { validateProgram } from "./domain/validate-program";
+import { currentWeek, findActiveProgression } from "./domain/schedule";
+import { validateProgram } from "./validation/validate-program";
 import { HevyClient } from "./hevy/client";
 import { htmlShell } from "./fragments/layout";
 import { carsCard, heroRoutineCard, completedSection, upcomingSection } from "./fragments/today";
 import { routineDetailPage } from "./fragments/routine-detail";
 import { skillCards, roadmapSection, benchmarksSection } from "./fragments/progress";
 import { setupPage, templateSelectionFragment } from "./fragments/setup";
-import type { Program, Progression } from "./types";
+import { programOverview, progressionsSection, routinesSection, foundationsSection, resourcesSection, bodiSection } from "./fragments/program";
+import type { Program } from "./types";
 import { escapeHtml } from "./utils/html";
 
 import defaultProgramJson from "../programs/mobility-joint-restoration.json";
@@ -57,23 +59,14 @@ function todayString(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-/** Find the active progression based on start_date and current date. */
-function getCurrentProgression(
-  startDate: string,
-  progressions: Progression[]
-): Progression | undefined {
-  const start = new Date(startDate);
-  const now = new Date();
-  const diffMs = now.getTime() - start.getTime();
-  const currentWeek = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1;
-
-  return progressions.find(
-    (p) =>
-      p.weekStart != null &&
-      p.weekEnd != null &&
-      currentWeek >= p.weekStart &&
-      currentWeek <= p.weekEnd
-  );
+/** Load the subtitle from the active program, or undefined on failure. */
+async function loadSubtitle(db: D1Database, userId: string): Promise<string | undefined> {
+  try {
+    const prog = await loadProgram(db, userId);
+    return prog.meta.subtitle;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Load the active program from D1 for a given user. */
@@ -85,7 +78,11 @@ async function loadProgram(db: D1Database, userId: string): Promise<Program> {
 
 function htmlResponse(body: string): Response {
   return new Response(body, {
-    headers: { "content-type": "text/html; charset=utf-8" },
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "private, no-store",
+      "vary": "Accept",
+    },
   });
 }
 
@@ -139,14 +136,7 @@ export default {
           return await handleTodaySSE(env, auth.userId);
         }
 
-        let subtitle: string | undefined;
-        try {
-          const prog = await loadProgram(env.DB, auth.userId);
-          subtitle = prog.meta.subtitle;
-        } catch {
-          // No active program — fallback to no subtitle
-        }
-
+        const subtitle = await loadSubtitle(env.DB, auth.userId);
         return htmlResponse(
           htmlShell({
             title: APP_NAME,
@@ -163,20 +153,30 @@ export default {
           return await handleProgressSSE(env, auth.userId);
         }
 
-        let subtitle: string | undefined;
-        try {
-          const prog = await loadProgram(env.DB, auth.userId);
-          subtitle = prog.meta.subtitle;
-        } catch {
-          // fallback
-        }
-
+        const subtitle = await loadSubtitle(env.DB, auth.userId);
         return htmlResponse(
           htmlShell({
             title: "Progress",
             subtitle,
             activeTab: "progress",
             ssePath: "/progress",
+          })
+        );
+      }
+
+      // ── GET /program ──────────────────────────────────────────
+      if (method === "GET" && path === "/program") {
+        if (isSSERequest(request)) {
+          return await handleProgramSSE(env, auth.userId);
+        }
+
+        const subtitle = await loadSubtitle(env.DB, auth.userId);
+        return htmlResponse(
+          htmlShell({
+            title: "Program",
+            subtitle,
+            activeTab: "program",
+            ssePath: "/program",
           })
         );
       }
@@ -380,6 +380,55 @@ async function handleProgressSSE(env: Env, userId: string): Promise<Response> {
   return sseResponse(mergeFragments(fragments));
 }
 
+/** SSE: Program page — overview, progressions, routines, foundations, resources, BODi */
+async function handleProgramSSE(env: Env, userId: string): Promise<Response> {
+  let program: Program;
+  let user: Awaited<ReturnType<typeof getUser>>;
+  try {
+    [program, user] = await Promise.all([
+      loadProgram(env.DB, userId),
+      getUser(env.DB, userId),
+    ]);
+  } catch {
+    return sseResponse(
+      patchElements(`<div class="card"><p style="color:var(--text-secondary)">No active program. Upload a program to get started.</p></div>`, {
+        selector: "#content", mode: "inner",
+      })
+    );
+  }
+  const fragments: string[] = [];
+  let isFirst = true;
+
+  const addFragment = (html: string) => {
+    fragments.push(patchElements(html, { selector: "#content", mode: isFirst ? "inner" : "append" }));
+    isFirst = false;
+  };
+
+  const week = user ? currentWeek(user.start_date) : null;
+
+  addFragment(programOverview(program, user, week));
+
+  if (program.progressions.length > 0) {
+    addFragment(progressionsSection(program.progressions, week));
+  }
+
+  addFragment(routinesSection(program));
+
+  if (program.foundations && program.foundations.length > 0) {
+    addFragment(foundationsSection(program.foundations));
+  }
+
+  if (program.resources && program.resources.length > 0) {
+    addFragment(resourcesSection(program.resources));
+  }
+
+  if (program.bodi && program.bodi.length > 0) {
+    addFragment(bodiSection(program.bodi));
+  }
+
+  return sseResponse(mergeFragments(fragments));
+}
+
 /** SSE: Routine detail — exercise list with coaching context */
 async function handleRoutineSSE(env: Env, userId: string, routineId: string): Promise<Response> {
   const program = await loadProgram(env.DB, userId);
@@ -392,8 +441,9 @@ async function handleRoutineSSE(env: Env, userId: string, routineId: string): Pr
 
   // Look up user to determine current progression from start_date
   const user = await getUser(env.DB, userId);
-  const currentProgression = user
-    ? getCurrentProgression(user.start_date, program.progressions)
+  const week = user ? currentWeek(user.start_date) : null;
+  const currentProgression = week != null
+    ? findActiveProgression(week, program.progressions)
     : program.progressions[0];
 
   const html = routineDetailPage(routine, program.exerciseTemplates, currentProgression);
@@ -470,6 +520,7 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
   await insertProgram(env.DB, userId, programJsonStr);
 
   // b-g. Hevy exercise template & routine creation (only with API key)
+  const routineIdMap = new Map<string, string>();
   if (apiKey) {
     const client = new HevyClient(apiKey);
 
@@ -506,18 +557,37 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
       });
     }
 
-    // f. Create a routine folder, then one Hevy routine per program routine
-    const folder = await client.createRoutineFolder(program.meta.title);
+    // f. Create or update Hevy routines (idempotent — safe to re-run setup)
     const allMappings = await getExerciseTemplateMappings(env.DB, userId);
-    const routineIdMap = new Map<string, string>();
+    const existingRoutineMappings = await getRoutineMappings(env.DB, userId);
+    const existingMap = new Map(
+      existingRoutineMappings.map((m) => [m.program_routine_id, m.hevy_routine_id])
+    );
+
+    const hasNewRoutines = program.routines.some((r) => !existingMap.has(r.id));
+    const folder = hasNewRoutines
+      ? await client.createRoutineFolder(program.meta.title)
+      : null;
+
     for (const routine of program.routines) {
       const payload = buildRoutinePayload(routine, allMappings);
-      const created = await client.createRoutine({
-        title: payload.title,
-        folder_id: folder.id,
-        exercises: payload.exercises,
-      });
-      routineIdMap.set(routine.id, created.id);
+      const existingHevyId = existingMap.get(routine.id);
+
+      if (existingHevyId) {
+        await client.updateRoutine(existingHevyId, {
+          title: payload.title,
+          exercises: payload.exercises,
+        });
+        routineIdMap.set(routine.id, existingHevyId);
+      } else {
+        if (!folder) throw new Error(`No folder created but routine "${routine.id}" needs one`);
+        const created = await client.createRoutine({
+          title: payload.title,
+          folder_id: folder.id,
+          exercises: payload.exercises,
+        });
+        routineIdMap.set(routine.id, created.id);
+      }
     }
 
     // g. Save all routine mappings
@@ -539,10 +609,6 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
 
   // j. Bulk-set hevy_routine_id on queue items via routine_mappings
   if (apiKey) {
-    const routineMappings = await getRoutineMappings(env.DB, userId);
-    const routineIdMap = new Map(
-      routineMappings.map((m) => [m.program_routine_id, m.hevy_routine_id])
-    );
     await bulkSetQueueItemRoutineIds(env.DB, userId, routineIdMap);
   }
 

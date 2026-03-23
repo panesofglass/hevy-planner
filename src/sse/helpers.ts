@@ -27,8 +27,8 @@ export function sseResponse(body: string): Response {
   return new Response(body, {
     headers: {
       "content-type": "text/event-stream",
-      "cache-control": "no-cache",
-      "connection": "keep-alive",
+      "cache-control": "private, no-store",
+      "vary": "Accept",
     },
   });
 }

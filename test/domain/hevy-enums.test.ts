@@ -30,7 +30,7 @@ describe("mapToHevyEnums", () => {
 
   describe("equipmentCategory", () => {
     it("passes through valid Hevy equipment", () => {
-      for (const eq of ["none", "dumbbell", "machine", "resistance_band", "other"]) {
+      for (const eq of ["none", "dumbbell", "machine", "resistance_band", "other"] as const) {
         const result = mapToHevyEnums(makeTemplate({ equipmentCategory: eq }));
         expect(result.equipmentCategory).toBe(eq);
       }
@@ -47,14 +47,14 @@ describe("mapToHevyEnums", () => {
     });
 
     it("maps unknown equipment to other", () => {
-      const result = mapToHevyEnums(makeTemplate({ equipmentCategory: "trampoline" }));
+      const result = mapToHevyEnums(makeTemplate({ equipmentCategory: "trampoline" as any }));
       expect(result.equipmentCategory).toBe("other");
     });
   });
 
   describe("primaryMuscleGroup", () => {
     it("passes through valid Hevy muscle groups", () => {
-      for (const mg of ["chest", "glutes", "shoulders", "lats", "upper_back", "lower_back", "abdominals", "quadriceps", "hamstrings", "calves", "neck", "forearms", "adductors"]) {
+      for (const mg of ["chest", "glutes", "shoulders", "lats", "upper_back", "lower_back", "abdominals", "quadriceps", "hamstrings", "calves", "neck", "forearms", "adductors"] as const) {
         const result = mapToHevyEnums(makeTemplate({ primaryMuscleGroup: mg }));
         expect(result.primaryMuscleGroup).toBe(mg);
       }
@@ -71,7 +71,7 @@ describe("mapToHevyEnums", () => {
     });
 
     it("maps unknown muscle group to other", () => {
-      const result = mapToHevyEnums(makeTemplate({ primaryMuscleGroup: "brain" }));
+      const result = mapToHevyEnums(makeTemplate({ primaryMuscleGroup: "brain" as any }));
       expect(result.primaryMuscleGroup).toBe("other");
     });
   });
@@ -102,14 +102,14 @@ describe("mapToHevyEnums", () => {
         resistance_band: "resistance_band",
       };
       for (const [input, output] of Object.entries(expected)) {
-        const result = mapToHevyEnums(makeTemplate({ equipmentCategory: input }));
+        const result = mapToHevyEnums(makeTemplate({ equipmentCategory: input as any }));
         expect(result.equipmentCategory, `equipment: ${input}`).toBe(output);
       }
     });
 
     it("maps all muscle group values from the mobility program to valid Hevy enums", () => {
       // Primary muscles — all are valid Hevy values, so they pass through
-      const primaryPassthrough = ["abdominals", "adductors", "calves", "chest", "forearms", "glutes", "lats", "lower_back", "neck", "quadriceps", "shoulders", "upper_back"];
+      const primaryPassthrough = ["abdominals", "adductors", "calves", "chest", "forearms", "glutes", "lats", "lower_back", "neck", "quadriceps", "shoulders", "upper_back"] as const;
       for (const mg of primaryPassthrough) {
         const result = mapToHevyEnums(makeTemplate({ primaryMuscleGroup: mg }));
         expect(result.primaryMuscleGroup, `primary: ${mg}`).toBe(mg);
@@ -123,7 +123,7 @@ describe("mapToHevyEnums", () => {
         glutes: "glutes",
       };
       for (const [input, output] of Object.entries(secondaryExpected)) {
-        const result = mapToHevyEnums(makeTemplate({ secondaryMuscleGroups: [input] }));
+        const result = mapToHevyEnums(makeTemplate({ secondaryMuscleGroups: [input as any] }));
         expect(result.secondaryMuscleGroups[0], `secondary: ${input}`).toBe(output);
       }
     });

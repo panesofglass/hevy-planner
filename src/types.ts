@@ -47,14 +47,29 @@ export interface ProgramRow {
 // Program domain types — used by queue and reflow logic
 // ──────────────────────────────────────────────────────────────────
 
+/** All Hevy equipment categories + program-specific extensions (mapped to "other" at sync time) */
+export type ExtendedEquipmentCategory =
+  | "barbell" | "dumbbell" | "machine" | "cable" | "bodyweight"
+  | "band" | "kettlebell" | "other" | "weighted_bodyweight"
+  | "assisted_bodyweight" | "cardio" | "duration" | "resistance_band" | "none"
+  | "foam_roller" | "pull_up_bar";
+
+/** All Hevy muscle groups + program-specific extensions (mapped at sync time) */
+export type ExtendedMuscleGroup =
+  | "abdominals" | "abductors" | "adductors" | "biceps" | "calves"
+  | "cardio" | "chest" | "forearms" | "full_body" | "glutes"
+  | "hamstrings" | "lats" | "lower_back" | "neck" | "other"
+  | "quadriceps" | "shoulders" | "triceps" | "traps" | "upper_back"
+  | "hip_flexors" | "obliques";
+
 export interface ExerciseTemplate {
   id: string;
   title: string;
   /** Hevy exercise type */
   type: "duration" | "reps_only" | "bodyweight_reps" | "weight_reps" | "weight_duration";
-  equipmentCategory: string;
-  primaryMuscleGroup: string;
-  secondaryMuscleGroups?: string[];
+  equipmentCategory: ExtendedEquipmentCategory;
+  primaryMuscleGroup: ExtendedMuscleGroup;
+  secondaryMuscleGroups?: ExtendedMuscleGroup[];
   /** Coaching fields — not in Hevy */
   notes?: string;
   videoURL?: string;
@@ -100,6 +115,22 @@ export interface WeekTemplate {
 // Extended program types — used by fragments for rendering
 // ──────────────────────────────────────────────────────────────────
 
+export interface Resource {
+  id: string;
+  title: string;
+  url?: string;
+  description?: string;
+  category?: string;
+}
+
+export interface BodiIntegration {
+  id: string;
+  title: string;
+  description?: string;
+  schedule?: string;
+  notes?: string;
+}
+
 export interface Program {
   meta: { title: string; subtitle?: string; description?: string; durationWeeks?: number };
   exerciseTemplates: ExerciseTemplate[];
@@ -110,6 +141,8 @@ export interface Program {
   skills?: Skill[];
   benchmarks?: Benchmark[];
   foundations?: Foundation[];
+  resources?: Resource[];
+  bodi?: BodiIntegration[];
 }
 
 export interface Progression {
@@ -157,6 +190,7 @@ export interface Foundation {
   id: string;
   title: string;
   description?: string;
-  steps?: Array<{ name: string; instructions: string }>;
+  steps?: Array<{ step?: number; name: string; instructions: string; videoSearch?: string }>;
   practice?: string;
+  activeDuringWeeks?: { start: number; end: number };
 }

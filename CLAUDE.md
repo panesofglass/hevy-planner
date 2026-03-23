@@ -70,6 +70,7 @@ hevy-planner/
 - Datastar fragments return HTML strings. No JSX, no templating engine.
 - D1 queries use prepared statements (no raw string interpolation).
 - Program data lives in D1 — load per-request via `loadProgram(db, userId)`. No static imports for active program state.
+- `HevyEnumValues` uses camelCase field names (domain side). Route handlers translate to snake_case at Hevy API sync time: `exerciseType` → `exercise_type`, `equipmentCategory` → `equipment_category`, `primaryMuscleGroup` → `muscle_group` (Hevy uses `muscle_group`, not `primary_muscle_group`), `secondaryMuscleGroups` → `secondary_muscle_groups`.
 - Dark theme: #141210 background, #e8e4df text.
 - Commit messages: imperative mood, concise.
 

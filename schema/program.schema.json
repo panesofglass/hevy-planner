@@ -97,6 +97,18 @@
       "items": { "$ref": "#/$defs/foundation" }
     },
 
+    "resources": {
+      "type": "array",
+      "description": "Optional reference materials, links, and educational resources.",
+      "items": { "$ref": "#/$defs/resource" }
+    },
+
+    "bodi": {
+      "type": "array",
+      "description": "Optional BODi integration notes for combining with BODi workouts.",
+      "items": { "$ref": "#/$defs/bodiIntegration" }
+    },
+
     "theme": {
       "$ref": "#/$defs/theme",
       "description": "Optional color theme for the program."
@@ -456,6 +468,32 @@
             "end": { "type": "integer" }
           }
         }
+      }
+    },
+
+    "resource": {
+      "type": "object",
+      "required": ["id", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "description": { "type": "string" },
+        "category": { "type": "string" }
+      }
+    },
+
+    "bodiIntegration": {
+      "type": "object",
+      "required": ["id", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "schedule": { "type": "string" },
+        "notes": { "type": "string" }
       }
     },
 

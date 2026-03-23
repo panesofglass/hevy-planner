@@ -7,7 +7,7 @@ import { escapeHtml } from "../utils/html";
 export interface HtmlShellOptions {
   title: string;
   subtitle?: string;
-  activeTab?: "today" | "progress";
+  activeTab?: "today" | "progress" | "program";
   /** Path for SSE data-on-load (defaults to current page path) */
   ssePath?: string;
   /** Inline body HTML (used when SSE is not needed) */
@@ -69,6 +69,13 @@ export function htmlShell(opts: HtmlShellOptions): string {
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
       </svg>
       <span class="tab-label">Progress</span>
+    </a>
+    <a href="/program" class="tab-item${activeTab === "program" ? " tab-active" : ""}">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      <span class="tab-label">Program</span>
     </a>
   </nav>
 </body>
@@ -190,6 +197,30 @@ body {
 .btn-block {
   display: flex;
   width: 100%;
+}
+
+/* ── Stats row ── */
+.stat-item {
+  flex: 1;
+  text-align: center;
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 10px 4px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
 }
 
 /* ── Sections ── */

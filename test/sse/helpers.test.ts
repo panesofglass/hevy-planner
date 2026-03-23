@@ -44,6 +44,7 @@ describe("sseResponse", () => {
   it("returns a Response with correct content-type and cache headers", () => {
     const res = sseResponse("event: test\ndata: hi\n\n");
     expect(res.headers.get("content-type")).toBe("text/event-stream");
-    expect(res.headers.get("cache-control")).toBe("no-cache");
+    expect(res.headers.get("cache-control")).toBe("private, no-store");
+    expect(res.headers.get("vary")).toBe("Accept");
   });
 });

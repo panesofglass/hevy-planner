@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateProgram } from "../../src/domain/validate-program";
+import { validateProgram } from "../../src/validation/validate-program";
 import programJson from "../../programs/mobility-joint-restoration.json";
 
 describe("validateProgram", () => {

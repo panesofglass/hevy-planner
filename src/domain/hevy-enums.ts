@@ -79,6 +79,16 @@ const muscleGroupOverrides: Record<string, HevyMuscleGroup> = {
   obliques: "abdominals",
 };
 
+/**
+ * Normalized enum values for a Hevy exercise template, using camelCase field names
+ * (domain side). When posting to the Hevy API, route handlers translate each field
+ * to its snake_case equivalent:
+ *
+ *   exerciseType          → exercise_type
+ *   equipmentCategory     → equipment_category
+ *   primaryMuscleGroup    → muscle_group          (Hevy uses "muscle_group", not "primary_muscle_group")
+ *   secondaryMuscleGroups → secondary_muscle_groups
+ */
 export interface HevyEnumValues {
   exerciseType: HevyExerciseType;
   equipmentCategory: HevyEquipmentCategory;
