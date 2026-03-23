@@ -3,8 +3,9 @@
   "checkpoint_id": "d984aecf8660",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 14,
+  "checkpoints_count": 21,
   "files_touched": [
+    "src/hevy/client.ts",
     "src/index.ts"
   ],
   "sessions": [
@@ -13,13 +14,19 @@
       "transcript": "/d9/84aecf8660/0/full.jsonl",
       "content_hash": "/d9/84aecf8660/0/content_hash.txt",
       "prompt": "/d9/84aecf8660/0/prompt.txt"
+    },
+    {
+      "metadata": "/d9/84aecf8660/1/metadata.json",
+      "transcript": "/d9/84aecf8660/1/full.jsonl",
+      "content_hash": "/d9/84aecf8660/1/content_hash.txt",
+      "prompt": "/d9/84aecf8660/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 1150,
-    "cache_creation_tokens": 676968,
-    "cache_read_tokens": 23811332,
-    "output_tokens": 57521,
-    "api_call_count": 173
+    "input_tokens": 1221,
+    "cache_creation_tokens": 703726,
+    "cache_read_tokens": 25937837,
+    "output_tokens": 66548,
+    "api_call_count": 223
   }
 }

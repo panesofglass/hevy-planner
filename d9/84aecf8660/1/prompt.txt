@@ -1,0 +1,25 @@
+Received Invalid Hevy API key. Check your key in Hevy Settings > Developer and try again.
+
+---
+
+Second attempt worked. I may have saved it incorrectly
+
+---
+
+Now when I try to push to hevy, I see Hevy API error: 400 Bad Request: {"error":"[public-post-routine] Invalid routine folder id: undefined"}
+
+---
+
+Pushed!
+
+---
+
+CARs pushed. Session A failed with "D1_TYPE_ERROR: Type 'undefined' not supported for value 'undefined'"
+
+---
+
+There are a lot of test routine pushes. Also, when I push, am I pushing a template, or am I pushing a workout I'm supposed to do that day?
+
+---
+
+That worked for Session A
