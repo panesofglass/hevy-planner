@@ -23,7 +23,6 @@ export interface HevySet {
   type: "normal" | "warmup" | "dropset" | "failure";
   weight_kg?: number;
   reps: number | null;
-  repRange: { start: number | null; end: number | null };
   duration_seconds?: number;
 }
 
@@ -67,11 +66,17 @@ export class HevyClient {
 
     if (!res.ok) {
       const errorBody = await res.text().catch(() => "");
-      console.error(`Hevy API ${res.status} ${res.statusText}: ${errorBody}`);
-      throw new Error(`Hevy API error: ${res.status} ${res.statusText}`);
+      console.error(`Hevy API ${res.status} ${res.statusText} ${url}: ${errorBody}`);
+      throw new Error(`Hevy API error: ${res.status} ${res.statusText}: ${errorBody}`);
     }
 
-    return res.json() as Promise<T>;
+    const text = await res.text();
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      console.error(`Hevy API response not JSON (${url}): ${text.slice(0, 200)}`);
+      throw new Error(`Hevy API returned non-JSON: ${text.slice(0, 100)}`);
+    }
   }
 
   async getExerciseTemplates(page = 1, pageSize = 10): Promise<HevyExerciseTemplate[]> {
@@ -95,14 +100,26 @@ export class HevyClient {
     return all;
   }
 
-  async createRoutine(routine: { title: string; exercises: HevyRoutineExercise[] }): Promise<HevyRoutine> {
+  async createRoutineFolder(name: string): Promise<{ id: number; title: string }> {
+    const data = await this.request<unknown>("/routine_folders", {
+      method: "POST",
+      body: JSON.stringify({ routine_folder: { title: name } }),
+    });
+    const obj = data as { routine_folder: { id: number; title: string } };
+    return obj.routine_folder;
+  }
+
+  async createRoutine(routine: { title: string; folder_id?: number; exercises: HevyRoutineExercise[] }): Promise<HevyRoutine> {
     const payload = { routine };
-    console.log("Hevy createRoutine payload:", JSON.stringify(payload, null, 2));
-    const data = await this.request<{ routine: HevyRoutine }>("/routines", {
+    const data = await this.request<unknown>("/routines", {
       method: "POST",
       body: JSON.stringify(payload),
     });
-    return data.routine;
+    // Hevy returns { routine: [ { id, ... } ] }
+    const obj = data as Record<string, unknown>;
+    const routines = obj.routine as HevyRoutine[] | undefined;
+    if (Array.isArray(routines) && routines.length > 0) return routines[0];
+    throw new Error(`Unexpected createRoutine response: ${JSON.stringify(data).slice(0, 200)}`);
   }
 
   async updateRoutine(routineId: string, routine: { title: string; exercises: HevyRoutineExercise[] }): Promise<HevyRoutine> {
@@ -118,15 +135,29 @@ export class HevyClient {
     title: string;
     exercise_type: string;
     equipment_category: string;
-    primary_muscle_group: string;
+    muscle_group: string;
     other_muscles: string[];
-  }): Promise<HevyExerciseTemplate> {
-    const payload = { exercise_template: template };
-    const data = await this.request<{ exercise_template: HevyExerciseTemplate }>("/exercise_templates", {
+  }): Promise<{ id: string }> {
+    const url = `${this.baseUrl}/exercise_templates`;
+    const res = await fetch(url, {
       method: "POST",
-      body: JSON.stringify(payload),
+      headers: {
+        "api-key": this.apiKey,
+        "accept": "application/json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ exercise: template }),
     });
-    return data.exercise_template;
+
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => "");
+      console.error(`Hevy API ${res.status} ${res.statusText} ${url}: ${errorBody}`);
+      throw new Error(`Hevy API error: ${res.status} ${res.statusText}: ${errorBody}`);
+    }
+
+    // Hevy returns just the ID as a plain string
+    const id = await res.text();
+    return { id: id.trim() };
   }
 
   async getRecentWorkouts(page = 1, pageSize = 5): Promise<HevyWorkout[]> {

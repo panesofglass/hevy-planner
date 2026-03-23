@@ -82,6 +82,7 @@ hevy-planner/
 - Datastar SSE events must end with two newlines (`\n\n`)
 - D1 has a 1MB response size limit per query — paginate workout history
 - Hevy API rate limits are undocumented — add backoff/retry logic
+- Do NOT assume Hevy API request/response shapes — verify against the live API (via MCP tools or curl) before writing client methods. Known quirks: POST `/exercise_templates` returns a plain string ID (not JSON), POST `/routines` returns `{ routine: [...] }` (array inside object), `folder_id` is required on routine creation, and field names differ from GET responses (e.g., `muscle_group` not `primary_muscle_group`).
 
 ## Current Phase
 

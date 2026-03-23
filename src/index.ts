@@ -235,6 +235,8 @@ export default {
     } catch (err) {
       if (err instanceof Response) return err;
       const message = err instanceof Error ? err.message : "Internal Server Error";
+      const stack = err instanceof Error ? err.stack : "";
+      console.error("Unhandled error:", message, stack);
       return new Response(message, { status: 500 });
     }
   },
@@ -486,7 +488,7 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
           title: et.title,
           exercise_type: enums.exerciseType,
           equipment_category: enums.equipmentCategory,
-          primary_muscle_group: enums.primaryMuscleGroup,
+          muscle_group: enums.primaryMuscleGroup,
           other_muscles: enums.secondaryMuscleGroups,
         });
         matched.set(et.id, created.id);
@@ -504,13 +506,15 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
       });
     }
 
-    // f. Create one Hevy routine per program routine
+    // f. Create a routine folder, then one Hevy routine per program routine
+    const folder = await client.createRoutineFolder(program.meta.title);
     const allMappings = await getExerciseTemplateMappings(env.DB, userId);
     const routineIdMap = new Map<string, string>();
     for (const routine of program.routines) {
       const payload = buildRoutinePayload(routine, allMappings);
       const created = await client.createRoutine({
         title: payload.title,
+        folder_id: folder.id,
         exercises: payload.exercises,
       });
       routineIdMap.set(routine.id, created.id);

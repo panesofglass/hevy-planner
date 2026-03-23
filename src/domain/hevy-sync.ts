@@ -20,7 +20,7 @@ function parseSetsString(setsStr: string): HevySet[] {
   const match = normalised.match(/^(\d+)\s*x\s*(\d+(?:\.\d+)?)\s*(sec|min)?/i);
   if (!match) {
     // Fallback: return a single normal set with no values
-    return [{ type: "normal", reps: null, repRange: { start: null, end: null } }];
+    return [{ type: "normal", reps: null }];
   }
 
   const count = parseInt(match[1], 10);
@@ -37,10 +37,10 @@ function parseSetsString(setsStr: string): HevySet[] {
   const sets: HevySet[] = [];
   for (let i = 0; i < count; i++) {
     if (isDuration) {
-      sets.push({ type: "normal", reps: null, repRange: { start: null, end: null }, duration_seconds });
+      sets.push({ type: "normal", reps: null, duration_seconds });
     } else {
       const reps = Math.round(value);
-      sets.push({ type: "normal", reps, repRange: { start: reps, end: reps } });
+      sets.push({ type: "normal", reps });
     }
   }
   return sets;
