@@ -100,6 +100,20 @@ export class HevyClient {
     return all;
   }
 
+  async getRoutineFolders(): Promise<{ id: number; title: string }[]> {
+    const all: { id: number; title: string }[] = [];
+    let page = 1;
+    while (page <= HevyClient.MAX_PAGES) {
+      const data = await this.request<{ page: number; page_count: number; routine_folders: { id: number; title: string }[] }>(
+        `/routine_folders?page=${page}&pageSize=10`
+      );
+      all.push(...data.routine_folders);
+      if (page >= data.page_count) break;
+      page++;
+    }
+    return all;
+  }
+
   async createRoutineFolder(name: string): Promise<{ id: number; title: string }> {
     const data = await this.request<unknown>("/routine_folders", {
       method: "POST",
@@ -107,6 +121,13 @@ export class HevyClient {
     });
     const obj = data as { routine_folder: { id: number; title: string } };
     return obj.routine_folder;
+  }
+
+  async getOrCreateRoutineFolder(name: string): Promise<{ id: number; title: string }> {
+    const folders = await this.getRoutineFolders();
+    const existing = folders.find((f) => f.title === name);
+    if (existing) return existing;
+    return this.createRoutineFolder(name);
   }
 
   async createRoutine(routine: { title: string; folder_id?: number; exercises: HevyRoutineExercise[] }): Promise<HevyRoutine> {

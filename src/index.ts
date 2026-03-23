@@ -566,7 +566,7 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
 
     const hasNewRoutines = program.routines.some((r) => !existingMap.has(r.id));
     const folder = hasNewRoutines
-      ? await client.createRoutineFolder(program.meta.title)
+      ? await client.getOrCreateRoutineFolder(program.meta.title)
       : null;
 
     for (const routine of program.routines) {
@@ -660,6 +660,15 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
 
   const payload = buildRoutinePayload(routine, mappings);
 
+  if (payload.exercises.length === 0) {
+    return sseResponse(
+      patchElements(
+        `<div class="card"><p style="color:var(--orange)">Cannot push: no exercises could be mapped to Hevy templates. ${payload.unmapped.length} unmapped exercise(s).</p></div>`,
+        { selector: "#content", mode: "prepend" }
+      )
+    );
+  }
+
   try {
     // Find existing queue item to update
     const items = await getQueueItems(env.DB, userId);
@@ -675,14 +684,16 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
       });
       hevyRoutineId = updated.id;
     } else {
+      const folder = await client.getOrCreateRoutineFolder(program.meta.title);
       const created = await client.createRoutine({
         title: payload.title,
+        folder_id: folder.id,
         exercises: payload.exercises,
       });
       hevyRoutineId = created.id;
     }
 
-    if (queueItem) {
+    if (queueItem && hevyRoutineId) {
       await updateQueueItemHevyRoutineId(env.DB, queueItem.id, hevyRoutineId);
     }
 
