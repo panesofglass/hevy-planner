@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "7f25ddcd4d30",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 8,
+  "files_touched": [
+    "migrations/0004_daily_completed_date.sql",
+    "src/domain/hevy-sync.ts",
+    "src/hevy/client.ts",
+    "src/index.ts",
+    "src/storage/queries.ts",
+    "src/types.ts",
+    "test/domain/hevy-sync.test.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/7f/25ddcd4d30/0/metadata.json",
+      "transcript": "/7f/25ddcd4d30/0/full.jsonl",
+      "content_hash": "/7f/25ddcd4d30/0/content_hash.txt",
+      "prompt": "/7f/25ddcd4d30/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 147,
+    "cache_creation_tokens": 201577,
+    "cache_read_tokens": 10379911,
+    "output_tokens": 33514,
+    "api_call_count": 117
+  }
+}

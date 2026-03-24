@@ -1,0 +1,33 @@
+I clicked Sync from Hevy in production. Did it pull any data?
+
+---
+
+yes
+
+---
+
+yes, and create an issue to think about whether we should track Daily CARs as a queue item
+
+---
+
+yes
+
+---
+
+/brainstorming can we fix #16 quickly?
+
+---
+
+Then there is a bug. I see both next session with today's session and Completed Today with the completed session.
+
+---
+
+Hero card shows Session D: Core Stability. Unfortunately, Daily CARs is already marked complete. Otherwise, this looks pretty good. Daily CARs should reset at midnight user local time.
+
+---
+
+Daily CARs still lists in Completed Today
+
+---
+
+That worked. Thank you!
