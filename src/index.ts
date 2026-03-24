@@ -849,9 +849,18 @@ async function handlePull(env: Env, userId: string, tz?: string): Promise<Respon
       (w) => nameToRoutineId.get(w.title) ?? null
     );
 
-    const today = todayString(tz);
+    // Build workout ID → local date map for accurate completion dates
+    const workoutDateMap = new Map<string, string>();
+    for (const w of newWorkouts) {
+      const d = tz
+        ? new Date(w.start_time).toLocaleDateString("en-CA", { timeZone: tz })
+        : w.start_time.slice(0, 10);
+      workoutDateMap.set(w.id, d);
+    }
+
     for (const match of matches) {
-      await markQueueItemCompleted(env.DB, match.queueItemId, today, match.workoutId);
+      const completedDate = workoutDateMap.get(match.workoutId) ?? todayString(tz);
+      await markQueueItemCompleted(env.DB, match.queueItemId, completedDate, match.workoutId);
     }
 
     // Check for daily routine completion (use workout date, not sync date)
