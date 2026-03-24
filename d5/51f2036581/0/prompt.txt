@@ -143,3 +143,7 @@ I found that I could set it from the ... on the Domains & Routes. I have an Audi
 ---
 
 aud is 7dfb68b023e5047e8aa19295e045bb1aa990dd7001a0f55c757cbb9012e98f1b and team is panesofglass-org
+
+---
+
+aud for production is 6c816f78cb0b73fa1f0b5cf41d9b585489e8332b56397da15bdd4a9e0a3a1c49 with the same team of panesofglass-org
