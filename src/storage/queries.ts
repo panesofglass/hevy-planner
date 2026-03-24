@@ -192,3 +192,46 @@ export async function getActiveProgram(
     .bind(userId)
     .first<Pick<ProgramRow, "id" | "json_data">>();
 }
+
+export async function updateWebhookState(
+  db: D1Database,
+  userId: string,
+  webhookId: string,
+  authToken: string
+): Promise<void> {
+  await db
+    .prepare("UPDATE users SET webhook_id = ?, webhook_auth_token = ? WHERE id = ?")
+    .bind(webhookId, authToken, userId)
+    .run();
+}
+
+export async function clearWebhookState(
+  db: D1Database,
+  userId: string
+): Promise<void> {
+  await db
+    .prepare("UPDATE users SET webhook_id = NULL, webhook_auth_token = NULL WHERE id = ?")
+    .bind(userId)
+    .run();
+}
+
+export async function updateLastSyncAt(
+  db: D1Database,
+  userId: string,
+  timestamp: string
+): Promise<void> {
+  await db
+    .prepare("UPDATE users SET last_sync_at = ? WHERE id = ?")
+    .bind(timestamp, userId)
+    .run();
+}
+
+export async function getUserByWebhookToken(
+  db: D1Database,
+  authToken: string
+): Promise<UserRow | null> {
+  return db
+    .prepare("SELECT * FROM users WHERE webhook_auth_token = ?")
+    .bind(authToken)
+    .first<UserRow>();
+}

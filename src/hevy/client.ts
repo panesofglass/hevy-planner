@@ -230,4 +230,47 @@ export class HevyClient {
     );
     return data.workouts;
   }
+
+  async createWebhookSubscription(url: string, authToken: string): Promise<{ id: string }> {
+    const data = await this.request<{ webhook_subscription: { id: string; url: string } }>(
+      "/webhook_subscriptions",
+      {
+        method: "POST",
+        body: JSON.stringify({ webhook_subscription: { url, auth_token: authToken } }),
+      }
+    );
+    return { id: data.webhook_subscription.id };
+  }
+
+  async getWebhookSubscription(): Promise<{ id: string; url: string } | null> {
+    try {
+      const data = await this.request<{ webhook_subscriptions: Array<{ id: string; url: string }> }>(
+        "/webhook_subscriptions"
+      );
+      const subs = data.webhook_subscriptions;
+      return Array.isArray(subs) && subs.length > 0 ? subs[0] : null;
+    } catch {
+      return null;
+    }
+  }
+
+  async deleteWebhookSubscription(webhookId: string): Promise<void> {
+    const url = `${this.baseUrl}/webhook_subscriptions/${webhookId}`;
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: { "api-key": this.apiKey },
+    });
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => "");
+      throw new Error(`Hevy API error: ${res.status} ${res.statusText}: ${errorBody}`);
+    }
+  }
+
+  async getWorkoutsSince(since: string, page = 1, pageSize = 10): Promise<HevyWorkout[]> {
+    const data = await this.request<{ page: number; page_count: number; workouts: HevyWorkout[] }>(
+      `/workouts?page=${page}&pageSize=${pageSize}`
+    );
+    // Filter to only workouts newer than the given ISO timestamp
+    return data.workouts.filter((w) => w.start_time >= since);
+  }
 }

@@ -10,6 +10,9 @@ export interface UserRow {
   readonly start_date: string;
   readonly created_at: string;
   readonly daily_completed_date: string | null;
+  readonly webhook_id: string | null;
+  readonly webhook_auth_token: string | null;
+  readonly last_sync_at: string | null;
 }
 
 export interface QueueItemRow {

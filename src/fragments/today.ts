@@ -174,13 +174,42 @@ ${rows}
  * Upcoming section — next sessions in queue with colored dots and spacers.
  */
 /**
- * Sync button — pulls completions from Hevy.
+ * Sync controls — manual sync button plus auto-sync (webhook) status/toggle.
+ *
+ * @param webhookId  - non-null if a webhook subscription is active
+ * @param lastSyncAt - ISO timestamp of the most recent auto-sync, if any
  */
-export function syncButton(): string {
-  return `<div style="text-align:center; margin-top:20px">
-  <button class="btn btn-ghost" data-on:click="@post('/api/pull')" style="font-size:13px">
+export function syncButton(webhookId?: string | null, lastSyncAt?: string | null): string {
+  const manualSync = `<button class="btn btn-ghost" data-on:click="@post('/api/pull')" style="font-size:13px">
     Sync from Hevy
-  </button>
+  </button>`;
+
+  if (webhookId) {
+    const lastSyncLabel = lastSyncAt
+      ? `<div style="font-size:11px; color:var(--text-tertiary); margin-top:4px">Last synced: ${escapeHtml(new Date(lastSyncAt).toLocaleString())}</div>`
+      : "";
+
+    return `<div style="text-align:center; margin-top:20px">
+  <div style="display:inline-flex; align-items:center; gap:8px; margin-bottom:8px">
+    <span style="font-size:12px; color:var(--green); font-weight:500">&#9679; Auto-sync enabled</span>
+    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/unregister')" style="font-size:12px; padding:4px 10px">
+      Disable
+    </button>
+  </div>
+  ${lastSyncLabel}
+  <div style="margin-top:8px">
+    ${manualSync}
+  </div>
+</div>`;
+  }
+
+  return `<div style="text-align:center; margin-top:20px">
+  <div style="margin-bottom:8px">
+    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/register')" style="font-size:13px">
+      Enable auto-sync
+    </button>
+  </div>
+  ${manualSync}
 </div>`;
 }
 
