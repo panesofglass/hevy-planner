@@ -83,8 +83,11 @@ hevy-planner/
 - Datastar SSE events must end with two newlines (`\n\n`)
 - D1 has a 1MB response size limit per query — paginate workout history
 - Hevy API rate limits are undocumented — add backoff/retry logic
-- Do NOT assume Hevy API request/response shapes — verify against the live API (via MCP tools or curl) before writing client methods. Known quirks: POST `/exercise_templates` returns a plain string ID (not JSON), POST `/routines` returns `{ routine: [...] }` (array inside object), `folder_id` is required on routine creation, and field names differ from GET responses (e.g., `muscle_group` not `primary_muscle_group`).
+- Do NOT assume Hevy API request/response shapes — verify against the live API (via MCP tools or curl) before writing client methods. Known quirks: POST `/exercise_templates` returns a plain string ID (not JSON), POST `/routines` returns `{ routine: [...] }` (array inside object), `folder_id` is required on routine creation, and field names differ from GET responses (e.g., `muscle_group` not `primary_muscle_group`). GET `/workouts` uses `title` (not `name`) for workout name.
+- When building Maps from queue items for matching, use first-match-wins (`if (!map.has(key))`) so the front of the queue is matched, not the end. Multiple queue items share the same `hevy_routine_id`.
+- When marking completions from Hevy, use the workout's `start_time` converted to user timezone (`request.cf.timezone`) — not `todayString()`. Users sync after midnight UTC but before local midnight, or sync the next day.
+- Before matching workouts to queue items in sync, filter out workouts whose ID already appears as `hevy_workout_id` on a completed queue item. Otherwise each sync re-matches the same workout to a new pending item.
 
 ## Current Phase
 
-**v1 implementation** — Core app on `feature/v1-implementation` branch. Upload-based setup flow complete: user uploads program JSON, server validates (Ajv), shows template cards, then on selection creates all Hevy exercise templates + routines, stores program in D1, generates queue with routine IDs pre-set. All pages load program from D1 per-request. 39 tests passing. Next: runtime smoke test (apply migration, dev server, end-to-end upload flow).
+**v1 deployed** — Core app on `main`, deployed to Cloudflare Workers production. Setup flow, Hevy sync (push + pull), queue with reflow, Daily CARs tracking, all pages rendering via Datastar SSE. 47 tests passing. All dates use user-local timezone via `request.cf.timezone`.
