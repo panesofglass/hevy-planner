@@ -1,0 +1,35 @@
+Next session: Pick up the approved plan at /Users/ryanr/.claude/plans/jazzy-greeting-hamster.md — restructure the program data model
+  from sessions → Exercise Templates + Routines, then wire up Hevy routine creation during setup. That's the last blocker for a working
+   MVP.
+
+---
+
+No
+
+---
+
+/retrospective
+
+---
+
+all of 1-5
+
+---
+
+/context-dump
+
+---
+
+I think the last commit(s) implemented #11. Can you check? It may be closed.
+
+---
+
+Let's brainstorm the right MVP for #11. Interview me on what we want to do. Goal is to not require a lot of rework later when we want to allow a user to upload a json file. Starting point should be to provide a json file, I think. What are the other options?
+
+---
+
+Help me use separate agents in separate terminals the way Boris Cherny would
+
+---
+
+Set up worktrees now
