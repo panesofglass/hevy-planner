@@ -15,5 +15,9 @@ ENVIRONMENT = "development"
 
 # Production deploy: wrangler deploy --env production
 [env.production]
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "hevy-planner"
+database_id = "856703c5-ee18-43c5-b910-4ee8f27742f4"
 [env.production.vars]
 ENVIRONMENT = "production"
