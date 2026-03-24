@@ -4,10 +4,6 @@ export interface AuthResult {
 }
 
 const CF_ACCESS_CERTS_URL = "https://panesofglass-org.cloudflareaccess.com/cdn-cgi/access/certs";
-const CF_ACCESS_AUD: Record<string, string> = {
-  development: "7dfb68b023e5047e8aa19295e045bb1aa990dd7001a0f55c757cbb9012e98f1b",
-  production: "6c816f78cb0b73fa1f0b5cf41d9b585489e8332b56397da15bdd4a9e0a3a1c49",
-};
 
 interface JWK {
   kid: string;
@@ -55,7 +51,7 @@ function base64UrlDecode(str: string): Uint8Array {
   return bytes;
 }
 
-async function verifyAndDecode(jwt: string, environment: string): Promise<{ email: string } | null> {
+async function verifyAndDecode(jwt: string, expectedAud: string): Promise<{ email: string } | null> {
   const parts = jwt.split(".");
   if (parts.length !== 3) return null;
 
@@ -63,8 +59,6 @@ async function verifyAndDecode(jwt: string, environment: string): Promise<{ emai
   const payload = JSON.parse(new TextDecoder().decode(base64UrlDecode(parts[1])));
 
   // Verify audience
-  const expectedAud = CF_ACCESS_AUD[environment];
-  if (!expectedAud) return null;
   const aud = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
   if (!aud.includes(expectedAud)) return null;
 
@@ -92,12 +86,12 @@ async function verifyAndDecode(jwt: string, environment: string): Promise<{ emai
   return { email: payload.email };
 }
 
-export async function getAuthenticatedUser(request: Request, environment: string): Promise<AuthResult | null> {
+export async function getAuthenticatedUser(request: Request, cfAccessAud: string): Promise<AuthResult | null> {
   const jwt = request.headers.get("cf-access-jwt-assertion");
   if (!jwt) return null;
 
   try {
-    const result = await verifyAndDecode(jwt, environment);
+    const result = await verifyAndDecode(jwt, cfAccessAud);
     if (!result?.email) return null;
     return { userId: result.email, email: result.email };
   } catch {
@@ -107,10 +101,12 @@ export async function getAuthenticatedUser(request: Request, environment: string
 
 export async function getAuthenticatedUserOrDev(
   request: Request,
-  env: { ENVIRONMENT: string }
+  env: { ENVIRONMENT: string; CF_ACCESS_AUD?: string }
 ): Promise<AuthResult> {
-  const user = await getAuthenticatedUser(request, env.ENVIRONMENT);
-  if (user) return user;
+  if (env.CF_ACCESS_AUD) {
+    const user = await getAuthenticatedUser(request, env.CF_ACCESS_AUD);
+    if (user) return user;
+  }
   if (env.ENVIRONMENT === "development") {
     return { userId: "dev@local", email: "dev@local" };
   }

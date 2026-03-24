@@ -49,6 +49,7 @@ const APP_NAME = "Hevy Planner";
 export interface Env {
   DB: D1Database;
   ENVIRONMENT: string;
+  CF_ACCESS_AUD?: string;
 }
 
 // ──────────────────────────────────────────────────────────────────
