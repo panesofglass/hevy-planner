@@ -16,15 +16,18 @@ export function carsCard(routine: Routine, hevyRoutineId?: string): string {
 
   const hevyButton = hevyRoutineId
     ? `<a href="https://hevy.com/routine/${escapeAttr(hevyRoutineId)}" target="_blank" class="btn btn-blue">Open in Hevy</a>`
-    : `<button class="btn btn-blue" data-on:click="@post('/api/push-hevy/daily')">Push to Hevy</button>`;
+    : `<button class="btn btn-blue" data-on:click="@post('/api/push-hevy/${escapeAttr(routine.id)}')">Push to Hevy</button>`;
+
+  const labelColor = escapeAttr(routine.color ?? "var(--green)");
+  const label = escapeHtml(routine.isDaily ? "Daily" : routine.title);
 
   return `<div class="card">
-  <div class="card-label" style="color: var(--green)">Daily</div>
+  <div class="card-label" style="color: ${labelColor}">${label}</div>
   <div class="card-title">${escapeHtml(routine.title)}</div>
   <div class="card-subtitle">${escapeHtml(subtitle)}</div>
   <div style="display:flex; gap:8px; margin-top:14px">
     ${hevyButton}
-    <a href="/routine/daily" class="btn btn-ghost">Details</a>
+    <a href="/routine/${encodeURIComponent(routine.id)}" class="btn btn-ghost">Details</a>
   </div>
 </div>`;
 }

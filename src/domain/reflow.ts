@@ -16,6 +16,8 @@ export function computeUpcoming(
   maxSessions: number
 ): UpcomingItem[] {
   const routineMap = new Map(routines.map((r) => [r.id, r]));
+  const dailyRoutine = routines.find((r) => r.isDaily);
+  const spacerTitle = dailyRoutine?.title ?? "Rest";
 
   // Build the template rhythm: which day indices are spacers vs routines
   const templateRhythm: Array<{ type: "routine" | "spacer"; routineId?: string }> = [];
@@ -52,7 +54,7 @@ export function computeUpcoming(
     const rhythmSlot = templateRhythm[rhythmIndex % templateRhythm.length];
 
     if (rhythmSlot.type === "spacer") {
-      result.push({ type: "spacer", title: "CARs only" });
+      result.push({ type: "spacer", title: spacerTitle });
     } else {
       const item = pendingItems[pendingIdx];
       const routine = routineMap.get(item.routine_id);
