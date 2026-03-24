@@ -107,3 +107,7 @@ Just to make sure, I deleted Daily and its routine. Reset once more so I can ver
 ---
 
 Daily is back. Deep linking works, at least on the web app. Will this open in the mobile app on my phone?
+
+---
+
+commit, push, and then let's deploy to Cloudflare, assuming Cloudflare Access is set up
