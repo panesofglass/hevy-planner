@@ -204,10 +204,10 @@ export function matchCompletions(
   workouts: HevyWorkout[],
   getRoutineId: (workout: HevyWorkout) => string | null
 ): CompletionMatch[] {
-  // Build a map: routine_id → queue item id
+  // Build a map: routine_id → queue item id (first match wins)
   const routineToItem = new Map<string, number>();
   for (const item of items) {
-    if (item.hevy_routine_id) {
+    if (item.hevy_routine_id && !routineToItem.has(item.hevy_routine_id)) {
       routineToItem.set(item.hevy_routine_id, item.id);
     }
   }

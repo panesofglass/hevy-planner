@@ -9,6 +9,7 @@ export interface UserRow {
   readonly template_id: string;
   readonly start_date: string;
   readonly created_at: string;
+  readonly daily_completed_date: string | null;
 }
 
 export interface QueueItemRow {

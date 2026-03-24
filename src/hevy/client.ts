@@ -32,7 +32,7 @@ export interface HevySet {
 export interface HevyWorkout {
   id: string;
   short_id: string;
-  name: string;
+  title: string;
   start_time: string;
   end_time: string;
   exercises: Array<{

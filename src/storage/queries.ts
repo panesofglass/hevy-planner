@@ -167,6 +167,17 @@ export async function insertProgram(
   return id;
 }
 
+export async function updateDailyCompleted(
+  db: D1Database,
+  userId: string,
+  date: string
+): Promise<void> {
+  await db
+    .prepare("UPDATE users SET daily_completed_date = ? WHERE id = ?")
+    .bind(date, userId)
+    .run();
+}
+
 export async function getActiveProgram(
   db: D1Database,
   userId: string

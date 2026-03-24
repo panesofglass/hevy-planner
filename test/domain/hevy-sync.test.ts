@@ -47,7 +47,7 @@ describe("matchCompletions", () => {
       { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending" as const, completed_date: null, hevy_routine_id: "r-2", hevy_workout_id: null },
     ];
     const workouts = [
-      { id: "w-1", short_id: "s1", name: "Routine A", start_time: "2026-03-21T08:00:00Z", end_time: "2026-03-21T08:30:00Z", exercises: [] },
+      { id: "w-1", short_id: "s1", title: "Routine A", start_time: "2026-03-21T08:00:00Z", end_time: "2026-03-21T08:30:00Z", exercises: [] },
     ];
     const matches = matchCompletions(items, workouts, (_w) => "r-1");
     expect(matches).toHaveLength(1);

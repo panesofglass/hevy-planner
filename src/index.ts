@@ -25,6 +25,7 @@ import {
   bulkSetQueueItemRoutineIds,
   insertProgram,
   getActiveProgram,
+  updateDailyCompleted,
 } from "./storage/queries";
 import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "./domain/queue";
 import { computeUpcoming } from "./domain/reflow";
@@ -56,7 +57,12 @@ export interface Env {
 // Helpers
 // ──────────────────────────────────────────────────────────────────
 
-function todayString(): string {
+function todayString(timezone?: string): string {
+  if (timezone) {
+    try {
+      return new Date().toLocaleDateString("en-CA", { timeZone: timezone });
+    } catch { /* fall through to UTC */ }
+  }
   return new Date().toISOString().slice(0, 10);
 }
 
@@ -108,6 +114,7 @@ export default {
       const auth = await getAuthenticatedUserOrDev(request, env);
       const url = new URL(request.url);
       const path = url.pathname;
+      const tz = (request.cf as Record<string, unknown> | undefined)?.timezone as string | undefined;
       const method = request.method;
 
       // ── GET /programs/default.json ─────────────────────────────
@@ -134,7 +141,7 @@ export default {
         }
 
         if (isSSERequest(request)) {
-          return await handleTodaySSE(env, auth.userId);
+          return await handleTodaySSE(env, auth.userId, tz);
         }
 
         const subtitle = await loadSubtitle(env.DB, auth.userId);
@@ -209,7 +216,7 @@ export default {
       const setupMatch = path.match(/^\/api\/setup\/([^/]+)$/);
       if (method === "POST" && (path === "/api/setup" || setupMatch)) {
         const urlTemplateId = setupMatch ? decodeURIComponent(setupMatch[1]) : undefined;
-        return await handleSetup(request, env, auth.userId, urlTemplateId);
+        return await handleSetup(request, env, auth.userId, urlTemplateId, tz);
       }
 
       // ── POST /api/push-hevy/:id ────────────────────────────────
@@ -221,7 +228,7 @@ export default {
 
       // ── POST /api/pull ─────────────────────────────────────────
       if (method === "POST" && path === "/api/pull") {
-        return await handlePull(env, auth.userId);
+        return await handlePull(env, auth.userId, tz);
       }
 
       // ── POST /api/cleanup-routines ───────────────────────────────
@@ -233,7 +240,7 @@ export default {
       const completeMatch = path.match(/^\/api\/complete\/([^/]+)$/);
       if (method === "POST" && completeMatch) {
         const itemId = parseInt(completeMatch[1], 10);
-        return await handleManualComplete(env, auth.userId, itemId);
+        return await handleManualComplete(env, auth.userId, itemId, tz);
       }
 
       // ── 404 ────────────────────────────────────────────────────
@@ -292,7 +299,7 @@ async function handleValidateProgram(request: Request): Promise<Response> {
 }
 
 /** SSE: Today page — CARs card, hero session, completed, upcoming */
-async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
+async function handleTodaySSE(env: Env, userId: string, tz?: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user) {
     return sseResponse(
@@ -305,7 +312,7 @@ async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
   const dailyRoutine = program.routines.find((r) => r.isDaily);
 
   const items = await getQueueItems(env.DB, userId);
-  const today = todayString();
+  const today = todayString(tz);
 
   // Look up routine mappings for deep links
   const routineMappings = await getRoutineMappings(env.DB, userId);
@@ -315,7 +322,9 @@ async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
 
   const fragments: string[] = [];
 
-  if (dailyRoutine) {
+  const dailyDoneToday = dailyRoutine && user.daily_completed_date === today;
+
+  if (dailyRoutine && !dailyDoneToday) {
     fragments.push(patchElements(carsCard(dailyRoutine, routineToHevyId.get(dailyRoutine.id)), { selector: "#content", mode: "inner" }));
   }
 
@@ -324,18 +333,22 @@ async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
   if (nextItem) {
     const routine = routineMap.get(nextItem.routine_id);
     if (routine) {
+      const mode = (dailyRoutine && !dailyDoneToday) ? "append" : "inner";
       fragments.push(
-        patchElements(heroRoutineCard(routine, nextItem), { selector: "#content", mode: "append" })
+        patchElements(heroRoutineCard(routine, nextItem), { selector: "#content", mode })
       );
     }
   }
 
   // Completed today
   const completed = getCompletedRoutines(items, today);
-  if (completed.length > 0) {
-    const completedData = completed.map((item) => ({
-      title: routineMap.get(item.routine_id)?.title ?? item.routine_id,
-    }));
+  const completedData = completed.map((item) => ({
+    title: routineMap.get(item.routine_id)?.title ?? item.routine_id,
+  }));
+  if (dailyDoneToday) {
+    completedData.unshift({ title: dailyRoutine.title });
+  }
+  if (completedData.length > 0) {
     fragments.push(
       patchElements(completedSection(completedData), { selector: "#content", mode: "append" })
     );
@@ -462,7 +475,7 @@ async function handleRoutineSSE(env: Env, userId: string, routineId: string): Pr
 }
 
 /** POST /api/setup — store program, sync Hevy, create user, generate queue */
-async function handleSetup(request: Request, env: Env, userId: string, urlTemplateId?: string): Promise<Response> {
+async function handleSetup(request: Request, env: Env, userId: string, urlTemplateId?: string, tz?: string): Promise<Response> {
   let body: { apiKey?: string; startDate?: string; templateId?: string; programJson?: string } = {};
   try {
     body = (await request.json()) as typeof body;
@@ -471,7 +484,7 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
   }
 
   const templateId = urlTemplateId ?? body.templateId;
-  const startDate = body.startDate || todayString();
+  const startDate = body.startDate || todayString(tz);
   const apiKey = body.apiKey || undefined;
   // Fall back to bundled default program if none uploaded
   const programJsonStr = body.programJson || JSON.stringify(defaultProgramJson);
@@ -793,7 +806,7 @@ async function handleCleanupRoutines(env: Env, userId: string): Promise<Response
 }
 
 /** POST /api/pull — pull completions from Hevy */
-async function handlePull(env: Env, userId: string): Promise<Response> {
+async function handlePull(env: Env, userId: string, tz?: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user || !user.hevy_api_key) {
     return sseResponse(
@@ -813,6 +826,13 @@ async function handlePull(env: Env, userId: string): Promise<Response> {
       client.getRecentWorkouts(),
       getQueueItems(env.DB, userId),
     ]);
+
+    // Skip workouts already matched to a completed queue item
+    const usedWorkoutIds = new Set(
+      items.filter((i) => i.hevy_workout_id).map((i) => i.hevy_workout_id)
+    );
+    const newWorkouts = workouts.filter((w) => !usedWorkoutIds.has(w.id));
+
     const pendingItems = items.filter((i) => i.status === "pending" && i.hevy_routine_id);
 
     const nameToRoutineId = new Map<string, string>();
@@ -825,17 +845,29 @@ async function handlePull(env: Env, userId: string): Promise<Response> {
 
     const matches = matchCompletions(
       pendingItems,
-      workouts,
-      (w) => nameToRoutineId.get(w.name) ?? null
+      newWorkouts,
+      (w) => nameToRoutineId.get(w.title) ?? null
     );
 
-    const today = todayString();
+    const today = todayString(tz);
     for (const match of matches) {
       await markQueueItemCompleted(env.DB, match.queueItemId, today, match.workoutId);
     }
 
+    // Check for daily routine completion (use workout date, not sync date)
+    const dailyRoutine = program.routines.find((r) => r.isDaily);
+    if (dailyRoutine) {
+      const dailyWorkout = workouts.find((w) => w.title === dailyRoutine.title);
+      if (dailyWorkout) {
+        const workoutDate = tz
+          ? new Date(dailyWorkout.start_time).toLocaleDateString("en-CA", { timeZone: tz })
+          : dailyWorkout.start_time.slice(0, 10);
+        await updateDailyCompleted(env.DB, userId, workoutDate);
+      }
+    }
+
     // Re-render today page
-    return await handleTodaySSE(env, userId);
+    return await handleTodaySSE(env, userId, tz);
   } catch (err) {
     const msg = escapeHtml(err instanceof Error ? err.message : "Pull failed");
     return sseResponse(
@@ -851,12 +883,13 @@ async function handlePull(env: Env, userId: string): Promise<Response> {
 async function handleManualComplete(
   env: Env,
   userId: string,
-  itemId: number
+  itemId: number,
+  tz?: string
 ): Promise<Response> {
   if (!Number.isInteger(itemId)) {
     return new Response("Invalid item ID", { status: 400 });
   }
-  const today = todayString();
+  const today = todayString(tz);
   await markQueueItemCompletedForUser(env.DB, itemId, userId, today);
-  return await handleTodaySSE(env, userId);
+  return await handleTodaySSE(env, userId, tz);
 }
