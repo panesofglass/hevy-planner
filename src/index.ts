@@ -104,7 +104,7 @@ function redirect(location: string, status = 303): Response {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     try {
-      const auth = getAuthenticatedUserOrDev(request, env);
+      const auth = await getAuthenticatedUserOrDev(request, env);
       const url = new URL(request.url);
       const path = url.pathname;
       const method = request.method;
