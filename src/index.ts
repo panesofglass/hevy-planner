@@ -34,7 +34,7 @@ import { currentWeek, findActiveProgression } from "./domain/schedule";
 import { validateProgram } from "./validation/validate-program";
 import { HevyClient } from "./hevy/client";
 import { htmlShell } from "./fragments/layout";
-import { carsCard, heroRoutineCard, completedSection, upcomingSection } from "./fragments/today";
+import { carsCard, heroRoutineCard, completedSection, upcomingSection, syncButton } from "./fragments/today";
 import { routineDetailPage } from "./fragments/routine-detail";
 import { skillCards, roadmapSection, benchmarksSection } from "./fragments/progress";
 import { setupPage, templateSelectionFragment } from "./fragments/setup";
@@ -354,6 +354,11 @@ async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
       );
     }
   }
+
+  // Sync button at the bottom
+  fragments.push(
+    patchElements(syncButton(), { selector: "#content", mode: "append" })
+  );
 
   return sseResponse(mergeFragments(fragments));
 }

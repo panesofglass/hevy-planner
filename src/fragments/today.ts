@@ -82,6 +82,17 @@ ${rows}
 /**
  * Upcoming section — next sessions in queue with colored dots and spacers.
  */
+/**
+ * Sync button — pulls completions from Hevy.
+ */
+export function syncButton(): string {
+  return `<div style="text-align:center; margin-top:20px">
+  <button class="btn btn-ghost" data-on:click="@post('/api/pull')" style="font-size:13px">
+    Sync from Hevy
+  </button>
+</div>`;
+}
+
 export function upcomingSection(items: UpcomingItem[]): string {
   if (items.length === 0) return "";
 
