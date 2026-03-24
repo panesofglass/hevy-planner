@@ -10,6 +10,9 @@ export interface HevyExerciseTemplate {
 export interface HevyRoutine {
   id: string;
   title: string;
+  folder_id?: number;
+  created_at?: string;
+  updated_at?: string;
   exercises: HevyRoutineExercise[];
 }
 
@@ -179,6 +182,44 @@ export class HevyClient {
     // Hevy returns just the ID as a plain string
     const id = await res.text();
     return { id: id.trim() };
+  }
+
+  async getAllRoutines(): Promise<HevyRoutine[]> {
+    const all: HevyRoutine[] = [];
+    let page = 1;
+    while (page <= HevyClient.MAX_PAGES) {
+      const data = await this.request<{ page: number; page_count: number; routines: HevyRoutine[] }>(
+        `/routines?page=${page}&pageSize=10`
+      );
+      all.push(...data.routines);
+      if (page >= data.page_count) break;
+      page++;
+    }
+    return all;
+  }
+
+  async deleteRoutine(routineId: string): Promise<void> {
+    const url = `${this.baseUrl}/routines/${routineId}`;
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: { "api-key": this.apiKey },
+    });
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => "");
+      throw new Error(`Hevy API error: ${res.status} ${res.statusText}: ${errorBody}`);
+    }
+  }
+
+  async deleteRoutineFolder(folderId: number): Promise<void> {
+    const url = `${this.baseUrl}/routine_folders/${folderId}`;
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: { "api-key": this.apiKey },
+    });
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => "");
+      throw new Error(`Hevy API error: ${res.status} ${res.statusText}: ${errorBody}`);
+    }
   }
 
   async getRecentWorkouts(page = 1, pageSize = 5): Promise<HevyWorkout[]> {

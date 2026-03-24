@@ -93,6 +93,69 @@ export function buildRoutinePayload(
 }
 
 // ──────────────────────────────────────────────────────────────────
+// Folder assignments & reconciliation
+// ──────────────────────────────────────────────────────────────────
+
+export interface RoutineFolderAssignment {
+  routineId: string;
+  routineTitle: string;
+  folderName: string;
+}
+
+/**
+ * Compute which Hevy folder each routine should belong to.
+ * Uses routine.folderGroup if set, falls back to "Daily" for isDaily,
+ * or programTitle for everything else.
+ */
+export function computeFolderAssignments(
+  routines: Routine[],
+  programTitle: string
+): RoutineFolderAssignment[] {
+  return routines.map((r) => ({
+    routineId: r.id,
+    routineTitle: r.title,
+    folderName: r.folderGroup ?? (r.isDaily ? "Daily" : programTitle),
+  }));
+}
+
+export interface RoutineReconciliation {
+  programRoutineId: string;
+  action: "create" | "update";
+  existingHevyRoutineId?: string;
+  folderName: string;
+}
+
+/**
+ * Reconcile program routines against existing Hevy routines.
+ * Checks D1 mappings first, then matches by title within the target folder.
+ */
+export function reconcileRoutines(
+  assignments: RoutineFolderAssignment[],
+  existingHevyRoutines: Array<{ id: string; title: string; folder_id?: number }>,
+  folderNameToId: Map<string, number>,
+  existingMappings: Map<string, string>
+): RoutineReconciliation[] {
+  return assignments.map((a) => {
+    // First check existing D1 mapping
+    const mappedId = existingMappings.get(a.routineId);
+    if (mappedId) {
+      return { programRoutineId: a.routineId, action: "update" as const, existingHevyRoutineId: mappedId, folderName: a.folderName };
+    }
+    // Then check Hevy by title + folder
+    const targetFolderId = folderNameToId.get(a.folderName);
+    if (targetFolderId !== undefined) {
+      const match = existingHevyRoutines.find(
+        (r) => r.title === a.routineTitle && r.folder_id === targetFolderId
+      );
+      if (match) {
+        return { programRoutineId: a.routineId, action: "update" as const, existingHevyRoutineId: match.id, folderName: a.folderName };
+      }
+    }
+    return { programRoutineId: a.routineId, action: "create" as const, folderName: a.folderName };
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────
 // buildExerciseTemplatePayload
 // ──────────────────────────────────────────────────────────────────
 

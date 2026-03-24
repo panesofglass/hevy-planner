@@ -35,7 +35,7 @@ export function setupPage(): string {
       " />
     <input type="text" id="programData" data-bind:program-json style="display:none" />
     <p style="font-size:13px; color:var(--text-tertiary); margin-top:8px">
-      Need a program? <a href="/programs/default.json" style="color:var(--blue)" download>Download the starter program</a>
+      Optional — leave empty to use the <a href="/programs/default.json" style="color:var(--blue)" download>default program</a>.
     </p>
   </div>
 

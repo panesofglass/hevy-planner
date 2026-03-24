@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRoutinePayload, matchCompletions, autoMatchExercises } from "../../src/domain/hevy-sync";
+import { buildRoutinePayload, matchCompletions, autoMatchExercises, computeFolderAssignments, reconcileRoutines } from "../../src/domain/hevy-sync";
 import type { Routine, ExerciseTemplate, ExerciseTemplateMappingRow } from "../../src/types";
 import type { HevyExerciseTemplate } from "../../src/hevy/client";
 
@@ -69,5 +69,75 @@ describe("autoMatchExercises", () => {
     const matches = autoMatchExercises(ourTemplates, hevyTemplates);
     expect(matches.get("dead-hangs")).toBe("h1");
     expect(matches.get("scapular-pushups")).toBe("h2");
+  });
+});
+
+describe("computeFolderAssignments", () => {
+  it("uses folderGroup when set", () => {
+    const routines: Routine[] = [
+      { id: "a", title: "Session A", folderGroup: "Main Sessions", exercises: [] },
+      { id: "b", title: "Session B", folderGroup: "Recovery", exercises: [] },
+    ];
+    const result = computeFolderAssignments(routines, "My Program");
+    expect(result[0].folderName).toBe("Main Sessions");
+    expect(result[1].folderName).toBe("Recovery");
+  });
+
+  it("defaults isDaily routines to 'Daily'", () => {
+    const routines: Routine[] = [
+      { id: "cars", title: "Daily CARs", isDaily: true, exercises: [] },
+    ];
+    const result = computeFolderAssignments(routines, "My Program");
+    expect(result[0].folderName).toBe("Daily");
+  });
+
+  it("defaults non-daily routines to program title", () => {
+    const routines: Routine[] = [
+      { id: "a", title: "Session A", exercises: [] },
+    ];
+    const result = computeFolderAssignments(routines, "My Program");
+    expect(result[0].folderName).toBe("My Program");
+  });
+
+  it("folderGroup takes priority over isDaily", () => {
+    const routines: Routine[] = [
+      { id: "cars", title: "Daily CARs", isDaily: true, folderGroup: "Custom Folder", exercises: [] },
+    ];
+    const result = computeFolderAssignments(routines, "My Program");
+    expect(result[0].folderName).toBe("Custom Folder");
+  });
+});
+
+describe("reconcileRoutines", () => {
+  it("returns update when D1 mapping exists", () => {
+    const assignments = [{ routineId: "a", routineTitle: "Session A", folderName: "Main" }];
+    const existingMappings = new Map([["a", "hevy-123"]]);
+    const result = reconcileRoutines(assignments, [], new Map(), existingMappings);
+    expect(result[0].action).toBe("update");
+    expect(result[0].existingHevyRoutineId).toBe("hevy-123");
+  });
+
+  it("returns update when Hevy routine matches by title+folder", () => {
+    const assignments = [{ routineId: "a", routineTitle: "Session A", folderName: "Main" }];
+    const hevyRoutines = [{ id: "hevy-456", title: "Session A", folder_id: 100 }];
+    const folderMap = new Map([["Main", 100]]);
+    const result = reconcileRoutines(assignments, hevyRoutines, folderMap, new Map());
+    expect(result[0].action).toBe("update");
+    expect(result[0].existingHevyRoutineId).toBe("hevy-456");
+  });
+
+  it("returns create when no match exists", () => {
+    const assignments = [{ routineId: "a", routineTitle: "Session A", folderName: "Main" }];
+    const result = reconcileRoutines(assignments, [], new Map([["Main", 100]]), new Map());
+    expect(result[0].action).toBe("create");
+    expect(result[0].existingHevyRoutineId).toBeUndefined();
+  });
+
+  it("does not match routine in wrong folder", () => {
+    const assignments = [{ routineId: "a", routineTitle: "Session A", folderName: "Main" }];
+    const hevyRoutines = [{ id: "hevy-789", title: "Session A", folder_id: 999 }];
+    const folderMap = new Map([["Main", 100]]);
+    const result = reconcileRoutines(assignments, hevyRoutines, folderMap, new Map());
+    expect(result[0].action).toBe("create");
   });
 });

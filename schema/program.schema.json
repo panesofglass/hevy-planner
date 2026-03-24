@@ -226,6 +226,10 @@
           "type": "integer",
           "description": "Display order in the program view."
         },
+        "folderGroup": {
+          "type": "string",
+          "description": "Hevy folder name for this routine. Routines sharing a folderGroup are placed in the same Hevy folder. Defaults to 'Daily' for isDaily routines, or the program title otherwise."
+        },
         "exercises": {
           "type": "array",
           "items": { "$ref": "#/$defs/routineExercise" },

@@ -558,6 +558,7 @@
       "subtitle": "Controlled Articular Rotations — 7-10 min",
       "description": "Do these every single day, no exceptions. CARs are the foundation — they maintain joint health, identify restrictions early, and prime your nervous system. Think of them as brushing your teeth for your joints.",
       "isDaily": true,
+      "folderGroup": "Daily",
       "sortOrder": 1,
       "color": "rgb(96, 165, 224)",
       "exercises": [
@@ -596,6 +597,7 @@
       "title": "Session A: Shoulder Rehab & Stability",
       "subtitle": "15-20 min — Do 2x per week",
       "description": "Your shoulders are compensating for weak scapular stabilizers and rotator cuff. This session rebuilds the foundation so your pressing strength can actually express itself without pain. Within 3-4 weeks, planks and overhead work should start feeling noticeably better.",
+      "folderGroup": "Phase 1: Joint Restoration",
       "sortOrder": 2,
       "color": "rgb(224, 134, 96)",
       "exercises": [
@@ -642,6 +644,7 @@
       "title": "Session B: Knee & Hip Mobility",
       "subtitle": "15-20 min — Do 2x per week",
       "description": "Your lateral lunge pain and cross-legged sitting difficulty both point to tight hip adductors and weak VMO (inner quad). This session opens the hips and builds the knee stability that lets you load lateral movements safely. The Cossack squat is your eventual goal movement.",
+      "folderGroup": "Phase 1: Joint Restoration",
       "sortOrder": 3,
       "color": "rgb(96, 200, 140)",
       "exercises": [
@@ -688,6 +691,7 @@
       "title": "Session C: Ankle/Achilles & Integration",
       "subtitle": "15-20 min — Do 1-2x per week",
       "description": "Your repaired Achilles needs consistent eccentric loading to stay resilient — this is backed by decades of research (Alfredson protocol). Combined with dorsiflexion work, this session protects the ankle and unlocks deeper squat positions. The balance work re-trains proprioception that was disrupted by the surgery.",
+      "folderGroup": "Phase 1: Joint Restoration",
       "sortOrder": 4,
       "color": "rgb(180, 140, 224)",
       "exercises": [
@@ -726,6 +730,7 @@
       "title": "Session D: Core Stability",
       "subtitle": "15-20 min — Do 1-2x per week",
       "description": "Your shoulders, knees, and ankles all depend on a stable trunk. When the core can't hold position, your joints compensate — that's a big part of why you keep getting injured. This session trains anti-extension, anti-rotation, and anti-lateral-flexion — the three pillars of functional core stability. These aren't crunches; they teach your core to resist unwanted movement so your limbs can move freely. Exercises marked with ◆ in other sessions are drawn from here.",
+      "folderGroup": "Phase 1: Joint Restoration",
       "sortOrder": 5,
       "color": "rgb(224, 120, 150)",
       "exercises": [
@@ -762,6 +767,7 @@
       "id": "active-recovery",
       "title": "Active Recovery",
       "subtitle": "20-30 min — Do 1-2x per week",
+      "folderGroup": "Recovery",
       "description": "Easy effort only. The purpose is blood flow, not fitness. If you find yourself breathing hard on the bike, you're going too hard. Pair with foam rolling to address tissue quality.",
       "sortOrder": 6,
       "color": "rgb(200, 196, 120)",

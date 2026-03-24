@@ -94,6 +94,7 @@ export interface Routine {
   color?: string;
   isDaily?: boolean;
   sortOrder?: number;
+  folderGroup?: string;
   exercises: RoutineExercise[];
 }
 

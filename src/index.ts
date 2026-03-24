@@ -28,7 +28,7 @@ import {
 } from "./storage/queries";
 import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "./domain/queue";
 import { computeUpcoming } from "./domain/reflow";
-import { buildRoutinePayload, matchCompletions, autoMatchExercises } from "./domain/hevy-sync";
+import { buildRoutinePayload, matchCompletions, autoMatchExercises, computeFolderAssignments, reconcileRoutines } from "./domain/hevy-sync";
 import { mapToHevyEnums } from "./domain/hevy-enums";
 import { currentWeek, findActiveProgression } from "./domain/schedule";
 import { validateProgram } from "./validation/validate-program";
@@ -223,6 +223,11 @@ export default {
         return await handlePull(env, auth.userId);
       }
 
+      // ── POST /api/cleanup-routines ───────────────────────────────
+      if (method === "POST" && path === "/api/cleanup-routines") {
+        return await handleCleanupRoutines(env, auth.userId);
+      }
+
       // ── POST /api/complete/:id ─────────────────────────────────
       const completeMatch = path.match(/^\/api\/complete\/([^/]+)$/);
       if (method === "POST" && completeMatch) {
@@ -249,16 +254,8 @@ export default {
 /** POST /api/validate-program — validate uploaded JSON, return template cards */
 async function handleValidateProgram(request: Request): Promise<Response> {
   const body = (await request.json()) as Record<string, unknown>;
-  const programJsonStr = body.programJson as string | undefined;
-
-  if (!programJsonStr) {
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">No program file selected.</p></div>`,
-        { selector: "#validation-result", mode: "inner" }
-      )
-    );
-  }
+  // Fall back to bundled default program if none uploaded
+  const programJsonStr = (body.programJson as string | undefined) || JSON.stringify(defaultProgramJson);
 
   let parsed: unknown;
   try {
@@ -309,10 +306,16 @@ async function handleTodaySSE(env: Env, userId: string): Promise<Response> {
   const items = await getQueueItems(env.DB, userId);
   const today = todayString();
 
+  // Look up routine mappings for deep links
+  const routineMappings = await getRoutineMappings(env.DB, userId);
+  const routineToHevyId = new Map(
+    routineMappings.map((m) => [m.program_routine_id, m.hevy_routine_id])
+  );
+
   const fragments: string[] = [];
 
   if (dailyRoutine) {
-    fragments.push(patchElements(carsCard(dailyRoutine), { selector: "#content", mode: "inner" }));
+    fragments.push(patchElements(carsCard(dailyRoutine, routineToHevyId.get(dailyRoutine.id)), { selector: "#content", mode: "inner" }));
   }
 
   // Hero session card — next pending
@@ -464,14 +467,11 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
   const templateId = urlTemplateId ?? body.templateId;
   const startDate = body.startDate || todayString();
   const apiKey = body.apiKey || undefined;
-  const programJsonStr = body.programJson;
+  // Fall back to bundled default program if none uploaded
+  const programJsonStr = body.programJson || JSON.stringify(defaultProgramJson);
 
   if (!templateId) {
     return new Response("Template ID is required", { status: 400 });
-  }
-
-  if (!programJsonStr) {
-    return new Response("Program data is required", { status: 400 });
   }
 
   // Parse and validate program
@@ -557,33 +557,45 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
       });
     }
 
-    // f. Create or update Hevy routines (idempotent — safe to re-run setup)
+    // f. Create or update Hevy routines with folder grouping + dedup
     const allMappings = await getExerciseTemplateMappings(env.DB, userId);
     const existingRoutineMappings = await getRoutineMappings(env.DB, userId);
-    const existingMap = new Map(
+    const existingMappingsMap = new Map(
       existingRoutineMappings.map((m) => [m.program_routine_id, m.hevy_routine_id])
     );
 
-    const hasNewRoutines = program.routines.some((r) => !existingMap.has(r.id));
-    const folder = hasNewRoutines
-      ? await client.getOrCreateRoutineFolder(program.meta.title)
-      : null;
+    // Compute folder assignments and create/find folders
+    const folderAssignments = computeFolderAssignments(program.routines, program.meta.title);
+    const uniqueFolderNames = [...new Set(folderAssignments.map((a) => a.folderName))];
+    const folderNameToId = new Map<string, number>();
+    for (const name of uniqueFolderNames) {
+      const folder = await client.getOrCreateRoutineFolder(name);
+      folderNameToId.set(name, folder.id);
+    }
 
-    for (const routine of program.routines) {
+    // Fetch existing Hevy routines for dedup by title+folder
+    const existingHevyRoutines = await client.getAllRoutines();
+
+    // Reconcile: decide create vs update for each routine
+    const reconciliations = reconcileRoutines(
+      folderAssignments, existingHevyRoutines, folderNameToId, existingMappingsMap
+    );
+
+    for (const recon of reconciliations) {
+      const routine = program.routines.find((r) => r.id === recon.programRoutineId)!;
       const payload = buildRoutinePayload(routine, allMappings);
-      const existingHevyId = existingMap.get(routine.id);
+      const folderId = folderNameToId.get(recon.folderName)!;
 
-      if (existingHevyId) {
-        await client.updateRoutine(existingHevyId, {
+      if (recon.action === "update" && recon.existingHevyRoutineId) {
+        await client.updateRoutine(recon.existingHevyRoutineId, {
           title: payload.title,
           exercises: payload.exercises,
         });
-        routineIdMap.set(routine.id, existingHevyId);
+        routineIdMap.set(routine.id, recon.existingHevyRoutineId);
       } else {
-        if (!folder) throw new Error(`No folder created but routine "${routine.id}" needs one`);
         const created = await client.createRoutine({
           title: payload.title,
-          folder_id: folder.id,
+          folder_id: folderId,
           exercises: payload.exercises,
         });
         routineIdMap.set(routine.id, created.id);
@@ -616,7 +628,7 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
   return sseResponse(executeScript("window.location.href = '/'"));
 }
 
-/** POST /api/push-hevy/:id — push routine to Hevy */
+/** POST /api/push-hevy/:id — open routine in Hevy (uses existing mapping from setup) */
 async function handlePush(env: Env, userId: string, routineId: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user || !user.hevy_api_key) {
@@ -628,6 +640,18 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
     );
   }
 
+  // Look up existing routine mapping from setup
+  const routineMappings = await getRoutineMappings(env.DB, userId);
+  const mapping = routineMappings.find((m) => m.program_routine_id === routineId);
+
+  if (mapping) {
+    // Routine already exists in Hevy — open it directly
+    return sseResponse(
+      executeScript(`window.open('https://hevy.com/routine/${mapping.hevy_routine_id}', '_blank')`)
+    );
+  }
+
+  // Fallback: no mapping exists (edge case — setup didn't create this routine)
   const program = await loadProgram(env.DB, userId);
   const routine = program.routines.find((r) => r.id === routineId);
   if (!routine) {
@@ -639,7 +663,6 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
   // Get or auto-create exercise template mappings
   let mappings = await getExerciseTemplateMappings(env.DB, userId);
   if (mappings.length === 0) {
-    // First push: auto-match exercise templates
     try {
       const hevyTemplates = await client.getAllExerciseTemplates();
       const autoMatched = autoMatchExercises(program.exerciseTemplates, hevyTemplates);
@@ -670,43 +693,31 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
   }
 
   try {
-    // Find existing queue item to update
+    const folder = await client.getOrCreateRoutineFolder(program.meta.title);
+    const created = await client.createRoutine({
+      title: payload.title,
+      folder_id: folder.id,
+      exercises: payload.exercises,
+    });
+
+    // Save the mapping so future pushes use the existing routine
+    await upsertRoutineMapping(env.DB, {
+      user_id: userId,
+      program_routine_id: routineId,
+      hevy_routine_id: created.id,
+    });
+
+    // Also update the queue item if there is one
     const items = await getQueueItems(env.DB, userId);
     const queueItem = items.find(
       (i) => i.routine_id === routineId && i.status === "pending"
     );
-
-    let hevyRoutineId: string;
-    if (queueItem?.hevy_routine_id) {
-      const updated = await client.updateRoutine(queueItem.hevy_routine_id, {
-        title: payload.title,
-        exercises: payload.exercises,
-      });
-      hevyRoutineId = updated.id;
-    } else {
-      const folder = await client.getOrCreateRoutineFolder(program.meta.title);
-      const created = await client.createRoutine({
-        title: payload.title,
-        folder_id: folder.id,
-        exercises: payload.exercises,
-      });
-      hevyRoutineId = created.id;
+    if (queueItem) {
+      await updateQueueItemHevyRoutineId(env.DB, queueItem.id, created.id);
     }
-
-    if (queueItem && hevyRoutineId) {
-      await updateQueueItemHevyRoutineId(env.DB, queueItem.id, hevyRoutineId);
-    }
-
-    const unmappedNote =
-      payload.unmapped.length > 0
-        ? `<p style="color:var(--orange);font-size:13px;margin-top:8px">${payload.unmapped.length} exercise(s) could not be mapped.</p>`
-        : "";
 
     return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--green)">Pushed to Hevy!</p>${unmappedNote}</div>`,
-        { selector: "#content", mode: "prepend" }
-      )
+      executeScript(`window.open('https://hevy.com/routine/${created.id}', '_blank')`)
     );
   } catch (err) {
     const msg = escapeHtml(err instanceof Error ? err.message : "Push failed");
@@ -717,6 +728,62 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
       )
     );
   }
+}
+
+/** POST /api/cleanup-routines — delete duplicate routines from Hevy */
+async function handleCleanupRoutines(env: Env, userId: string): Promise<Response> {
+  const user = await getUser(env.DB, userId);
+  if (!user || !user.hevy_api_key) {
+    return sseResponse(
+      patchElements(`<div class="card"><p>Connect your Hevy API key first.</p></div>`, {
+        selector: "#content",
+        mode: "prepend",
+      })
+    );
+  }
+
+  const client = new HevyClient(user.hevy_api_key);
+  const allRoutines = await client.getAllRoutines();
+
+  // Group by title+folder, find duplicates
+  const byKey = new Map<string, typeof allRoutines>();
+  for (const r of allRoutines) {
+    const key = `${r.title}::${r.folder_id ?? "none"}`;
+    const list = byKey.get(key) ?? [];
+    list.push(r);
+    byKey.set(key, list);
+  }
+
+  const toDelete: string[] = [];
+  for (const [, routines] of byKey) {
+    if (routines.length > 1) {
+      // Keep the most recently updated, delete the rest
+      routines.sort((a, b) => (b.updated_at ?? "").localeCompare(a.updated_at ?? ""));
+      toDelete.push(...routines.slice(1).map((r) => r.id));
+    }
+  }
+
+  let deleted = 0;
+  let failed = 0;
+  for (const id of toDelete) {
+    try {
+      await client.deleteRoutine(id);
+      deleted++;
+    } catch {
+      failed++;
+    }
+  }
+
+  const msg = toDelete.length === 0
+    ? "No duplicates found."
+    : `Cleaned up ${deleted} duplicate(s)${failed > 0 ? `, ${failed} failed` : ""}.`;
+
+  return sseResponse(
+    patchElements(
+      `<div class="card"><p style="color:var(--green)">${escapeHtml(msg)}</p></div>`,
+      { selector: "#content", mode: "prepend" }
+    )
+  );
 }
 
 /** POST /api/pull — pull completions from Hevy */

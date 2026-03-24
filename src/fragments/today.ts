@@ -10,16 +10,20 @@ import { escapeHtml, escapeAttr, truncate } from "../utils/html";
  * Daily CARs card — always shown at the top of Today.
  * Green accent label, exercise count, Push to Hevy + Details.
  */
-export function carsCard(routine: Routine): string {
+export function carsCard(routine: Routine, hevyRoutineId?: string): string {
   const count = routine.exercises.length;
   const subtitle = routine.subtitle ?? `${count} exercises`;
+
+  const hevyButton = hevyRoutineId
+    ? `<a href="https://hevy.com/routine/${escapeAttr(hevyRoutineId)}" target="_blank" class="btn btn-blue">Open in Hevy</a>`
+    : `<button class="btn btn-blue" data-on:click="@post('/api/push-hevy/daily')">Push to Hevy</button>`;
 
   return `<div class="card">
   <div class="card-label" style="color: var(--green)">Daily</div>
   <div class="card-title">${escapeHtml(routine.title)}</div>
   <div class="card-subtitle">${escapeHtml(subtitle)}</div>
   <div style="display:flex; gap:8px; margin-top:14px">
-    <button class="btn btn-blue" data-on:click="@post('/api/push-hevy/daily')">Push to Hevy</button>
+    ${hevyButton}
     <a href="/routine/daily" class="btn btn-ghost">Details</a>
   </div>
 </div>`;
@@ -36,13 +40,17 @@ export function heroRoutineCard(routine: Routine, queueItem: QueueItemRow): stri
     ? `<div class="card-desc">${escapeHtml(truncate(routine.description, 120))}</div>`
     : "";
 
+  const hevyButton = queueItem.hevy_routine_id
+    ? `<a href="https://hevy.com/routine/${escapeAttr(queueItem.hevy_routine_id)}" target="_blank" class="btn btn-blue">Open in Hevy</a>`
+    : `<button class="btn btn-blue" data-on:click="@post('/api/push-hevy/${escapeAttr(queueItem.routine_id)}')">Push to Hevy</button>`;
+
   return `<div class="card">
   <div class="card-label" style="color: var(--blue)">Next Session</div>
   <div class="card-title">${escapeHtml(routine.title)}</div>
   <div class="card-subtitle">${escapeHtml(subtitle)}</div>
   ${desc}
   <div style="display:flex; gap:8px; margin-top:14px">
-    <button class="btn btn-blue" data-on:click="@post('/api/push-hevy/${escapeAttr(queueItem.routine_id)}')">Push to Hevy</button>
+    ${hevyButton}
     <a href="/routine/${escapeAttr(routine.id)}" class="btn btn-ghost">Details</a>
   </div>
 </div>`;
