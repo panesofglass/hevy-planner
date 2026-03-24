@@ -1,0 +1,109 @@
+Received Invalid Hevy API key. Check your key in Hevy Settings > Developer and try again.
+
+---
+
+Second attempt worked. I may have saved it incorrectly
+
+---
+
+Now when I try to push to hevy, I see Hevy API error: 400 Bad Request: {"error":"[public-post-routine] Invalid routine folder id: undefined"}
+
+---
+
+Pushed!
+
+---
+
+CARs pushed. Session A failed with "D1_TYPE_ERROR: Type 'undefined' not supported for value 'undefined'"
+
+---
+
+There are a lot of test routine pushes. Also, when I push, am I pushing a template, or am I pushing a workout I'm supposed to do that day?
+
+---
+
+That worked for Session A
+
+---
+
+Yes, use MCP to clean up everything. We can reset the database and start over.
+
+---
+
+Yes, that's how it was supposed to work.
+
+---
+
+I still see a bunch of test folders and routines in Hevy
+
+---
+
+done
+
+---
+
+I have the routines, but I don't appear to have a scheduled workout
+
+---
+
+Yes, I'm in the Hevy Workout tab in their app.
+
+---
+
+Oh, so I can't schedule the workouts for a given day?
+
+---
+
+yes, today page shows the correct thing
+
+---
+
+yes
+
+---
+
+yes
+
+---
+
+Set up has completed.
+
+---
+
+I don't understand. You successfully deleted the duplicates earlier.
+
+---
+
+I've deleted them manually.
+
+---
+
+I ran setup. However, I still get a Hevy Planner folder. Oh, I didn't download the revised default plan. Is that JSON the source of the folder structure?
+
+---
+
+Yes, it allow picking one of the available day options from the default or downloading and uploading a custom plan, then picking the day option
+
+---
+
+yes
+
+---
+
+done
+
+---
+
+let's test it
+
+---
+
+Looks good! No duplicates!
+
+---
+
+Just to make sure, I deleted Daily and its routine. Reset once more so I can verify it loads the missing folder and routine.
+
+---
+
+Daily is back. Deep linking works, at least on the web app. Will this open in the mobile app on my phone?
