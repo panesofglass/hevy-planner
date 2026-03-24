@@ -39,3 +39,7 @@ yes
 ---
 
 Is "Completed Today" supposed to hang around in subsequent days? Shouldn't it clear once we are into the next day?
+
+---
+
+create a new one and push
