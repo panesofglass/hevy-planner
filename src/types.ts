@@ -21,6 +21,7 @@ export interface QueueItemRow {
   readonly completed_date: string | null;
   readonly hevy_routine_id: string | null;
   readonly hevy_workout_id: string | null;
+  readonly hevy_workout_data: string | null;
 }
 
 export interface ExerciseTemplateMappingRow {

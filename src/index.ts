@@ -344,9 +344,11 @@ async function handleTodaySSE(env: Env, userId: string, tz?: string): Promise<Re
   const completed = getCompletedRoutines(items, today);
   const completedData = completed.map((item) => ({
     title: routineMap.get(item.routine_id)?.title ?? item.routine_id,
+    hevy_workout_data: item.hevy_workout_data,
+    prescribedExercises: routineMap.get(item.routine_id)?.exercises ?? [],
   }));
   if (dailyDoneToday) {
-    completedData.unshift({ title: dailyRoutine.title });
+    completedData.unshift({ title: dailyRoutine.title, hevy_workout_data: null, prescribedExercises: [] });
   }
   if (completedData.length > 0) {
     fragments.push(
@@ -851,16 +853,19 @@ async function handlePull(env: Env, userId: string, tz?: string): Promise<Respon
 
     // Build workout ID → local date map for accurate completion dates
     const workoutDateMap = new Map<string, string>();
+    const workoutExercisesMap = new Map<string, string>();
     for (const w of newWorkouts) {
       const d = tz
         ? new Date(w.start_time).toLocaleDateString("en-CA", { timeZone: tz })
         : w.start_time.slice(0, 10);
       workoutDateMap.set(w.id, d);
+      workoutExercisesMap.set(w.id, JSON.stringify(w.exercises));
     }
 
     for (const match of matches) {
       const completedDate = workoutDateMap.get(match.workoutId) ?? todayString(tz);
-      await markQueueItemCompleted(env.DB, match.queueItemId, completedDate, match.workoutId);
+      const workoutData = workoutExercisesMap.get(match.workoutId);
+      await markQueueItemCompleted(env.DB, match.queueItemId, completedDate, match.workoutId, workoutData);
     }
 
     // Check for daily routine completion (use workout date, not sync date)
