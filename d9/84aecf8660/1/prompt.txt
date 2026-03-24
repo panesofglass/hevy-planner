@@ -23,3 +23,7 @@ There are a lot of test routine pushes. Also, when I push, am I pushing a templa
 ---
 
 That worked for Session A
+
+---
+
+Yes, use MCP to clean up everything. We can reset the database and start over.
