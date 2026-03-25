@@ -1,0 +1,36 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "8dac88e41b6e",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 6,
+  "files_touched": [
+    "src/fragments/program.ts",
+    "src/fragments/setup.ts",
+    "src/fragments/template-grid.ts",
+    "src/fragments/today.ts",
+    "src/hevy/client.ts",
+    "src/index.ts",
+    "src/storage/queries.ts",
+    "src/utils/crypto.ts",
+    "src/utils/date.ts",
+    "test/domain/hevy-sync.test.ts",
+    "test/domain/queue.test.ts",
+    "test/domain/reflow.test.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/8d/ac88e41b6e/0/metadata.json",
+      "transcript": "/8d/ac88e41b6e/0/full.jsonl",
+      "content_hash": "/8d/ac88e41b6e/0/content_hash.txt",
+      "prompt": "/8d/ac88e41b6e/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 152,
+    "cache_creation_tokens": 253010,
+    "cache_read_tokens": 10737998,
+    "output_tokens": 38424,
+    "api_call_count": 110
+  }
+}
