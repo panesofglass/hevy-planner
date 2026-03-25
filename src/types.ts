@@ -1,4 +1,16 @@
 // ──────────────────────────────────────────────────────────────────
+// Worker environment bindings
+// ──────────────────────────────────────────────────────────────────
+
+export interface Env {
+  DB: D1Database;
+  ENVIRONMENT: string;
+  CF_ACCESS_AUD?: string;
+  /** AES-256 key in hex (64 chars). Set via `wrangler secret put ENCRYPTION_KEY`. */
+  ENCRYPTION_KEY: string;
+}
+
+// ──────────────────────────────────────────────────────────────────
 // D1 row types — mirror the schema in migrations/
 // ──────────────────────────────────────────────────────────────────
 
