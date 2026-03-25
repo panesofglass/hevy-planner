@@ -30,6 +30,8 @@ import {
   clearWebhookState,
   updateLastSyncAt,
   getUserByWebhookToken,
+  clearPendingQueueItems,
+  clearMappings,
 } from "./storage/queries";
 import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "./domain/queue";
 import { computeUpcoming } from "./domain/reflow";
@@ -43,7 +45,7 @@ import { carsCard, heroRoutineCard, completedSection, upcomingSection, syncButto
 import { routineDetailPage } from "./fragments/routine-detail";
 import { skillCards, roadmapSection, benchmarksSection } from "./fragments/progress";
 import { setupPage, templateSelectionFragment } from "./fragments/setup";
-import { programOverview, progressionsSection, routinesSection, foundationsSection, resourcesSection, bodiSection } from "./fragments/program";
+import { programOverview, progressionsSection, routinesSection, foundationsSection, resourcesSection, bodiSection, importProgramSection, importTemplateSelectionFragment } from "./fragments/program";
 import type { Program } from "./types";
 import { escapeHtml } from "./utils/html";
 
@@ -221,6 +223,16 @@ export default {
       // ── POST /api/validate-program ─────────────────────────────
       if (method === "POST" && path === "/api/validate-program") {
         return await handleValidateProgram(request);
+      }
+
+      // ── POST /api/validate-import-program ──────────────────────
+      if (method === "POST" && path === "/api/validate-import-program") {
+        return await handleValidateImportProgram(request);
+      }
+
+      // ── POST /api/import-program ────────────────────────────────
+      if (method === "POST" && path === "/api/import-program") {
+        return await handleImportProgram(request, env, auth.userId, tz);
       }
 
       // ── POST /api/setup/:templateId ─────────────────────────────
@@ -471,6 +483,9 @@ async function handleProgramSSE(env: Env, userId: string): Promise<Response> {
     addFragment(bodiSection(program.bodi));
   }
 
+  // Import section — always shown at the bottom of the Program page
+  addFragment(importProgramSection());
+
   return sseResponse(mergeFragments(fragments));
 }
 
@@ -558,10 +573,36 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
     hevy_api_key: apiKey,
   });
 
-  // a. Store program in D1
-  await insertProgram(env.DB, userId, programJsonStr);
+  // a-j. Store program, sync Hevy templates/routines, generate queue
+  await activateProgram(env.DB, userId, program, programJsonStr, templateId, apiKey);
 
-  // b-g. Hevy exercise template & routine creation (only with API key)
+  // k. Redirect to Today
+  return sseResponse(executeScript("window.location.href = '/'"));
+}
+
+/**
+ * Activate a program: clear old pending queue and mappings, store in D1,
+ * sync to Hevy (exercise templates + routines), then generate queue.
+ * Reused by both initial setup (handleSetup) and program import (handleImportProgram).
+ */
+async function activateProgram(
+  db: D1Database,
+  userId: string,
+  program: Program,
+  programJsonStr: string,
+  templateId: string,
+  apiKey: string | undefined
+): Promise<void> {
+  const template = program.weekTemplates.find((t) => t.id === templateId)!;
+
+  // 1. Clear existing pending queue items and mappings (preserve completed history)
+  await clearPendingQueueItems(db, userId);
+  await clearMappings(db, userId);
+
+  // 2. Insert program (deactivates previous via batch in insertProgram)
+  await insertProgram(db, userId, programJsonStr);
+
+  // 3. Hevy exercise template & routine creation (only with API key)
   const routineIdMap = new Map<string, string>();
   if (apiKey) {
     const client = new HevyClient(apiKey);
@@ -591,7 +632,7 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
 
     // e. Save all exercise template mappings
     for (const [programTemplateId, hevyTemplateId] of matched) {
-      await upsertExerciseTemplateMapping(env.DB, {
+      await upsertExerciseTemplateMapping(db, {
         user_id: userId,
         program_template_id: programTemplateId,
         hevy_template_id: hevyTemplateId,
@@ -600,8 +641,8 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
     }
 
     // f. Create or update Hevy routines with folder grouping + dedup
-    const allMappings = await getExerciseTemplateMappings(env.DB, userId);
-    const existingRoutineMappings = await getRoutineMappings(env.DB, userId);
+    const allMappings = await getExerciseTemplateMappings(db, userId);
+    const existingRoutineMappings = await getRoutineMappings(db, userId);
     const existingMappingsMap = new Map(
       existingRoutineMappings.map((m) => [m.program_routine_id, m.hevy_routine_id])
     );
@@ -646,7 +687,7 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
 
     // g. Save all routine mappings
     for (const [programRoutineId, hevyRoutineId] of routineIdMap) {
-      await upsertRoutineMapping(env.DB, {
+      await upsertRoutineMapping(db, {
         user_id: userId,
         program_routine_id: programRoutineId,
         hevy_routine_id: hevyRoutineId,
@@ -654,20 +695,126 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
     }
   }
 
-  // i. Generate queue playlist
+  // 4. Generate queue playlist and insert items
   const weeks = program.meta.durationWeeks || 8;
   const playlist = generatePlaylist(template, program.routines, weeks);
   if (playlist.length > 0) {
-    await insertQueueItems(env.DB, userId, playlist);
+    await insertQueueItems(db, userId, playlist);
   }
 
-  // j. Bulk-set hevy_routine_id on queue items via routine_mappings
+  // 5. Bulk-set hevy_routine_id on queue items via routine_mappings
   if (apiKey) {
-    await bulkSetQueueItemRoutineIds(env.DB, userId, routineIdMap);
+    await bulkSetQueueItemRoutineIds(db, userId, routineIdMap);
+  }
+}
+
+/** POST /api/validate-import-program — validate uploaded JSON for the import flow */
+async function handleValidateImportProgram(request: Request): Promise<Response> {
+  const body = (await request.json()) as Record<string, unknown>;
+  const programJsonStr = body.programJson as string | undefined;
+
+  if (!programJsonStr) {
+    return sseResponse(
+      patchElements(
+        `<div class="card"><p style="color:var(--orange)">No program JSON provided.</p></div>`,
+        { selector: "#import-validation-result", mode: "inner" }
+      )
+    );
   }
 
-  // k. Redirect to Today
-  return sseResponse(executeScript("window.location.href = '/'"));
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(programJsonStr);
+  } catch {
+    return sseResponse(
+      patchElements(
+        `<div class="card"><p style="color:var(--orange)">Invalid JSON file.</p></div>`,
+        { selector: "#import-validation-result", mode: "inner" }
+      )
+    );
+  }
+
+  const result = validateProgram(parsed);
+  if (!result.valid) {
+    const errorList = result.errors
+      .map((e) => `<li>${escapeHtml(e)}</li>`)
+      .join("");
+    return sseResponse(
+      patchElements(
+        `<div class="card"><p style="color:var(--orange)">Validation errors:</p><ul style="margin:8px 0 0 16px;font-size:13px;color:var(--text-secondary)">${errorList}</ul></div>`,
+        { selector: "#import-validation-result", mode: "inner" }
+      )
+    );
+  }
+
+  return sseResponse(
+    patchElements(importTemplateSelectionFragment(result.program.weekTemplates), {
+      selector: "#import-validation-result",
+      mode: "inner",
+    })
+  );
+}
+
+/** POST /api/import-program — replace active program, re-sync Hevy, regenerate queue */
+async function handleImportProgram(request: Request, env: Env, userId: string, tz?: string): Promise<Response> {
+  let body: { programJson?: string; templateId?: string } = {};
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return new Response("Invalid request body", { status: 400 });
+  }
+
+  const { programJson: programJsonStr, templateId } = body;
+
+  if (!programJsonStr) {
+    return sseResponse(
+      patchElements(
+        `<div class="card"><p style="color:var(--orange)">No program JSON provided.</p></div>`,
+        { selector: "#import-validation-result", mode: "inner" }
+      )
+    );
+  }
+
+  if (!templateId) {
+    return new Response("Template ID is required", { status: 400 });
+  }
+
+  // Parse and validate program
+  let program: Program;
+  try {
+    const parsed = JSON.parse(programJsonStr);
+    const result = validateProgram(parsed);
+    if (!result.valid) {
+      return new Response(`Invalid program: ${result.errors.join(", ")}`, { status: 400 });
+    }
+    program = result.program;
+  } catch {
+    return new Response("Invalid program JSON", { status: 400 });
+  }
+
+  if (!program.weekTemplates.find((t) => t.id === templateId)) {
+    return new Response("Invalid template ID", { status: 400 });
+  }
+
+  // Get the user's existing API key and start_date
+  const user = await getUser(env.DB, userId);
+  const apiKey = user?.hevy_api_key ?? undefined;
+  const startDate = todayString(tz);
+
+  // Update user record with new program info (preserves API key via COALESCE)
+  await upsertUser(env.DB, {
+    id: userId,
+    active_program: program.meta.title,
+    template_id: templateId,
+    start_date: startDate,
+    hevy_api_key: undefined,
+  });
+
+  // Activate: clear old state, sync to Hevy, generate queue
+  await activateProgram(env.DB, userId, program, programJsonStr, templateId, apiKey);
+
+  // Re-render the Program page
+  return await handleProgramSSE(env, userId);
 }
 
 /** POST /api/push-hevy/:id — open routine in Hevy (uses existing mapping from setup) */
