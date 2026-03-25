@@ -32,6 +32,7 @@ import {
   getUserByWebhookToken,
   clearPendingQueueItems,
   clearMappings,
+  updateUserProgram,
 } from "./storage/queries";
 import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "./domain/queue";
 import { computeUpcoming } from "./domain/reflow";
@@ -48,6 +49,7 @@ import { setupPage, templateSelectionFragment } from "./fragments/setup";
 import { programOverview, progressionsSection, routinesSection, foundationsSection, resourcesSection, bodiSection, importProgramSection, importTemplateSelectionFragment } from "./fragments/program";
 import type { Program } from "./types";
 import { escapeHtml } from "./utils/html";
+import { todayString, toLocalDate } from "./utils/date";
 
 import defaultProgramJson from "../programs/mobility-joint-restoration.json";
 
@@ -63,13 +65,21 @@ export interface Env {
 // Helpers
 // ──────────────────────────────────────────────────────────────────
 
-function todayString(timezone?: string): string {
-  if (timezone) {
-    try {
-      return new Date().toLocaleDateString("en-CA", { timeZone: timezone });
-    } catch { /* fall through to UTC */ }
-  }
-  return new Date().toISOString().slice(0, 10);
+/**
+ * Return an SSE response that patches an error card into the given selector.
+ * Always HTML-escapes the message, so callers should pass the raw string.
+ */
+function sseErrorCard(
+  msg: string,
+  selector = "#content",
+  mode: "inner" | "prepend" | "append" = "prepend"
+): Response {
+  return sseResponse(
+    patchElements(
+      `<div class="card"><p style="color:var(--orange)">${escapeHtml(msg)}</p></div>`,
+      { selector, mode }
+    )
+  );
 }
 
 /** Load the subtitle from the active program, or undefined on failure. */
@@ -292,42 +302,60 @@ export default {
 // Route handlers
 // ──────────────────────────────────────────────────────────────────
 
-/** POST /api/validate-program — validate uploaded JSON, return template cards */
-async function handleValidateProgram(request: Request): Promise<Response> {
-  const body = (await request.json()) as Record<string, unknown>;
-  // Fall back to bundled default program if none uploaded
-  const programJsonStr = (body.programJson as string | undefined) || JSON.stringify(defaultProgramJson);
+/**
+ * Shared validation logic for both the setup and import program flows.
+ * Parses and validates programJsonStr, then returns either an error card
+ * or the rendered template selection fragment.
+ *
+ * @param programJsonStr  - raw JSON string to validate (may be undefined)
+ * @param selector        - CSS selector for the patch target
+ * @param renderTemplates - function that renders the template selection UI
+ * @param fallback        - JSON string to use when programJsonStr is empty
+ */
+function validateAndRespond(
+  programJsonStr: string | undefined,
+  selector: string,
+  renderTemplates: (templates: import("./types").WeekTemplate[]) => string,
+  fallback?: string
+): Response {
+  const jsonStr = programJsonStr || fallback;
+  if (!jsonStr) {
+    return sseErrorCard("No program JSON provided.", selector, "inner");
+  }
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(programJsonStr);
+    parsed = JSON.parse(jsonStr);
   } catch {
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">Invalid JSON file.</p></div>`,
-        { selector: "#validation-result", mode: "inner" }
-      )
-    );
+    return sseErrorCard("Invalid JSON file.", selector, "inner");
   }
 
   const result = validateProgram(parsed);
   if (!result.valid) {
-    const errorList = result.errors
-      .map((e) => `<li>${escapeHtml(e)}</li>`)
-      .join("");
+    const errorList = result.errors.map((e) => `<li>${escapeHtml(e)}</li>`).join("");
     return sseResponse(
       patchElements(
         `<div class="card"><p style="color:var(--orange)">Validation errors:</p><ul style="margin:8px 0 0 16px;font-size:13px;color:var(--text-secondary)">${errorList}</ul></div>`,
-        { selector: "#validation-result", mode: "inner" }
+        { selector, mode: "inner" }
       )
     );
   }
 
   return sseResponse(
-    patchElements(templateSelectionFragment(result.program.weekTemplates), {
-      selector: "#validation-result",
-      mode: "inner",
-    })
+    patchElements(renderTemplates(result.program.weekTemplates), { selector, mode: "inner" })
+  );
+}
+
+/** POST /api/validate-program — validate uploaded JSON, return template cards */
+async function handleValidateProgram(request: Request): Promise<Response> {
+  const body = (await request.json()) as Record<string, unknown>;
+  const programJsonStr = body.programJson as string | undefined;
+  // Fall back to bundled default program if none uploaded
+  return validateAndRespond(
+    programJsonStr,
+    "#validation-result",
+    templateSelectionFragment,
+    JSON.stringify(defaultProgramJson)
   );
 }
 
@@ -378,10 +406,9 @@ async function handleTodaySSE(env: Env, userId: string, tz?: string): Promise<Re
   const completedData = completed.map((item) => ({
     title: routineMap.get(item.routine_id)?.title ?? item.routine_id,
     hevy_workout_data: item.hevy_workout_data,
-    prescribedExercises: routineMap.get(item.routine_id)?.exercises ?? [],
   }));
   if (dailyDoneToday) {
-    completedData.unshift({ title: dailyRoutine.title, hevy_workout_data: null, prescribedExercises: [] });
+    completedData.unshift({ title: dailyRoutine.title, hevy_workout_data: null });
   }
   if (completedData.length > 0) {
     fragments.push(
@@ -405,7 +432,7 @@ async function handleTodaySSE(env: Env, userId: string, tz?: string): Promise<Re
 
   // Sync button at the bottom
   fragments.push(
-    patchElements(syncButton(user.webhook_id, user.last_sync_at), { selector: "#content", mode: "append" })
+    patchElements(syncButton(user.webhook_id, user.last_sync_at, tz), { selector: "#content", mode: "append" })
   );
 
   return sseResponse(mergeFragments(fragments));
@@ -555,11 +582,10 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
       const client = new HevyClient(apiKey);
       await client.getExerciseTemplates(1, 1);
     } catch {
-      return sseResponse(
-        patchElements(
-          `<div class="card"><p style="color:var(--orange)">Invalid Hevy API key. Check your key in Hevy Settings &gt; Developer and try again.</p></div>`,
-          { selector: "#content", mode: "prepend" }
-        )
+      return sseErrorCard(
+        "Invalid Hevy API key. Check your key in Hevy Settings > Developer and try again.",
+        "#content",
+        "prepend"
       );
     }
   }
@@ -593,7 +619,8 @@ async function activateProgram(
   templateId: string,
   apiKey: string | undefined
 ): Promise<void> {
-  const template = program.weekTemplates.find((t) => t.id === templateId)!;
+  const template = program.weekTemplates.find((t) => t.id === templateId);
+  if (!template) throw new Error(`Week template "${templateId}" not found in program`);
 
   // 1. Clear existing pending queue items and mappings (preserve completed history)
   await clearPendingQueueItems(db, userId);
@@ -630,14 +657,25 @@ async function activateProgram(
       }
     }
 
-    // e. Save all exercise template mappings
-    for (const [programTemplateId, hevyTemplateId] of matched) {
-      await upsertExerciseTemplateMapping(db, {
-        user_id: userId,
-        program_template_id: programTemplateId,
-        hevy_template_id: hevyTemplateId,
-        is_custom: customCreated.has(programTemplateId) ? 1 : 0,
-      });
+    // e. Save all exercise template mappings (batched)
+    if (matched.size > 0) {
+      const upsertTemplateStmt = db.prepare(
+        `INSERT INTO exercise_template_mappings (user_id, program_template_id, hevy_template_id, is_custom)
+         VALUES (?, ?, ?, ?)
+         ON CONFLICT(user_id, program_template_id) DO UPDATE SET
+           hevy_template_id = excluded.hevy_template_id,
+           is_custom = excluded.is_custom`
+      );
+      await db.batch(
+        [...matched.entries()].map(([programTemplateId, hevyTemplateId]) =>
+          upsertTemplateStmt.bind(
+            userId,
+            programTemplateId,
+            hevyTemplateId,
+            customCreated.has(programTemplateId) ? 1 : 0
+          )
+        )
+      );
     }
 
     // f. Create or update Hevy routines with folder grouping + dedup
@@ -651,9 +689,15 @@ async function activateProgram(
     const folderAssignments = computeFolderAssignments(program.routines, program.meta.title);
     const uniqueFolderNames = [...new Set(folderAssignments.map((a) => a.folderName))];
     const folderNameToId = new Map<string, number>();
-    for (const name of uniqueFolderNames) {
-      const folder = await client.getOrCreateRoutineFolder(name);
-      folderNameToId.set(name, folder.id);
+    // Create folders in parallel, limited to 3 concurrent to avoid Hevy rate limits
+    for (let i = 0; i < uniqueFolderNames.length; i += 3) {
+      const batch = uniqueFolderNames.slice(i, i + 3);
+      const results = await Promise.all(
+        batch.map((name) => client.getOrCreateRoutineFolder(name))
+      );
+      for (let j = 0; j < batch.length; j++) {
+        folderNameToId.set(batch[j], results[j].id);
+      }
     }
 
     // Fetch existing Hevy routines for dedup by title+folder
@@ -665,7 +709,8 @@ async function activateProgram(
     );
 
     for (const recon of reconciliations) {
-      const routine = program.routines.find((r) => r.id === recon.programRoutineId)!;
+      const routine = program.routines.find((r) => r.id === recon.programRoutineId);
+      if (!routine) continue;
       const payload = buildRoutinePayload(routine, allMappings);
       const folderId = folderNameToId.get(recon.folderName)!;
 
@@ -685,13 +730,19 @@ async function activateProgram(
       }
     }
 
-    // g. Save all routine mappings
-    for (const [programRoutineId, hevyRoutineId] of routineIdMap) {
-      await upsertRoutineMapping(db, {
-        user_id: userId,
-        program_routine_id: programRoutineId,
-        hevy_routine_id: hevyRoutineId,
-      });
+    // g. Save all routine mappings (batched)
+    if (routineIdMap.size > 0) {
+      const upsertRoutineStmt = db.prepare(
+        `INSERT INTO routine_mappings (user_id, program_routine_id, hevy_routine_id)
+         VALUES (?, ?, ?)
+         ON CONFLICT(user_id, program_routine_id) DO UPDATE SET
+           hevy_routine_id = excluded.hevy_routine_id`
+      );
+      await db.batch(
+        [...routineIdMap.entries()].map(([programRoutineId, hevyRoutineId]) =>
+          upsertRoutineStmt.bind(userId, programRoutineId, hevyRoutineId)
+        )
+      );
     }
   }
 
@@ -712,47 +763,7 @@ async function activateProgram(
 async function handleValidateImportProgram(request: Request): Promise<Response> {
   const body = (await request.json()) as Record<string, unknown>;
   const programJsonStr = body.programJson as string | undefined;
-
-  if (!programJsonStr) {
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">No program JSON provided.</p></div>`,
-        { selector: "#import-validation-result", mode: "inner" }
-      )
-    );
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(programJsonStr);
-  } catch {
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">Invalid JSON file.</p></div>`,
-        { selector: "#import-validation-result", mode: "inner" }
-      )
-    );
-  }
-
-  const result = validateProgram(parsed);
-  if (!result.valid) {
-    const errorList = result.errors
-      .map((e) => `<li>${escapeHtml(e)}</li>`)
-      .join("");
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">Validation errors:</p><ul style="margin:8px 0 0 16px;font-size:13px;color:var(--text-secondary)">${errorList}</ul></div>`,
-        { selector: "#import-validation-result", mode: "inner" }
-      )
-    );
-  }
-
-  return sseResponse(
-    patchElements(importTemplateSelectionFragment(result.program.weekTemplates), {
-      selector: "#import-validation-result",
-      mode: "inner",
-    })
-  );
+  return validateAndRespond(programJsonStr, "#import-validation-result", importTemplateSelectionFragment);
 }
 
 /** POST /api/import-program — replace active program, re-sync Hevy, regenerate queue */
@@ -767,12 +778,7 @@ async function handleImportProgram(request: Request, env: Env, userId: string, t
   const { programJson: programJsonStr, templateId } = body;
 
   if (!programJsonStr) {
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">No program JSON provided.</p></div>`,
-        { selector: "#import-validation-result", mode: "inner" }
-      )
-    );
+    return sseErrorCard("No program JSON provided.", "#import-validation-result", "inner");
   }
 
   if (!templateId) {
@@ -796,19 +802,8 @@ async function handleImportProgram(request: Request, env: Env, userId: string, t
     return new Response("Invalid template ID", { status: 400 });
   }
 
-  // Get the user's existing API key and start_date
-  const user = await getUser(env.DB, userId);
-  const apiKey = user?.hevy_api_key ?? undefined;
-  const startDate = todayString(tz);
-
-  // Update user record with new program info (preserves API key via COALESCE)
-  await upsertUser(env.DB, {
-    id: userId,
-    active_program: program.meta.title,
-    template_id: templateId,
-    start_date: startDate,
-    hevy_api_key: undefined,
-  });
+  // Update user program fields and get existing API key in one pass
+  const apiKey = await updateUserProgram(env.DB, userId, program.meta.title, templateId, todayString(tz)) ?? undefined;
 
   // Activate: clear old state, sync to Hevy, generate queue
   await activateProgram(env.DB, userId, program, programJsonStr, templateId, apiKey);
@@ -821,12 +816,7 @@ async function handleImportProgram(request: Request, env: Env, userId: string, t
 async function handlePush(env: Env, userId: string, routineId: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user || !user.hevy_api_key) {
-    return sseResponse(
-      patchElements(`<div class="card"><p>Connect your Hevy API key first.</p></div>`, {
-        selector: "#content",
-        mode: "inner",
-      })
-    );
+    return sseErrorCard("Connect your Hevy API key first.", "#content", "inner");
   }
 
   // Look up existing routine mapping from setup
@@ -873,11 +863,8 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
   const payload = buildRoutinePayload(routine, mappings);
 
   if (payload.exercises.length === 0) {
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">Cannot push: no exercises could be mapped to Hevy templates. ${payload.unmapped.length} unmapped exercise(s).</p></div>`,
-        { selector: "#content", mode: "prepend" }
-      )
+    return sseErrorCard(
+      `Cannot push: no exercises could be mapped to Hevy templates. ${payload.unmapped.length} unmapped exercise(s).`
     );
   }
 
@@ -909,13 +896,7 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
       executeScript(`window.open('https://hevy.com/routine/${created.id}', '_blank')`)
     );
   } catch (err) {
-    const msg = escapeHtml(err instanceof Error ? err.message : "Push failed");
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">${msg}</p></div>`,
-        { selector: "#content", mode: "prepend" }
-      )
-    );
+    return sseErrorCard(err instanceof Error ? err.message : "Push failed");
   }
 }
 
@@ -923,12 +904,7 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
 async function handleCleanupRoutines(env: Env, userId: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user || !user.hevy_api_key) {
-    return sseResponse(
-      patchElements(`<div class="card"><p>Connect your Hevy API key first.</p></div>`, {
-        selector: "#content",
-        mode: "prepend",
-      })
-    );
+    return sseErrorCard("Connect your Hevy API key first.");
   }
 
   const client = new HevyClient(user.hevy_api_key);
@@ -1012,21 +988,27 @@ async function performSync(db: D1Database, userId: string, apiKey: string, tz?: 
     (w) => nameToRoutineId.get(w.title) ?? null
   );
 
-  // Build workout ID → local date map for accurate completion dates
-  const workoutDateMap = new Map<string, string>();
-  const workoutExercisesMap = new Map<string, string>();
+  // Build workout ID → { date, exercisesJson } map for accurate completion dates
+  const workoutInfo = new Map<string, { date: string; exercisesJson: string }>();
   for (const w of newWorkouts) {
-    const d = tz
-      ? new Date(w.start_time).toLocaleDateString("en-CA", { timeZone: tz })
-      : w.start_time.slice(0, 10);
-    workoutDateMap.set(w.id, d);
-    workoutExercisesMap.set(w.id, JSON.stringify(w.exercises));
+    workoutInfo.set(w.id, {
+      date: toLocalDate(w.start_time, tz),
+      exercisesJson: JSON.stringify(w.exercises),
+    });
   }
 
-  for (const match of matches) {
-    const completedDate = workoutDateMap.get(match.workoutId) ?? todayString(tz);
-    const workoutData = workoutExercisesMap.get(match.workoutId);
-    await markQueueItemCompleted(db, match.queueItemId, completedDate, match.workoutId, workoutData);
+  // Batch-mark completions
+  if (matches.length > 0) {
+    await db.batch(
+      matches.map((match) => {
+        const info = workoutInfo.get(match.workoutId);
+        return db
+          .prepare(
+            "UPDATE queue_items SET status = 'completed', completed_date = ?, hevy_workout_id = ?, hevy_workout_data = ? WHERE id = ?"
+          )
+          .bind(info?.date ?? todayString(tz), match.workoutId, info?.exercisesJson ?? null, match.queueItemId);
+      })
+    );
   }
 
   // Check for daily routine completion (use workout date, not sync date)
@@ -1034,10 +1016,7 @@ async function performSync(db: D1Database, userId: string, apiKey: string, tz?: 
   if (dailyRoutine) {
     const dailyWorkout = workouts.find((w) => w.title === dailyRoutine.title);
     if (dailyWorkout) {
-      const workoutDate = tz
-        ? new Date(dailyWorkout.start_time).toLocaleDateString("en-CA", { timeZone: tz })
-        : dailyWorkout.start_time.slice(0, 10);
-      await updateDailyCompleted(db, userId, workoutDate);
+      await updateDailyCompleted(db, userId, toLocalDate(dailyWorkout.start_time, tz));
     }
   }
 
@@ -1048,25 +1027,14 @@ async function performSync(db: D1Database, userId: string, apiKey: string, tz?: 
 async function handlePull(env: Env, userId: string, tz?: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user || !user.hevy_api_key) {
-    return sseResponse(
-      patchElements(`<div class="card"><p>Connect your Hevy API key first.</p></div>`, {
-        selector: "#content",
-        mode: "inner",
-      })
-    );
+    return sseErrorCard("Connect your Hevy API key first.", "#content", "inner");
   }
 
   try {
     await performSync(env.DB, userId, user.hevy_api_key, tz);
     return await handleTodaySSE(env, userId, tz);
   } catch (err) {
-    const msg = escapeHtml(err instanceof Error ? err.message : "Pull failed");
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">${msg}</p></div>`,
-        { selector: "#content", mode: "prepend" }
-      )
-    );
+    return sseErrorCard(err instanceof Error ? err.message : "Pull failed");
   }
 }
 
@@ -1079,12 +1047,7 @@ async function handleWebhookRegister(
 ): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user || !user.hevy_api_key) {
-    return sseResponse(
-      patchElements(`<div class="card"><p>Connect your Hevy API key first.</p></div>`, {
-        selector: "#content",
-        mode: "prepend",
-      })
-    );
+    return sseErrorCard("Connect your Hevy API key first.");
   }
 
   try {
@@ -1095,13 +1058,7 @@ async function handleWebhookRegister(
     await updateWebhookState(env.DB, userId, sub.id, authToken);
     return await handleTodaySSE(env, userId, tz);
   } catch (err) {
-    const msg = escapeHtml(err instanceof Error ? err.message : "Failed to enable auto-sync");
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">${msg}</p></div>`,
-        { selector: "#content", mode: "prepend" }
-      )
-    );
+    return sseErrorCard(err instanceof Error ? err.message : "Failed to enable auto-sync");
   }
 }
 
@@ -1113,12 +1070,7 @@ async function handleWebhookUnregister(
 ): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user) {
-    return sseResponse(
-      patchElements(`<div class="card"><p>User not found.</p></div>`, {
-        selector: "#content",
-        mode: "prepend",
-      })
-    );
+    return sseErrorCard("User not found.");
   }
 
   try {
@@ -1129,13 +1081,7 @@ async function handleWebhookUnregister(
     await clearWebhookState(env.DB, userId);
     return await handleTodaySSE(env, userId, tz);
   } catch (err) {
-    const msg = escapeHtml(err instanceof Error ? err.message : "Failed to disable auto-sync");
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">${msg}</p></div>`,
-        { selector: "#content", mode: "prepend" }
-      )
-    );
+    return sseErrorCard(err instanceof Error ? err.message : "Failed to disable auto-sync");
   }
 }
 

@@ -2,7 +2,7 @@
 // Today page fragments — CARs card, hero routine, completed, upcoming
 // ──────────────────────────────────────────────────────────────────
 
-import type { Routine, QueueItemRow, RoutineExercise } from "../types";
+import type { Routine, QueueItemRow } from "../types";
 import type { UpcomingItem } from "../domain/reflow";
 import type { HevyWorkoutExercise, ActualSet } from "../domain/workout-compare";
 import { escapeHtml, escapeAttr, truncate } from "../utils/html";
@@ -141,7 +141,6 @@ ${exerciseRows}
 export interface CompletedItemData {
   title: string;
   hevy_workout_data: string | null;
-  prescribedExercises: RoutineExercise[];
 }
 
 /**
@@ -178,15 +177,16 @@ ${rows}
  *
  * @param webhookId  - non-null if a webhook subscription is active
  * @param lastSyncAt - ISO timestamp of the most recent auto-sync, if any
+ * @param tz         - IANA timezone for formatting lastSyncAt (defaults to UTC)
  */
-export function syncButton(webhookId?: string | null, lastSyncAt?: string | null): string {
+export function syncButton(webhookId?: string | null, lastSyncAt?: string | null, tz?: string): string {
   const manualSync = `<button class="btn btn-ghost" data-on:click="@post('/api/pull')" style="font-size:13px">
     Sync from Hevy
   </button>`;
 
   if (webhookId) {
     const lastSyncLabel = lastSyncAt
-      ? `<div style="font-size:11px; color:var(--text-tertiary); margin-top:4px">Last synced: ${escapeHtml(new Date(lastSyncAt).toLocaleString())}</div>`
+      ? `<div style="font-size:11px; color:var(--text-tertiary); margin-top:4px">Last synced: ${escapeHtml(new Date(lastSyncAt).toLocaleString("en-US", { timeZone: tz ?? "UTC" }))}</div>`
       : "";
 
     return `<div style="text-align:center; margin-top:20px">

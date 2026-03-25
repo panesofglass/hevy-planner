@@ -1,4 +1,5 @@
 import type { UserRow, QueueItemRow, ExerciseTemplateMappingRow, RoutineMappingRow, ProgramRow } from "../types";
+import { sha256Hex } from "../utils/crypto";
 
 export async function getUser(db: D1Database, userId: string): Promise<UserRow | null> {
   return db.prepare("SELECT * FROM users WHERE id = ?").bind(userId).first<UserRow>();
@@ -20,6 +21,22 @@ export async function upsertUser(
     )
     .bind(user.id, user.active_program, user.template_id, user.start_date, user.hevy_api_key ?? null)
     .run();
+}
+
+/** Update program fields and return the existing API key in one roundtrip */
+export async function updateUserProgram(
+  db: D1Database,
+  userId: string,
+  activeProgram: string,
+  templateId: string,
+  startDate: string
+): Promise<string | null> {
+  await db
+    .prepare("UPDATE users SET active_program = ?, template_id = ?, start_date = ? WHERE id = ?")
+    .bind(activeProgram, templateId, startDate, userId)
+    .run();
+  const row = await db.prepare("SELECT hevy_api_key FROM users WHERE id = ?").bind(userId).first<{ hevy_api_key: string | null }>();
+  return row?.hevy_api_key ?? null;
 }
 
 export async function getQueueItems(db: D1Database, userId: string): Promise<QueueItemRow[]> {
@@ -199,9 +216,10 @@ export async function updateWebhookState(
   webhookId: string,
   authToken: string
 ): Promise<void> {
+  const hashed = await sha256Hex(authToken);
   await db
     .prepare("UPDATE users SET webhook_id = ?, webhook_auth_token = ? WHERE id = ?")
-    .bind(webhookId, authToken, userId)
+    .bind(webhookId, hashed, userId)
     .run();
 }
 
@@ -230,9 +248,10 @@ export async function getUserByWebhookToken(
   db: D1Database,
   authToken: string
 ): Promise<UserRow | null> {
+  const hashed = await sha256Hex(authToken);
   return db
     .prepare("SELECT * FROM users WHERE webhook_auth_token = ?")
-    .bind(authToken)
+    .bind(hashed)
     .first<UserRow>();
 }
 
@@ -243,6 +262,8 @@ export async function clearPendingQueueItems(db: D1Database, userId: string): Pr
 
 /** Clear all exercise template and routine mappings for a user */
 export async function clearMappings(db: D1Database, userId: string): Promise<void> {
-  await db.prepare("DELETE FROM exercise_template_mappings WHERE user_id = ?").bind(userId).run();
-  await db.prepare("DELETE FROM routine_mappings WHERE user_id = ?").bind(userId).run();
+  await db.batch([
+    db.prepare("DELETE FROM exercise_template_mappings WHERE user_id = ?").bind(userId),
+    db.prepare("DELETE FROM routine_mappings WHERE user_id = ?").bind(userId),
+  ]);
 }

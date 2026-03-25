@@ -3,7 +3,8 @@
 // ──────────────────────────────────────────────────────────────────
 
 import type { WeekTemplate } from "../types";
-import { escapeHtml, escapeAttr } from "../utils/html";
+import { escapeAttr } from "../utils/html";
+import { renderTemplateGrid } from "./template-grid";
 
 /**
  * First-run setup page. Shows:
@@ -76,24 +77,13 @@ export function setupPage(): string {
  * Shown inside #validation-result after successful program validation.
  */
 export function templateSelectionFragment(templates: WeekTemplate[]): string {
-  const sorted = [...templates].sort(
-    (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+  const grid = renderTemplateGrid(
+    templates,
+    (id) => `data-on:click="@post('/api/setup/${escapeAttr(id)}')"`,
   );
-
-  const templateCards = sorted
-    .map(
-      (t) =>
-        `<div class="template-card" data-on:click="@post('/api/setup/${escapeAttr(t.id)}')">
-  <div class="template-name">${escapeHtml(t.name)}</div>
-  ${t.description ? `<div class="template-desc">${escapeHtml(t.description)}</div>` : ""}
-</div>`
-    )
-    .join("\n    ");
 
   return `<div class="form-group">
   <label class="form-label">Choose Your Schedule</label>
-  <div class="template-grid">
-    ${templateCards}
-  </div>
+  ${grid}
 </div>`;
 }

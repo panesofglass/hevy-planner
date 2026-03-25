@@ -255,22 +255,24 @@ export class HevyClient {
   }
 
   async deleteWebhookSubscription(webhookId: string): Promise<void> {
+    // Use a custom request path: the response body may be empty (204 No Content),
+    // so we call fetch directly rather than this.request() which tries to parse JSON.
     const url = `${this.baseUrl}/webhook_subscriptions/${webhookId}`;
     const res = await fetch(url, {
       method: "DELETE",
-      headers: { "api-key": this.apiKey },
+      headers: {
+        "api-key": this.apiKey,
+        "accept": "application/json",
+        "content-type": "application/json",
+      },
     });
+    if (res.status === 429) {
+      throw new Error("RATE_LIMITED");
+    }
     if (!res.ok) {
       const errorBody = await res.text().catch(() => "");
+      console.error(`Hevy API ${res.status} ${res.statusText} ${url}: ${errorBody}`);
       throw new Error(`Hevy API error: ${res.status} ${res.statusText}: ${errorBody}`);
     }
-  }
-
-  async getWorkoutsSince(since: string, page = 1, pageSize = 10): Promise<HevyWorkout[]> {
-    const data = await this.request<{ page: number; page_count: number; workouts: HevyWorkout[] }>(
-      `/workouts?page=${page}&pageSize=${pageSize}`
-    );
-    // Filter to only workouts newer than the given ISO timestamp
-    return data.workouts.filter((w) => w.start_time >= since);
   }
 }

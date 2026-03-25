@@ -6,6 +6,7 @@
 import type { Program, Progression, Foundation, Resource, BodiIntegration, UserRow, WeekTemplate } from "../types";
 import { escapeHtml, escapeAttr } from "../utils/html";
 import { findActiveProgression } from "../domain/schedule";
+import { renderTemplateGrid } from "./template-grid";
 
 // ── Program overview card ──────────────────────────────────────────
 
@@ -293,30 +294,16 @@ export function importProgramSection(): string {
  * Clicking a card sets $importTemplateId and shows the Apply button.
  */
 export function importTemplateSelectionFragment(templates: WeekTemplate[]): string {
-  const sorted = [...templates].sort(
-    (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+  const grid = renderTemplateGrid(
+    templates,
+    (id) =>
+      `data-on:click="$importTemplateId = '${escapeAttr(id)}'" data-class:selected="$importTemplateId === '${escapeAttr(id)}'"`,
   );
-
-  const templateCards = sorted
-    .map(
-      (t) =>
-        `<div
-  class="template-card"
-  data-on:click="$importTemplateId = '${escapeAttr(t.id)}'"
-  data-class:selected="$importTemplateId === '${escapeAttr(t.id)}'"
->
-  <div class="template-name">${escapeHtml(t.name)}</div>
-  ${t.description ? `<div class="template-desc">${escapeHtml(t.description)}</div>` : ""}
-</div>`
-    )
-    .join("\n    ");
 
   return `<div class="card" style="margin-bottom:0">
   <div class="form-group" style="margin-bottom:0">
     <label class="form-label">Choose Schedule</label>
-    <div class="template-grid">
-    ${templateCards}
-    </div>
+    ${grid}
   </div>
 </div>`;
 }
