@@ -35,8 +35,37 @@ describe("computeUpcoming", () => {
     const upcoming = computeUpcoming(pending, template, routines, 5);
     const types = upcoming.map((u) => u.type);
     expect(types[0]).toBe("routine");   // b
-    expect(types[1]).toBe("spacer");    // CARs-only
+    expect(types[1]).toBe("spacer");    // daily-only day
     expect(types[2]).toBe("routine");   // c
+  });
+
+  it("derives spacer title from the daily routine's title", () => {
+    const pending: QueueItemRow[] = [
+      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
+      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
+    ];
+
+    const upcoming = computeUpcoming(pending, template, routines, 5);
+    const spacer = upcoming.find((u) => u.type === "spacer");
+    // routines[0] has isDaily: true and title: "CARs"
+    expect(spacer?.title).toBe("CARs");
+  });
+
+  it("falls back to 'Rest' for spacer title when no daily routine exists", () => {
+    const noDaily: Routine[] = [
+      { id: "a", title: "Routine A", exercises: [] },
+      { id: "b", title: "Routine B", exercises: [] },
+      { id: "c", title: "Routine C", exercises: [] },
+      { id: "recovery", title: "Recovery", exercises: [] },
+    ];
+    const pending: QueueItemRow[] = [
+      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
+      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null },
+    ];
+
+    const upcoming = computeUpcoming(pending, template, noDaily, 5);
+    const spacer = upcoming.find((u) => u.type === "spacer");
+    expect(spacer?.title).toBe("Rest");
   });
 
   it("limits to requested count of main sessions", () => {
