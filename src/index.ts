@@ -49,6 +49,8 @@ import { programOverview, progressionsSection, routinesSection, foundationsSecti
 import type { Program } from "./types";
 import { escapeHtml } from "./utils/html";
 import { todayString, toLocalDate } from "./utils/date";
+import { getDecryptedApiKey } from "./storage/api-key";
+import { encryptAesGcm } from "./utils/crypto";
 
 import defaultProgramJson from "../programs/mobility-joint-restoration.json";
 
@@ -58,6 +60,8 @@ export interface Env {
   DB: D1Database;
   ENVIRONMENT: string;
   CF_ACCESS_AUD?: string;
+  /** AES-256 key in hex (64 chars). Set via `wrangler secret put ENCRYPTION_KEY`. */
+  ENCRYPTION_KEY: string;
 }
 
 // ──────────────────────────────────────────────────────────────────
@@ -588,12 +592,14 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
   }
 
   // h. Upsert user (must exist before program insert due to FK constraint)
+  // Encrypt the API key before storage; pass undefined when no key provided.
+  const encryptedApiKey = apiKey ? await encryptAesGcm(apiKey, env.ENCRYPTION_KEY) : undefined;
   await upsertUser(env.DB, {
     id: userId,
     active_program: program.meta.title,
     template_id: templateId,
     start_date: startDate,
-    hevy_api_key: apiKey,
+    hevy_api_key: encryptedApiKey,
     timezone: tz,
   });
 
@@ -801,8 +807,9 @@ async function handleImportProgram(request: Request, env: Env, userId: string, t
     return sseErrorCard("Invalid template ID.", "#import-validation-result", "inner");
   }
 
-  // Update user program fields and get existing API key in one pass
-  const apiKey = await updateUserProgram(env.DB, userId, program.meta.title, templateId, todayString(tz)) ?? undefined;
+  // Update user program fields and get existing (encrypted) API key in one pass, then decrypt
+  const storedKey = await updateUserProgram(env.DB, userId, program.meta.title, templateId, todayString(tz));
+  const apiKey = storedKey ? (await getDecryptedApiKey(env.DB, userId, env.ENCRYPTION_KEY)) ?? undefined : undefined;
 
   // Activate: clear old state, sync to Hevy, generate queue
   await activateProgram(env.DB, userId, program, programJsonStr, templateId, apiKey);
@@ -836,7 +843,11 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
     return new Response("Routine not found", { status: 404 });
   }
 
-  const client = new HevyClient(user.hevy_api_key);
+  const apiKey = await getDecryptedApiKey(env.DB, userId, env.ENCRYPTION_KEY);
+  if (!apiKey) {
+    return sseErrorCard("Connect your Hevy API key first.", "#content", "inner");
+  }
+  const client = new HevyClient(apiKey);
 
   // Get or auto-create exercise template mappings
   let mappings = await getExerciseTemplateMappings(env.DB, userId);
@@ -906,7 +917,11 @@ async function handleCleanupRoutines(env: Env, userId: string): Promise<Response
     return sseErrorCard("Connect your Hevy API key first.");
   }
 
-  const client = new HevyClient(user.hevy_api_key);
+  const apiKey = await getDecryptedApiKey(env.DB, userId, env.ENCRYPTION_KEY);
+  if (!apiKey) {
+    return sseErrorCard("Connect your Hevy API key first.");
+  }
+  const client = new HevyClient(apiKey);
   const allRoutines = await client.getAllRoutines();
 
   // Group by title+folder, find duplicates
@@ -1030,7 +1045,11 @@ async function handlePull(env: Env, userId: string, tz?: string): Promise<Respon
   }
 
   try {
-    await performSync(env.DB, userId, user.hevy_api_key, tz);
+    const apiKey = await getDecryptedApiKey(env.DB, userId, env.ENCRYPTION_KEY);
+    if (!apiKey) {
+      return sseErrorCard("Connect your Hevy API key first.", "#content", "inner");
+    }
+    await performSync(env.DB, userId, apiKey, tz);
     return await handleTodaySSE(env, userId, tz);
   } catch (err) {
     return sseErrorCard(err instanceof Error ? err.message : "Pull failed");
@@ -1052,7 +1071,11 @@ async function handleWebhookRegister(
   try {
     const authToken = crypto.randomUUID();
     const webhookUrl = `${new URL(request.url).origin}/api/webhooks/hevy`;
-    const client = new HevyClient(user.hevy_api_key);
+    const apiKey = await getDecryptedApiKey(env.DB, userId, env.ENCRYPTION_KEY);
+    if (!apiKey) {
+      return sseErrorCard("Connect your Hevy API key first.");
+    }
+    const client = new HevyClient(apiKey);
     const sub = await client.createWebhookSubscription(webhookUrl, authToken);
     await updateWebhookState(env.DB, userId, sub.id, authToken);
     return await handleTodaySSE(env, userId, tz);
@@ -1074,8 +1097,11 @@ async function handleWebhookUnregister(
 
   try {
     if (user.hevy_api_key && user.webhook_id) {
-      const client = new HevyClient(user.hevy_api_key);
-      await client.deleteWebhookSubscription(user.webhook_id);
+      const apiKey = await getDecryptedApiKey(env.DB, userId, env.ENCRYPTION_KEY);
+      if (apiKey) {
+        const client = new HevyClient(apiKey);
+        await client.deleteWebhookSubscription(user.webhook_id);
+      }
     }
     await clearWebhookState(env.DB, userId);
     return await handleTodaySSE(env, userId, tz);
@@ -1113,8 +1139,11 @@ async function handleWebhookEvent(
   // Run sync in the background via waitUntil so the response is not delayed
   if (user.hevy_api_key) {
     ctx.waitUntil(
-      performSync(env.DB, user.id, user.hevy_api_key, user.timezone ?? undefined).catch((err) => {
-        console.error("Webhook sync failed:", err instanceof Error ? err.message : err);
+      getDecryptedApiKey(env.DB, user.id, env.ENCRYPTION_KEY).then((apiKey) => {
+        if (!apiKey) return;
+        return performSync(env.DB, user.id, apiKey, user.timezone ?? undefined).catch((err) => {
+          console.error("Webhook sync failed:", err instanceof Error ? err.message : err);
+        });
       })
     );
   }
