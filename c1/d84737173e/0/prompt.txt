@@ -1,0 +1,1106 @@
+Review the v1 milestone. is anything remaining to be done? If not, mark it closed.
+
+---
+
+What's the next milestone, and what's the gh commands to manage milestones?
+
+---
+
+Plan milestone v2 according to Boris Cherny's method
+
+---
+
+9, 6, 7
+
+---
+
+<task-notification>
+<task-id>a748c12ea5d9daa13</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/a748c12ea5d9daa13.output</output-file>
+<status>completed</status>
+<summary>Agent "Issue #9: Data-driven rendering" completed</summary>
+<result>The tests all pass. I wasn't able to run the git staging command — you'll need to run that yourself:
+
+```
+cd /Users/ryanr/Code/hevy-planner/.claude/worktrees/data-driven && git add -A && git status
+```
+
+Here is a summary of every change made:
+
+---
+
+**`/Users/ryanr/Code/hevy-planner/.claude/worktrees/data-driven/src/fragments/today.ts`** — `carsCard` function
+
+- Push-to-Hevy API URL: `'/api/push-hevy/daily'` replaced with `'/api/push-hevy/${escapeAttr(routine.id)}'`
+- Label color: `var(--green)` hardcode replaced with `routine.color ?? 'var(--green)'`, escaped via `escapeAttr`
+- Label text: `"Daily"` replaced with `routine.isDaily ? "Daily" : routine.title`, HTML-escaped
+- Details link: `/routine/daily` replaced with `/routine/${encodeURIComponent(routine.id)}`
+
+**`/Users/ryanr/Code/hevy-planner/.claude/worktrees/data-driven/src/domain/reflow.ts`** — `computeUpcoming` function
+
+- Added `const dailyRoutine = routines.find((r) => r.isDaily)` and `const spacerTitle = dailyRoutine?.title ?? "Rest"` immediately after building `routineMap`
+- Replaced hardcoded `"CARs only"` spacer title with `spacerTitle`
+
+**`/Users/ryanr/Code/hevy-planner/.claude/worktrees/data-driven/test/domain/reflow.test.ts`**
+
+- Added test "derives spacer title from the daily routine's title" — asserts the spacer's title equals `"CARs"` (the daily routine's actual title in the fixture)
+- Added test "falls back to 'Rest' for spacer title when no daily routine exists" — passes a `noDaily` routines array without any `isDaily: true` entry and asserts the spacer title is `"Rest"`
+- Updated an existing comment `// CARs-only` to `// daily-only day` to reflect the new abstraction</result>
+<usage><total_tokens>23839</total_tokens><tool_uses>12</tool_uses><duration_ms>59794</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/a748c12ea5d9daa13.output
+
+---
+
+<task-notification>
+<task-id>a31506a740bbeaa7d</task-id>
+<tool-use-id>toolu_01JP21LpeRmK1LUXRC3cXCtq</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/a31506a740bbeaa7d.output</output-file>
+<status>completed</status>
+<summary>Agent "Issue #4: Program import/upload" completed</summary>
+<result>I need Bash access to run `git add` and `git status`. Let me ask: the user's instructions say to run `git add -A && git status` at the end. I'll explain what I was trying to do and note that tests already passed.
+
+The tests all pass (56/56). Here is what changed and where:
+
+---
+
+## Summary of Changes
+
+### `/Users/ryanr/Code/hevy-planner/.claude/worktrees/program-import/src/storage/queries.ts`
+
+Added two new queries at the end of the file:
+- `clearPendingQueueItems(db, userId)` — deletes only `pending` queue items, preserving completed history
+- `clearMappings(db, userId)` — deletes all exercise template and routine mappings for a user
+
+### `/Users/ryanr/Code/hevy-planner/.claude/worktrees/program-import/src/index.ts`
+
+Three changes:
+
+1. **New imports** — added `clearPendingQueueItems`, `clearMappings` from storage queries and `importProgramSection`, `importTemplateSelectionFragment` from the program fragments.
+
+2. **`activateProgram` function** (extracted before `handlePush`) — contains all the Hevy sync logic previously duplicated in `handleSetup`: clears pending queue and mappings, calls `insertProgram`, auto-matches and creates exercise templates, reconciles routines (create vs. update with folder dedup), saves all mappings, generates and inserts the queue playlist, bulk-sets `hevy_routine_id` on queue items.
+
+3. **`handleSetup` refactored** — the duplicate sync logic is replaced with a single `await activateProgram(...)` call. The user upsert still happens in `handleSetup` before the call (preserving the FK-before-insert order).
+
+4. **Two new handlers**:
+   - `handleValidateImportProgram` — validates uploaded JSON and returns `importTemplateSelectionFragment` into `#import-validation-result`
+   - `handleImportProgram` — parses/validates JSON, reads the existing API key from the user record (preserves it via `COALESCE`), upserts user with new program title/template/start_date, calls `activateProgram`, then returns the full re-rendered Program page SSE response
+
+5. **Two new routes** registered in the router:
+   - `POST /api/validate-import-program`
+   - `POST /api/import-program`
+
+6. **`handleProgramSSE`** — now calls `addFragment(importProgramSection())` at the bottom of every Program page render.
+
+### `/Users/ryanr/Code/hevy-planner/.claude/worktrees/program-import/src/fragments/program.ts`
+
+Added `WeekTemplate` to the type import and two new exported functions:
+
+- **`importProgramSection()`** — collapsible "Import Program" section with three Datastar signals (`$importOpen`, `$importProgramJson`, `$importTemplateId`), a file input that reads the file into a hidden bound input, a "Validate & Preview" button posting to `/api/validate-import-program`, the `#import-validation-result` target div, and an "Apply Program" button (visible only when a template is selected) posting to `/api/import-program`.
+
+- **`importTemplateSelectionFragment(templates)`** — template selection cards that set `$importTemplateId` on click and use `data-class:selected` to highlight the active choice. Used by the validate endpoint to render the template picker inside `#import-validation-result`.</result>
+<usage><total_tokens>62074</total_tokens><tool_uses>31</tool_uses><duration_ms>188073</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/a31506a740bbeaa7d.output
+
+---
+
+Make a memory to finish each worktree before PR with the verify -> simplify -> expert-review flow to verify. verify should normally use superpowers:validation-before-completion. The other two should have related skills.
+
+---
+
+<task-notification>
+<task-id>ad843fad95c3a0c38</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/ad843fad95c3a0c38.output</output-file>
+<status>completed</status>
+<summary>Agent "Efficiency review of v2 changes" completed</summary>
+<result>I now have a complete picture. Here is the full findings report.
+
+---
+
+## Efficiency Findings
+
+### HIGH severity
+
+**1. N+1 DB writes in `performSync` matches loop**
+`/Users/ryanr/Code/hevy-planner/src/index.ts`, lines 1026-1030
+
+Each matched workout fires an individual `UPDATE queue_items` statement inside a `for...of` loop. With 5 recent workouts this is at most 5 round-trips, but the pattern is structurally N+1 and the existing batching infrastructure in `queries.ts` is not used here. `markQueueItemCompleted` does not have a batch variant. On webhook-triggered sync this runs in `waitUntil` so latency is invisible to the user, but on manual pull it holds up the response. This should use `db.batch([...])` the same way `insertQueueItems` and `bulkSetQueueItemRoutineIds` already do.
+
+**2. Sequential `upsertExerciseTemplateMapping` calls in `activateProgram`**
+`/Users/ryanr/Code/hevy-planner/src/index.ts`, lines 634-641
+
+The `for...of` loop over `matched` (one entry per exercise template, which can be 20+ for a full program) issues one prepared-statement `.run()` per iteration. These are pure upserts with no inter-dependency. They should be batched with `db.batch([...])` as is already done for `insertQueueItems` and `bulkSetQueueItemRoutineIds`. Same applies to the `upsertRoutineMapping` loop at lines 689-695.
+
+**3. Sequential Hevy API calls for folder creation in `activateProgram`**
+`/Users/ryanr/Code/hevy-planner/src/index.ts`, lines 654-657
+
+`getOrCreateRoutineFolder` is called sequentially for each unique folder name. For a program with 3 folder groups (e.g. Daily / Phase 1 / Phase 2) that is 3 serial outbound HTTP calls that could be `Promise.all`'d. Hevy API latency is ~200-400ms each so this adds 400-800ms to setup time unnecessarily.
+
+---
+
+### MEDIUM severity
+
+**4. `handleImportProgram` fetches the user twice in one request**
+`/Users/ryanr/Code/hevy-planner/src/index.ts`, lines 800-814
+
+`getUser` is called to extract `hevy_api_key`, then `upsertUser` is called, then `activateProgram` itself does further DB work. The `upsertUser` call at line 805 passes `hevy_api_key: undefined` with the expectation that `COALESCE` will preserve the existing key — which works, but it means a write just to update `active_program`/`template_id`/`start_date`. These three fields could instead be updated in a targeted UPDATE. More importantly, the `getUser` result is not threaded into `activateProgram`; the API key is extracted from the row and passed as a plain string while the full user row (which was just read) is discarded. No structural bug, but it is one unnecessary round-trip.
+
+**5. `workoutExercisesMap` serializes all workout exercises to JSON strings for every workout in `newWorkouts`, even workouts that will never match**
+`/Users/ryanr/Code/hevy-planner/src/index.ts`, lines 1017-1024
+
+With `pageSize=5` the actual impact is small, but the map is built over all `newWorkouts` (not just the matches). `JSON.stringify` on a full exercise array with sets can be kilobytes per workout. The simple fix: build the map lazily or only for matched workout IDs (which are known from `matches` before the writes loop).
+
+**6. `getWorkoutsSince` ignores pagination and fetches only page 1**
+`/Users/ryanr/Code/hevy-planner/src/hevy/client.ts`, lines 269-275
+
+The method fetches page 1 with `pageSize=10`, applies a `since` filter client-side, and returns. If the user has done more than 10 workouts since `since` (e.g. first sync after a long gap, or the `since` timestamp is old), results on page 2+ are silently dropped. This method is defined but does not appear to be called yet in the v2 diff (still using `getRecentWorkouts`), so it is a latent correctness/efficiency bug: when it is wired up, pagination must be walked until `start_time < since` to be correct.
+
+**7. `clearMappings` issues two sequential DELETEs instead of one transaction**
+`/Users/ryanr/Code/hevy-planner/src/storage/queries.ts`, lines 245-248
+
+The two `DELETE` statements (`exercise_template_mappings` and `routine_mappings`) run as independent statements. They should be wrapped in `db.batch([stmt1, stmt2])` to reduce round-trips and ensure they either both succeed or both fail. The same applies to `clearPendingQueueItems` + `clearMappings` being called sequentially in `activateProgram` (lines 599-600): all three DELETEs could be one batch.
+
+---
+
+### LOW severity
+
+**8. `performSync` builds `nameToRoutineId` map from `pendingItems` but `matchCompletions` ignores the name key entirely**
+`/Users/ryanr/Code/hevy-planner/src/index.ts`, lines 1001-1012
+
+The map `nameToRoutineId` (title → hevy_routine_id) is used as the `getRoutineId` lookup in `matchCompletions`, but `matchCompletions` itself builds a second map (hevy_routine_id → queue item id) from `pendingItems` directly. The title→hevy_routine_id indirection means the workout title must equal the routine title exactly for a match — a potential future fragility — but more immediately it means two separate passes over `pendingItems` where one would do. Low severity because it is only O(N) over a small list.
+
+**9. `syncButton` in `today.ts` calls `new Date(lastSyncAt).toLocaleString()` without a locale or timezone**
+`/Users/ryanr/Code/hevy-planner/src/fragments/today.ts` (diff line ~426)
+
+`toLocaleString()` with no arguments uses the runtime's locale and timezone. In a Cloudflare Worker the runtime is V8 isolate, so the timezone is UTC, not the user's local timezone. The `last_sync_at` timestamp will be formatted in UTC regardless of `request.cf.timezone`. Not a performance issue, but it is a correctness bug introduced in this diff that will surface as confusing timestamps. Should use `new Date(lastSyncAt).toLocaleString("en-US", { timeZone: tz })` with the user's `tz` threaded through.
+
+**10. `handleWebhookRegister` calls `getUser` independently even though the caller (`fetch`) already resolved `auth` which contains `userId`**
+`/Users/ryanr/Code/hevy-planner/src/index.ts`, line 1080
+
+The `fetch` handler calls `getAuthenticatedUserOrDev` (which does a DB lookup), then passes `auth.userId` into `handleWebhookRegister`, which immediately calls `getUser` again. The `auth` object could be extended to carry the full `UserRow` to eliminate the second read. This pattern exists for `handlePull` and `handleWebhookUnregister` as well — same issue in each.
+
+---
+
+### Summary table
+
+| # | Severity | Location | Issue |
+|---|----------|----------|-------|
+| 1 | HIGH | `src/index.ts` ~1026 | N+1 DB writes in `performSync` match loop — needs `db.batch` |
+| 2 | HIGH | `src/index.ts` ~634, ~689 | Sequential upsert loops in `activateProgram` — needs `db.batch` |
+| 3 | HIGH | `src/index.ts` ~654 | Sequential Hevy folder creation calls — should be `Promise.all` |
+| 4 | MEDIUM | `src/index.ts` ~800 | `handleImportProgram` reads user then writes user redundantly |
+| 5 | MEDIUM | `src/index.ts` ~1017 | `workoutExercisesMap` JSON-serializes all workouts, not just matched |
+| 6 | MEDIUM | `src/hevy/client.ts` ~269 | `getWorkoutsSince` fetches only page 1, silently drops older pages |
+| 7 | MEDIUM | `src/storage/queries.ts` ~245 | `clearMappings` two sequential DELETEs should be `db.batch` |
+| 8 | LOW | `src/index.ts` ~1001 | Redundant double-pass over `pendingItems` for name map |
+| 9 | LOW | `src/fragments/today.ts` | `toLocaleString()` uses UTC, not user timezone |
+| 10 | LOW | `src/index.ts` ~1080 | Redundant `getUser` calls — `auth` object already does one DB read |</result>
+<usage><total_tokens>48218</total_tokens><tool_uses>18</tool_uses><duration_ms>84696</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/ad843fad95c3a0c38.output
+
+---
+
+<task-notification>
+<task-id>aa98cde265aa94aff</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/aa98cde265aa94aff.output</output-file>
+<status>completed</status>
+<summary>Agent "Code quality review of v2 changes" completed</summary>
+<result>I now have a thorough understanding of the codebase changes. Here is my review.
+
+---
+
+## Code Quality Review: v2 Changes
+
+### 1. Copy-paste: `handleValidateImportProgram` vs `handleValidateProgram`
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts`, lines 296-332 vs 712-756
+
+These two functions are structurally identical. The only differences are:
+- The CSS selector string (`"#validation-result"` vs `"#import-validation-result"`)
+- The default-program fallback (`|| JSON.stringify(defaultProgramJson)` vs an explicit "No program JSON" error)
+- Which template selection fragment is returned (`templateSelectionFragment` vs `importTemplateSelectionFragment`)
+
+The parse-validate-render-errors pipeline is duplicated verbatim. Extract a shared helper like `validateAndRespond(programJsonStr, selector, templateRenderer)` that takes the target selector and the fragment function as parameters. This eliminates ~40 lines of near-identical code.
+
+### 2. Copy-paste: `importTemplateSelectionFragment` vs `templateSelectionFragment`
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/fragments/program.ts`, lines 295-322 vs `/Users/ryanr/Code/hevy-planner/src/fragments/setup.ts`, lines 78-99
+
+Both sort templates by `sortOrder`, map them to nearly identical card HTML, and wrap in a grid. The only real difference is the click behavior: setup cards `@post('/api/setup/${id}')` directly, while import cards set a signal `$importTemplateId = '${id}'`. Consider a shared `templateGrid(templates, onClickAttr)` that takes a function producing the `data-on:click` attribute value per card.
+
+### 3. Redundant state on `CompletedItemData`
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/fragments/today.ts`, lines 141-145
+
+```typescript
+export interface CompletedItemData {
+  title: string;
+  hevy_workout_data: string | null;
+  prescribedExercises: RoutineExercise[];
+}
+```
+
+`prescribedExercises` is populated at `/Users/ryanr/Code/hevy-planner/src/index.ts` line 381 but never read anywhere -- `completedSection` (line 151) passes only `item.hevy_workout_data` to `workoutDetailBlock`. The `compareWorkout` domain function that would consume it is also never called from any rendering path. This is dead data being threaded through the interface. Either remove `prescribedExercises` from `CompletedItemData` now, or add a TODO with a ticket reference if it is intended for a future comparison view.
+
+### 4. Dead code: `getWorkoutsSince` in HevyClient
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/hevy/client.ts`, lines 269-275
+
+This method is added but never called. `performSync` (index.ts line 989) calls `getRecentWorkouts()`, not `getWorkoutsSince`. If it was intended for the webhook path, it is not wired up. Additionally, the implementation does client-side string comparison (`w.start_time >= since`) for ISO timestamp filtering, which is fragile -- it silently depends on both sides using identical ISO 8601 format with the same timezone offset representation.
+
+### 5. Dead code: `compareWorkout` domain function
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/domain/workout-compare.ts`, entire file
+
+This module is imported by `today.ts` only for its type exports (`HevyWorkoutExercise`, `ActualSet`). The `compareWorkout` function itself is never called from any production code path. The tests cover it well, but it is unused functionality shipping to production. Same concern as finding 3 -- either wire it in or defer the addition.
+
+### 6. Inconsistent `hevy_workout_data` on test fixtures
+
+**File:** `/Users/ryanr/Code/hevy-planner/test/domain/reflow.test.ts`, lines 30-31, 44-45, 62-63, 73-76
+
+`QueueItemRow` now includes `hevy_workout_data` (types.ts line 27), but the test fixtures do not include it. TypeScript likely infers it as `undefined`, which happens to work because the reflow domain code does not read this field. However, the fixtures are now structurally incomplete relative to the type. This will cause a compile error if `strict` mode checks for missing properties in object literals. Adding `hevy_workout_data: null` to each fixture keeps them honest.
+
+### 7. `activateProgram` non-null assertion on template lookup
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts`, line 596
+
+```typescript
+const template = program.weekTemplates.find((t) => t.id === templateId)!;
+```
+
+Both callers (`handleSetup` at line 547 and `handleImportProgram` at line 795) validate the template ID before calling `activateProgram`, so the `!` is currently safe. But the function's own contract does not enforce this -- a future caller could pass an invalid `templateId` and hit an undefined-as-WeekTemplate bug silently. Throw an explicit error instead of using `!`.
+
+### 8. `deleteWebhookSubscription` bypasses the shared `this.request` method
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/hevy/client.ts`, lines 257-267
+
+Every other method in `HevyClient` goes through `this.request()`, which handles headers, error formatting, and content-type. `deleteWebhookSubscription` manually calls `fetch` with hand-rolled headers and error handling. This duplicates the error message format and skips any future improvements to the base `request` method (e.g., retry logic, rate limiting). Use `this.request` with `method: "DELETE"` instead. You may need to handle the empty-body response case, but that is a smaller change than duplicating the fetch logic.
+
+### 9. `performSync` builds two parallel Maps with identical iteration
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts`, lines 1016-1024
+
+```typescript
+const workoutDateMap = new Map<string, string>();
+const workoutExercisesMap = new Map<string, string>();
+for (const w of newWorkouts) {
+  const d = tz
+    ? new Date(w.start_time).toLocaleDateString("en-CA", { timeZone: tz })
+    : w.start_time.slice(0, 10);
+  workoutDateMap.set(w.id, d);
+  workoutExercisesMap.set(w.id, JSON.stringify(w.exercises));
+}
+```
+
+Two separate Maps keyed by the same `w.id` built in the same loop. Use a single `Map<string, { date: string; exercisesJson: string }>` instead of two parallel maps. Easier to reason about, impossible to get out of sync.
+
+### 10. Duplicated date-conversion logic
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts`, lines 1019-1021 and 1037-1039
+
+The ternary pattern for converting `start_time` to a local date string:
+```typescript
+const d = tz
+  ? new Date(w.start_time).toLocaleDateString("en-CA", { timeZone: tz })
+  : w.start_time.slice(0, 10);
+```
+
+appears twice in `performSync` (once for the general workout date map, once for the daily routine). Extract a `workoutLocalDate(startTime: string, tz?: string): string` helper. This pattern also appeared in the pre-v2 code, so it was already duplicated -- the extraction from `handlePull` into `performSync` was the right time to fix it.
+
+### 11. Unnecessary comment in `handleWebhookEvent`
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts`, line 1148
+
+```typescript
+// Extract auth token — Hevy sends it in the Authorization header as "Bearer <token>"
+// or as a plain token. Fall back to checking the request body.
+```
+
+This comment explains WHY (Hevy's inconsistent token delivery) and is fine. But the comments on lines 1032 ("Check for daily routine completion (use workout date, not sync date)") and 993 ("Skip workouts already matched to a completed queue item") are borderline -- they were valuable as gotcha-documentation in the original code, and the ones in `performSync` are essentially the same comments carried over. They remain useful as gotcha reminders, so I would keep them.
+
+### 12. Inline JavaScript in `importProgramSection` DOM manipulation
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/fragments/program.ts`, lines 255-265
+
+```
+data-on:change="
+  const f = evt.target.files[0];
+  if (!f) return;
+  f.text().then(t => {
+    const el = document.getElementById('importProgramData');
+    el.value = t;
+    el.dispatchEvent(new Event('input', {bubbles: true}));
+    $importTemplateId = '';
+    document.getElementById('import-validation-result').innerHTML = '';
+  });
+"
+```
+
+This is identical to the setup page's file-read inline JS (setup.ts lines 28-34) except for: the hidden input ID (`importProgramData` vs `programData`), the extra signal reset (`$importTemplateId = ''`), and the extra `innerHTML = ''` cleanup. This is a third instance of the copy-paste pattern. The setup page version and the import version could share a named inline handler pattern if the IDs were parameterized, but given Datastar's inline-attribute model, this is somewhat inherent. Still worth noting as duplication.
+
+### 13. `webhook_auth_token` stored in plaintext
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts`, lines 196-206 and 229-237
+
+The webhook auth token is stored and queried as plaintext in D1. CLAUDE.md explicitly warns "Do NOT store Hevy API keys in plaintext -- encrypt at rest in D1." The same principle applies to the webhook auth token, which is a bearer credential that authenticates incoming webhook requests. If the D1 database is compromised, an attacker can forge webhook events for any user. Store a hash of the token, or encrypt it with the same scheme used for API keys.
+
+---
+
+### Summary
+
+| # | Severity | Category | Location |
+|---|----------|----------|----------|
+| 1 | Medium | Copy-paste | `handleValidateImportProgram` vs `handleValidateProgram` in index.ts |
+| 2 | Low | Copy-paste | `importTemplateSelectionFragment` vs `templateSelectionFragment` |
+| 3 | Medium | Dead data | `prescribedExercises` on `CompletedItemData` is populated but never read |
+| 4 | Low | Dead code | `getWorkoutsSince` added but never called |
+| 5 | Low | Dead code | `compareWorkout` function never called from production paths |
+| 6 | Low | Type safety | Test fixtures missing `hevy_workout_data` field |
+| 7 | Low | Safety | Non-null assertion `!` on template lookup in `activateProgram` |
+| 8 | Medium | Leaky abstraction | `deleteWebhookSubscription` bypasses shared `this.request()` |
+| 9 | Low | Redundant state | Two parallel Maps with identical keys in `performSync` |
+| 10 | Low | Duplication | Date-conversion ternary repeated twice in `performSync` |
+| 11 | N/A | Comments | Comments are generally good; carried-over gotcha comments are appropriate |
+| 12 | Low | Copy-paste | Inline file-read JS duplicated between setup and import |
+| 13 | High | Security | `webhook_auth_token` stored in plaintext, same concern as API key encryption |
+
+The highest-priority items are **13** (security: plaintext auth token), **1** (the validate handler duplication is the most actionable refactor), and **3** (dead data on `CompletedItemData` signals incomplete work -- either finish wiring `compareWorkout` into the rendering path or remove the unused field so it does not mislead future readers).</result>
+<usage><total_tokens>72926</total_tokens><tool_uses>20</tool_uses><duration_ms>109342</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/aa98cde265aa94aff.output
+
+---
+
+<task-notification>
+<task-id>a49cb1bd99d69335c</task-id>
+<tool-use-id>toolu_01B7VNMXyBk6CZgosJgX3JHV</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/a49cb1bd99d69335c.output</output-file>
+<status>completed</status>
+<summary>Agent "Code reuse review of v2 changes" completed</summary>
+<result>Good. Now I have a complete picture. Let me compile my findings.
+
+---
+
+Here is the code reuse review of the v2 changes, organized by finding.
+
+---
+
+## Finding 1: `handleValidateImportProgram` is a near-duplicate of `handleValidateProgram`
+
+**Files:**
+- `/Users/ryanr/Code/hevy-planner/src/index.ts` lines 296-332 (`handleValidateProgram`)
+- `/Users/ryanr/Code/hevy-planner/src/index.ts` lines 712-756 (`handleValidateImportProgram`)
+
+**Details:** These two functions share identical logic: parse JSON body, `JSON.parse`, call `validateProgram`, format error responses, return template selection on success. The only differences are:
+1. `handleValidateProgram` falls back to a bundled default program when no JSON is provided; `handleValidateImportProgram` returns an error instead.
+2. The target CSS selector (`#validation-result` vs `#import-validation-result`).
+3. The success fragment (`templateSelectionFragment` vs `importTemplateSelectionFragment`).
+
+**Recommendation:** Extract a shared `validateAndRespond(programJsonStr, selector, successFragment)` helper that encapsulates the parse/validate/error-format logic. Each route handler becomes a 5-line wrapper that supplies its own fallback behavior, selector, and fragment builder.
+
+---
+
+## Finding 2: `importTemplateSelectionFragment` is a near-duplicate of `templateSelectionFragment`
+
+**Files:**
+- `/Users/ryanr/Code/hevy-planner/src/fragments/setup.ts` lines 78-99 (`templateSelectionFragment`)
+- `/Users/ryanr/Code/hevy-planner/src/fragments/program.ts` lines 295-322 (`importTemplateSelectionFragment`)
+
+**Details:** Both functions sort templates by `sortOrder`, iterate to produce `.template-card` divs with `.template-name` and optional `.template-desc`, then wrap them in a `.template-grid`. The differences are:
+1. The click handler: setup uses `data-on:click="@post('/api/setup/${id}')"` while import uses `data-on:click="$importTemplateId = '${id}'"` with a `data-class:selected` attribute.
+2. Minor wrapper markup (outer `<div class="card">` vs `<div class="form-group">`).
+
+**Recommendation:** Extract a shared `renderTemplateCards(templates, cardAttrsBuilder)` that takes templates and a callback to produce per-card attributes (the click handler and any extra attributes). Each fragment calls this with its specific behavior. This eliminates ~25 lines of duplicated sort/map/join/escape logic.
+
+---
+
+## Finding 3: SSE error response pattern repeated 12+ times with no helper
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts` lines 307, 320, 560, 719, 731, 744, 772, 878, 915, 1066, 1101, 1135
+
+**Details:** The pattern `sseResponse(patchElements(\`<div class="card"><p style="color:var(--orange)">${msg}</p></div>\`, { selector, mode }))` appears 12 times across the file. Each instance builds the same orange-text error card HTML, varying only the message, selector, and mode.
+
+**Recommendation:** Create a helper function:
+```typescript
+function sseErrorCard(msg: string, selector = "#content", mode: "inner" | "prepend" = "prepend"): Response {
+  return sseResponse(
+    patchElements(
+      `<div class="card"><p style="color:var(--orange)">${escapeHtml(msg)}</p></div>`,
+      { selector, mode }
+    )
+  );
+}
+```
+This reduces each call site to a single line and centralizes the error card styling. Note that some current call sites forget to escape `msg` (the static-string ones are safe, but the pattern is fragile) -- the helper would enforce escaping consistently.
+
+---
+
+## Finding 4: Date conversion from `start_time` to local date is duplicated in `performSync`
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts` lines 1019-1021 and 1037-1039
+
+**Details:** Inside `performSync`, the expression for converting a workout's `start_time` to a local YYYY-MM-DD string appears twice, once for the `workoutDateMap` loop and once for the daily routine check:
+```typescript
+const d = tz
+  ? new Date(w.start_time).toLocaleDateString("en-CA", { timeZone: tz })
+  : w.start_time.slice(0, 10);
+```
+
+A similar pattern also exists in `todayString` at line 66-73, but `todayString` uses `new Date()` (current time) rather than an arbitrary ISO timestamp.
+
+**Recommendation:** Extract a utility like `toLocalDate(isoTimestamp: string, tz?: string): string` alongside or generalizing `todayString`. Then `todayString` could be `toLocalDate(new Date().toISOString(), tz)`, and the two duplicated blocks in `performSync` become single calls.
+
+---
+
+## Finding 5: `performSync` properly replaces `handlePull` logic (no residual duplication)
+
+**Files:**
+- `/Users/ryanr/Code/hevy-planner/src/index.ts` lines 975-1045 (`performSync`)
+- `/Users/ryanr/Code/hevy-planner/src/index.ts` lines 1047-1071 (`handlePull`)
+
+**Details:** The refactor correctly extracted the sync logic into `performSync` and `handlePull` is now a thin wrapper that calls it. The webhook handler (`handleWebhookEvent` at line 1139) also calls `performSync`. No duplicate sync logic remains. This is good.
+
+---
+
+## Finding 6: `getWorkoutsSince` is unused dead code
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/hevy/client.ts` line 269
+
+**Details:** The new method `getWorkoutsSince` is defined but never called anywhere in the codebase. `performSync` uses `getRecentWorkouts` (line 989). This method also has a design issue: it fetches a fixed page then filters client-side, meaning it could silently drop older workouts if the page boundary falls within the `since` range.
+
+**Recommendation:** Either remove it (dead code) or, if it is planned for future use, add a `// TODO` comment noting the pagination limitation.
+
+---
+
+## Finding 7: `deleteWebhookSubscription` bypasses the shared `this.request()` method
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/hevy/client.ts` lines 257-267
+
+**Details:** Every other method in `HevyClient` uses the private `this.request()` helper (line 54), which handles header injection, rate-limit detection (`429`), error formatting, and JSON parsing. `deleteWebhookSubscription` manually calls `fetch()` with hand-rolled headers and error handling. It also sends `Content-Type: application/json` implicitly via `this.request()` in other methods but omits it here, and it does not handle 429 rate limiting.
+
+**Recommendation:** Use `this.request<void>("/webhook_subscriptions/${webhookId}", { method: "DELETE" })`. The `request` method will need a small tweak to handle void/empty responses (204), but that is better than maintaining a parallel fetch path.
+
+---
+
+## Finding 8: `CompletedItemData.prescribedExercises` is populated but never consumed
+
+**Files:**
+- `/Users/ryanr/Code/hevy-planner/src/fragments/today.ts` line 144 (interface definition)
+- `/Users/ryanr/Code/hevy-planner/src/index.ts` lines 381, 384 (populated in `handleTodaySSE`)
+
+**Details:** The `prescribedExercises` field is included in `CompletedItemData` and populated for every completed item, but the `completedSection` function (line 151) never reads it. The `workoutDetailBlock` helper only uses `hevy_workout_data`. This field was presumably intended for use with `compareWorkout` from `src/domain/workout-compare.ts`, but that integration was never wired up.
+
+**Recommendation:** Either wire it into the completed section rendering (calling `compareWorkout` to show matched/missing/extra indicators) or remove it from the interface and stop populating it to avoid dead data passing.
+
+---
+
+## Finding 9: `importProgramSection` duplicates the file-upload JS pattern from `setupPage`
+
+**Files:**
+- `/Users/ryanr/Code/hevy-planner/src/fragments/setup.ts` lines 27-35 (file upload handler)
+- `/Users/ryanr/Code/hevy-planner/src/fragments/program.ts` lines 255-265 (file upload handler)
+
+**Details:** Both fragments contain nearly identical inline JavaScript for reading a file via `FileReader`-style `f.text().then(...)` and dispatching an input event to a hidden element. The import version adds two extra lines (resetting `$importTemplateId` and clearing the result div), but the core read-and-dispatch logic is the same copy-pasted block.
+
+**Recommendation:** This is less urgent since it is client-side JS embedded in HTML strings, which makes extraction harder. However, if a third upload context is ever added, consider a shared inline JS snippet constant, or a small client-side utility function injected once via the page shell.
+
+---
+
+## Summary
+
+| # | Finding | Severity | Effort |
+|---|---------|----------|--------|
+| 1 | `handleValidateImportProgram` duplicates `handleValidateProgram` | Medium | Low - extract shared helper |
+| 2 | `importTemplateSelectionFragment` duplicates `templateSelectionFragment` | Medium | Low - parameterize card builder |
+| 3 | SSE orange error card pattern repeated 12 times | Medium | Low - one-line helper |
+| 4 | Date conversion duplicated in `performSync` | Low | Low - extract `toLocalDate` |
+| 5 | `performSync` extraction is clean (positive) | N/A | N/A |
+| 6 | `getWorkoutsSince` is unused dead code | Low | Trivial - delete |
+| 7 | `deleteWebhookSubscription` bypasses `this.request()` | Medium | Low - use shared method |
+| 8 | `prescribedExercises` populated but never consumed | Low | Trivial - remove or use |
+| 9 | File upload JS duplicated in two fragments | Low | Medium - harder to extract from inline HTML |
+
+The highest-value changes are findings 1, 2, and 3, which together would eliminate roughly 80 lines of duplicated code and establish reusable patterns for the validation flow and error responses.</result>
+<usage><total_tokens>56992</total_tokens><tool_uses>29</tool_uses><duration_ms>137232</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/a49cb1bd99d69335c.output
+
+---
+
+yes
+
+---
+
+<task-notification>
+<task-id>ae57756f30bfc7e79</task-id>
+<tool-use-id>toolu_01GJtwyUjeefCYYuL7mtCf72</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/ae57756f30bfc7e79.output</output-file>
+<status>completed</status>
+<summary>Agent "HTTP/API review of v2 milestone" completed</summary>
+<result>I now have all the information needed for a thorough review. Let me compile the findings.
+
+---
+
+## HTTP/API Design Review: v2 Changes (6d71d97..30af6ce)
+
+### Critical Findings
+
+**[API-CRITICAL] Missing index on `webhook_auth_token` -- full table scan on every webhook call**
+`/Users/ryanr/Code/hevy-planner/migrations/0006_webhook_state.sql`
+
+`getUserByWebhookToken` at `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts:253` runs `SELECT * FROM users WHERE webhook_auth_token = ?`. This is the hot path for every Hevy webhook delivery, yet there is no index on `webhook_auth_token`. With D1 at the edge, every webhook event triggers a full table scan. This is both a performance issue and a timing concern since the webhook handler must return quickly (Hevy expects a fast 2xx). Add a migration:
+
+```sql
+CREATE INDEX idx_users_webhook_auth_token ON users (webhook_auth_token);
+```
+
+**[API-CRITICAL] Datastar signal naming mismatch -- import flow silently sends empty values**
+`/Users/ryanr/Code/hevy-planner/src/fragments/program.ts:239` and `/Users/ryanr/Code/hevy-planner/src/index.ts:771-778`
+
+The import fragment declares signals with kebab-case: `data-signals:import-program-json` and `data-signals:import-template-id`. Datastar converts kebab-case attribute names to camelCase in the signal store, so these become `importProgramJson` and `importTemplateId` in the `@post` JSON body. The route handler at line 778 destructures `body.programJson` and `body.templateId` -- but Datastar sends `importProgramJson` and `importTemplateId` (with the `import` prefix). The handler will always see `undefined` for both fields, producing either a 400 or the "No program JSON provided" SSE error card on every import attempt.
+
+Compare with the working setup flow: `data-signals:program-json` becomes `programJson` in the body, and the handler reads `body.programJson` -- that works because there is no prefix. The import flow handler needs to read `body.importProgramJson` and `body.importTemplateId`, or the signal names need to drop the `import` prefix (which would conflict with the setup signals if both pages are ever loaded together, but since setup and program are separate pages, aliased names would work).
+
+---
+
+### Important Findings
+
+**[API-IMPORTANT] `POST /api/webhooks/unregister` should be `DELETE /api/webhooks`**
+`/Users/ryanr/Code/hevy-planner/src/index.ts:285`
+
+The register/unregister pair uses `POST` for both operations, but unregistration is a resource deletion. REST convention says `DELETE /api/webhooks` (or `DELETE /api/webhooks/:id`). The current naming `POST /api/webhooks/unregister` is an RPC-style verb path. Even if Datastar's `@post` is the only convenient client-side action verb, consider renaming to `POST /api/webhooks` (register) and `DELETE /api/webhooks` (unregister) for API correctness. If Datastar cannot issue `DELETE`, a `POST /api/webhooks/disable` reads more naturally than `unregister` and avoids the REST smell. This is not blocking but worth aligning before the API surface grows.
+
+**[API-IMPORTANT] Webhook body cloning without Content-Type check**
+`/Users/ryanr/Code/hevy-planner/src/index.ts:1104-1111`
+
+The webhook handler clones the request body and tries `request.clone().json()` as a fallback when the `Authorization` header is missing. If Hevy ever sends a non-JSON body (or no body at all), this silently catches the error -- which is fine as-is. However, there is no validation of the webhook event type or payload structure. The handler fires `performSync` regardless of the event type (e.g., `workout.created` vs hypothetical `subscription.deleted` or `test` events). If Hevy introduces new event types, this will trigger unnecessary syncs. Consider at minimum logging the event type, and ideally filtering:
+
+```typescript
+const body = await request.clone().json() as Record<string, unknown>;
+if (body.event_type && body.event_type !== "workout_updated") {
+  return new Response(null, { status: 200 }); // Acknowledge but skip
+}
+```
+
+**[API-IMPORTANT] Inconsistent error response formats across new routes**
+`/Users/ryanr/Code/hevy-planner/src/index.ts:775-785` vs `/Users/ryanr/Code/hevy-planner/src/index.ts:780-781`
+
+The import handler mixes plain-text `Response` error bodies (line 775: `"Invalid request body"`, line 785: `"Template ID is required"`) with SSE error card responses (line 781: `sseErrorCard("No program JSON provided.")`). Since the client calls this via Datastar `@post`, which expects SSE responses, returning a plain `new Response("...", { status: 400 })` will not render an error message in the UI -- Datastar will either silently fail or show a generic error. All error responses from routes called by Datastar `@post` should use `sseErrorCard()` to ensure the user sees the error message. The same issue exists in the setup handler at lines 558 and 567.
+
+**[API-IMPORTANT] Webhook `200 OK` with `null` body is unconventional**
+`/Users/ryanr/Code/hevy-planner/src/index.ts:1133`
+
+The webhook handler returns `new Response(null, { status: 200 })`. While not incorrect, `204 No Content` is the conventional status for "accepted, no body to return." This also communicates the intent more clearly than a 200 with an empty body.
+
+**[API-IMPORTANT] Webhook auth token stored as raw UUID, hashed per-request**
+`/Users/ryanr/Code/hevy-planner/src/utils/crypto.ts` and `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts:219,251`
+
+Good design choice to hash the token before storage. However, the `sha256Hex` function is called on every webhook event (line 251) and again on every registration (line 219). SHA-256 is fast, so this is not a performance concern, but be aware that if the token is ever rotated or compared in a different context, the hex encoding choice is baked in. The implementation is sound.
+
+---
+
+### Minor Findings
+
+**[API-MINOR] `deleteWebhookSubscription` inconsistent with `deleteRoutine` / `deleteRoutineFolder`**
+`/Users/ryanr/Code/hevy-planner/src/hevy/client.ts:257-277` vs lines 201-222
+
+`deleteWebhookSubscription` duplicates the `fetch` + error handling logic but adds rate limit handling (`status === 429`) and extra headers (`accept`, `content-type`) that the existing `deleteRoutine` and `deleteRoutineFolder` methods do not have. The older delete methods also lack the `429` check. This is inconsistent -- either all methods should handle rate limits (they should, since the CLAUDE.md notes Hevy rate limits exist), or `this.request()` should be enhanced to handle 204 responses so all methods go through the same code path. The simplest fix would be making `this.request()` return `void` when the response body is empty instead of trying to parse JSON.
+
+**[API-MINOR] Route naming: `/api/validate-import-program` is redundant**
+`/Users/ryanr/Code/hevy-planner/src/index.ts:239`
+
+The existing route is `/api/validate-program` for setup. The new route is `/api/validate-import-program`. A more consistent pattern would be `/api/programs/validate` and `/api/programs/import` (resource-oriented), or if you want to keep the flat namespace, `/api/validate-program` with an optional `?context=import` query parameter that changes the target selector. The current approach works but creates a second validation endpoint that shares 95% of the logic (via `validateAndRespond`), differing only in the target CSS selector.
+
+**[API-MINOR] `GET /programs/default.json` serves static JSON before auth check**
+`/Users/ryanr/Code/hevy-planner/src/index.ts:144`
+
+This route is after the webhook pre-auth check but after the main auth call on line 140. This is fine -- it is behind auth. However, the default program JSON is bundled into the Worker and is not user-specific. If you ever want this to be publicly downloadable (e.g., for a setup page accessible without auth), note it currently requires authentication.
+
+**[API-MINOR] The `handleImportProgram` re-renders the full Program page SSE on success**
+`/Users/ryanr/Code/hevy-planner/src/index.ts:812`
+
+After a successful import, the handler returns `handleProgramSSE(env, userId)` which replaces `#content` entirely. This is correct behavior, but the import section's own `#import-validation-result` div will be destroyed and recreated, potentially causing a flash. Consider whether `executeScript("window.location.href = '/program'")` (like the setup flow uses with `'/'`) would provide a cleaner transition.
+
+**[API-MINOR] Comment says `$import_program_json` but the actual Datastar signal uses camelCase `$importProgramJson`**
+`/Users/ryanr/Code/hevy-planner/src/fragments/program.ts:235-236`
+
+The JSDoc comment documents signal names as `$import_program_json` and `$import_template_id` (snake_case), but Datastar converts `data-signals:import-program-json` to `$importProgramJson` (camelCase). The comments are misleading.
+
+**[API-MINOR] `performSync` does not pass timezone through `waitUntil`**
+`/Users/ryanr/Code/hevy-planner/src/index.ts:1127`
+
+The webhook handler calls `performSync(env.DB, user.id, user.hevy_api_key)` without a timezone argument. Cloudflare's `request.cf.timezone` is available in the original request context, but the webhook request comes from Hevy, not from the user's browser, so there is no meaningful timezone to extract. The fallback in `toLocalDate` will use UTC slicing (`isoTimestamp.slice(0, 10)`). This means webhook-triggered syncs may record completion dates in UTC rather than the user's local timezone, which could cause a one-day-off error for users in late-offset timezones (e.g., US Pacific at 10pm local = next day UTC). Consider storing the user's timezone preference in D1 at setup time.
+
+---
+
+### Summary
+
+| Severity | Count | Key Issues |
+|----------|-------|------------|
+| CRITICAL | 2 | Signal naming mismatch breaks import flow; missing DB index on webhook lookup |
+| IMPORTANT | 4 | Inconsistent error response formats; REST method choice; no webhook event filtering; 200 vs 204 |
+| MINOR | 6 | Client method inconsistency; route naming; timezone gap in webhook sync; stale comments |
+
+The two critical findings are likely to manifest as user-visible bugs: the import flow will silently fail because the server never receives the uploaded JSON or selected template ID, and the missing index will degrade webhook latency as the user table grows.</result>
+<usage><total_tokens>59881</total_tokens><tool_uses>32</tool_uses><duration_ms>135960</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/ae57756f30bfc7e79.output
+
+---
+
+<task-notification>
+<task-id>afac77607e9196b8b</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/afac77607e9196b8b.output</output-file>
+<status>completed</status>
+<summary>Agent "Architecture review of v2 milestone" completed</summary>
+<result>I have a complete picture now. Here is my architectural review.
+
+---
+
+## Architecture Review: hevy-planner v2 (6d71d97..30af6ce)
+
+### Summary
+
+The v2 diff adds four feature areas across 18 files (+1,099 / -208 lines): data-driven rendering, workout detail display, webhook-based auto-sync, and program import/upload. The changes are generally well-structured and follow the project's established patterns. I found two critical issues, three important ones, and several minor observations.
+
+---
+
+### [ARCH-CRITICAL-1] Raw SQL duplicated between `performSync` and `queries.ts`
+
+**Files:** `/Users/ryanr/Code/hevy-planner/src/index.ts` (line 1007), `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts` (line 71)
+
+The `performSync` function in `index.ts` contains a hand-rolled `db.batch()` call with the exact same SQL as `markQueueItemCompleted` in `queries.ts`:
+
+```sql
+UPDATE queue_items SET status = 'completed', completed_date = ?, hevy_workout_id = ?, hevy_workout_data = ? WHERE id = ?
+```
+
+This violates the project convention that D1 queries live in `src/storage/queries.ts`. If the schema changes (column names, new columns), only one copy might be updated. The batching rationale is valid (performance), but the solution is to expose a `batchMarkQueueItemsCompleted` function from `queries.ts` that accepts an array and returns prepared statements for `db.batch()`, keeping all SQL in one place.
+
+Additionally, `markQueueItemCompleted` is imported in `index.ts` (line 18) but never called anywhere in that file -- it has become dead import code since `performSync` replaced its usage with inline SQL.
+
+---
+
+### [ARCH-CRITICAL-2] Webhook sync runs without user timezone
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts` (line 1127)
+
+The webhook handler calls `performSync(env.DB, user.id, user.hevy_api_key)` without passing a timezone. Inside `performSync`, this means `toLocalDate(w.start_time, tz)` falls back to slicing the ISO string (UTC), and `todayString(tz)` returns UTC date. For a user in US Pacific time who finishes a workout at 10pm local (6am UTC next day), the `completed_date` will be wrong -- off by a day.
+
+CLAUDE.md explicitly warns about this: "use the workout's start_time converted to user timezone (request.cf.timezone) -- not todayString(). Users sync after midnight UTC but before local midnight."
+
+The webhook request comes from Hevy's servers, not the user's browser, so `request.cf.timezone` reflects Hevy's infrastructure location, not the user. The user's timezone needs to be stored in the `users` table during setup (when `request.cf.timezone` is available from a real user request) and read back during webhook processing. This is a data integrity issue that will affect real users' completion dates.
+
+---
+
+### [ARCH-IMPORTANT-1] `activateProgram` is application orchestration living in `index.ts`
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts` (lines 614-760)
+
+`activateProgram` is 146 lines of orchestration logic that coordinates D1 writes, Hevy API calls, exercise matching, routine reconciliation, folder management, queue generation, and bulk mapping updates. It is not a route handler -- it is a reusable service function called by both `handleSetup` and `handleImportProgram`.
+
+Per the CLAUDE.md convention, domain functions should be pure, but `activateProgram` is not domain logic -- it is application-level orchestration that coordinates side effects. The question is where it belongs. It does not fit in `domain/` (it has side effects). It does not fit in `storage/` (it calls the Hevy API). It is not a fragment.
+
+Right now it lives alongside route handlers in `index.ts`, which is workable at this scale. However, it is the longest single function in the codebase and combines Hevy API calls with D1 writes in a sequence that has no transactional guarantee (more below). If another orchestration function of this size were added, `index.ts` would become difficult to navigate. Consider extracting it to `src/services/activate-program.ts` or similar when the next service-level function appears.
+
+---
+
+### [ARCH-IMPORTANT-2] `activateProgram` has no atomicity guarantees for D1 writes
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts` (lines 625-759)
+
+The function performs this sequence:
+1. `clearPendingQueueItems` (1 D1 call)
+2. `clearMappings` (1 batched D1 call)
+3. `insertProgram` (1 batched D1 call)
+4. Hevy API calls (many, can fail mid-sequence due to rate limits)
+5. Batch upsert exercise template mappings
+6. Hevy routine creation loop (can fail mid-sequence)
+7. Batch upsert routine mappings
+8. `insertQueueItems`
+9. `bulkSetQueueItemRoutineIds`
+
+If step 4 or 6 fails partway through (Hevy rate limit, network error), the user is left in an inconsistent state: old queue cleared, new program inserted, but only partial mappings and no queue items. The Hevy API calls are inherently non-transactional, so full atomicity is impossible, but the D1 operations (steps 1-3 and 5, 7-9) could be grouped into fewer `db.batch()` calls to reduce the window of inconsistency. At minimum, steps 1-3 should be a single batch, and the post-Hevy D1 writes (5, 7, 8, 9) should be another single batch.
+
+---
+
+### [ARCH-IMPORTANT-3] `index.ts` growth trajectory: 1,149 lines with 15 handler functions
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts`
+
+The file contains 24 functions total: 6 helpers, 15 route handlers, 2 orchestration functions (`activateProgram`, `performSync`), and 1 shared validator (`validateAndRespond`). At 1,149 lines it is still navigable but approaching the threshold where cognitive load becomes a problem.
+
+The file's structure is clean -- router at top, handlers below, good naming, clear separation. But the next feature (e.g., settings page, history page) will push it past 1,300+ lines. Consider splitting into route modules by domain:
+- `src/routes/today.ts` -- handleTodaySSE, handlePull, handleManualComplete
+- `src/routes/program.ts` -- handleProgramSSE, handleValidateProgram, handleImportProgram
+- `src/routes/webhooks.ts` -- handleWebhookRegister, handleWebhookUnregister, handleWebhookEvent
+- `src/routes/setup.ts` -- handleSetup, handleValidateProgram
+
+Keep `index.ts` as the thin routing layer that dispatches to these modules. This is not urgent for v2 but should be the next structural change before adding more features.
+
+---
+
+### [ARCH-MINOR-1] `compareWorkout` function is shipped but unused in production
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/domain/workout-compare.ts`
+
+The `compareWorkout` function is exported but only called from tests. Production code imports only the *types* (`HevyWorkoutExercise`, `ActualSet`) from this module, used in `src/fragments/today.ts` for formatting workout detail display.
+
+The function itself is well-designed (pure, well-tested with 7 test cases), but shipping dead production code is a minor code smell. The types should arguably live in `src/types.ts` (where all other shared types reside) rather than being co-located with a function that is not yet wired up. The function itself is fine to keep if it will be used soon for the "compare prescribed vs actual" feature the types suggest, but it should be flagged as pending integration.
+
+---
+
+### [ARCH-MINOR-2] `updateUserProgram` comment says "one roundtrip" but issues two queries
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts` (lines 26-40)
+
+The JSDoc says "Update program fields and return the existing API key in one roundtrip" but the implementation runs an UPDATE followed by a separate SELECT. On D1 these are two roundtrips. Either use `db.batch()` to run both in one call, or use a D1 `RETURNING` clause (`UPDATE ... SET ... WHERE ... RETURNING hevy_api_key`), or correct the comment.
+
+---
+
+### [ARCH-MINOR-3] Duplicated `addFragment` helper pattern
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts` (lines 447-448, 486-488)
+
+The `addFragment` closure is defined identically in both `handleProgressSSE` and `handleProgramSSE`. It manages the "first fragment uses inner mode, subsequent use append" pattern. This is a small duplication -- extracting a `buildFragmentAccumulator()` helper would remove it, but it is low priority.
+
+---
+
+### [ARCH-MINOR-4] `clearPendingQueueItems` and `clearMappings` are sequential but could be batched
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts` (lines 626-627)
+
+These two calls are independent and could run as a single `db.batch()` call, reducing D1 round-trips from 2 to 1. `clearMappings` already uses `db.batch` internally for its two DELETEs, so all three DELETEs could be combined.
+
+---
+
+### [ARCH-MINOR-5] Webhook token hashing uses SHA-256 without a salt
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/utils/crypto.ts`
+
+The `sha256Hex` function hashes the webhook auth token with plain SHA-256. Since the tokens are `crypto.randomUUID()` (122 bits of entropy), they are not vulnerable to rainbow table attacks, and SHA-256 is appropriate for this use case (lookup token, not a password). This is fine. Just noting it for the record -- if this function were ever reused for password hashing, it would need PBKDF2/scrypt/argon2.
+
+---
+
+### [ARCH-MINOR-6] Template grid fragment is well-extracted
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/fragments/template-grid.ts`
+
+The extraction of `renderTemplateGrid` with a `cardAttrs` callback is a good pattern. It cleanly separates the shared card layout from the context-specific behavior (setup uses direct POST, import uses signal binding). The file lives alongside other fragments in `src/fragments/`, which is the right location -- no separate `shared/` directory needed at this scale.
+
+---
+
+### [ARCH-MINOR-7] Reflow spacer title is now data-driven (good)
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/domain/reflow.ts`
+
+The change from hardcoded `"CARs only"` to `dailyRoutine?.title ?? "Rest"` is correct and maintains the pure function contract. The fallback to `"Rest"` when there is no daily routine is sensible.
+
+---
+
+### [ARCH-MINOR-8] Webhook design is architecturally sound
+
+**File:** `/Users/ryanr/Code/hevy-planner/src/index.ts` (lines 1089-1134)
+
+The webhook handler pattern is correct for Cloudflare Workers:
+- Immediate 200 response (Hevy expects fast acknowledgement)
+- `ctx.waitUntil()` for background processing (keeps worker alive)
+- `.catch()` on the promise to prevent unhandled rejections
+- Token-based auth with hashed lookup
+
+The only issue is the missing timezone (CRITICAL-2 above). The structural pattern itself is well-suited to the Workers execution model.
+
+---
+
+### Positive observations
+
+1. **Date utilities extracted well.** Moving `todayString` and `toLocalDate` from inline in `index.ts` to `src/utils/date.ts` follows the DRY principle and makes them testable. The `toLocalDate` composition through `todayString` is clean.
+
+2. **No circular dependencies.** The dependency graph flows cleanly: `index.ts` -> `fragments/`, `domain/`, `storage/`, `hevy/`, `utils/`. No module imports from `index.ts`.
+
+3. **Prepared statements throughout.** All D1 queries use parameterized bindings. No string interpolation of user input into SQL.
+
+4. **Validation duplication eliminated.** The `validateAndRespond` helper consolidates the JSON parse/validate/render pattern for both setup and import flows, parameterized by selector and render function.
+
+5. **Batch DB operations.** The v2 changes make good use of `db.batch()` for `clearMappings`, exercise template upserts, and routine mapping upserts, reducing D1 round-trips.
+
+---
+
+### Priority summary
+
+| ID | Severity | Issue | Effort |
+|---|---|---|---|
+| CRITICAL-1 | Critical | Raw SQL duplicated outside queries.ts + dead import | Small |
+| CRITICAL-2 | Critical | Webhook sync missing user timezone -- wrong completion dates | Medium (schema change needed) |
+| IMPORTANT-1 | Important | `activateProgram` orchestration in index.ts | Medium (extract when next service appears) |
+| IMPORTANT-2 | Important | No atomicity grouping for D1 writes in `activateProgram` | Small (group into fewer batches) |
+| IMPORTANT-3 | Important | index.ts at 1,149 lines approaching split threshold | Medium (defer to next feature) |
+| MINOR-1 | Minor | `compareWorkout` shipped but unused; types co-located with dead function | Trivial |
+| MINOR-2 | Minor | `updateUserProgram` comment claims one roundtrip, issues two | Trivial |
+| MINOR-3 | Minor | `addFragment` closure duplicated in two SSE handlers | Trivial |
+| MINOR-4 | Minor | Sequential clears could be single batch | Trivial |
+
+**Recommended immediate action:** Fix CRITICAL-2 by adding a `timezone` column to the `users` table, storing it during setup (from `request.cf.timezone`), and reading it back in `handleWebhookEvent` to pass to `performSync`. Fix CRITICAL-1 by extracting a `batchMarkCompletions` function in `queries.ts` and removing the dead `markQueueItemCompleted` import.</result>
+<usage><total_tokens>54412</total_tokens><tool_uses>38</tool_uses><duration_ms>162022</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/afac77607e9196b8b.output
+
+---
+
+<task-notification>
+<task-id>a7ae3c2e6a96fbb2a</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/a7ae3c2e6a96fbb2a.output</output-file>
+<status>completed</status>
+<summary>Agent "Security review of v2 milestone" completed</summary>
+<result>Now I have a thorough understanding of the codebase. Let me compile the findings.
+
+---
+
+# Security Audit Report: hevy-planner v2
+
+**Audit scope**: Diff range `6d71d97..30af6ce` -- webhook endpoints, program import, crypto, storage queries, fragment rendering, auth flow.
+
+**Date**: 2026-03-24
+
+---
+
+## Findings
+
+### [SECURITY-CRITICAL] SC-01: Hevy API Key Stored in Plaintext in D1
+
+**File**: `/Users/ryanr/Code/hevy-planner/migrations/0001_initial.sql:2`, `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts:14-23`
+
+The `hevy_api_key` column stores the user's API key as plaintext. The migration itself notes `-- TODO: encrypt at rest before production`. This key grants full read/write access to the user's Hevy account (creating routines, deleting routines, reading workout history). If D1 is compromised, exported, or accessed by an unauthorized party (e.g., via a Cloudflare dashboard compromise or a SQL injection in a different binding), all user API keys are immediately usable.
+
+**Risk**: If an attacker obtains a D1 export or read access, they get direct Hevy API access for every user.
+
+**Recommendation**: Encrypt `hevy_api_key` at rest using AES-GCM with a key stored as a Cloudflare secret (`wrangler secret put ENCRYPTION_KEY`). Decrypt on use. The CLAUDE.md already flags this as a known violation.
+
+---
+
+### [SECURITY-IMPORTANT] SC-02: Webhook Token Uses Unsalted SHA-256 -- Vulnerable to Preimage Lookup
+
+**File**: `/Users/ryanr/Code/hevy-planner/src/utils/crypto.ts:5-9`, `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts:247-256`
+
+The webhook auth token is a `crypto.randomUUID()` (122 bits of entropy), hashed with raw SHA-256 before storage. While the entropy of a UUID v4 makes brute-force preimage attacks infeasible in practice, there are two concerns:
+
+1. **No salt/pepper**: If the same UUID were ever reused (e.g., due to a PRNG issue), the hash would collide. More practically, using a keyed construct (HMAC with a server secret) would provide defense-in-depth against hash table leaks -- an attacker with DB read access cannot forge tokens without the HMAC key.
+
+2. **Timing on DB lookup**: `getUserByWebhookToken` hashes the input then does `WHERE webhook_auth_token = ?`. SQLite string comparison in D1 is not constant-time. However, since the comparison is on the *hash* (not the token), and the hash has high entropy, timing attacks are not practically exploitable here. This is an observation, not a finding.
+
+**Risk**: Low given UUID entropy, but defense-in-depth is missing.
+
+**Recommendation**: Switch to HMAC-SHA256 with a server-side secret (`wrangler secret put WEBHOOK_HMAC_KEY`). This way even a full D1 dump does not let an attacker forge webhook calls.
+
+---
+
+### [SECURITY-IMPORTANT] SC-03: JavaScript Injection via Unescaped Hevy Routine ID in `executeScript`
+
+**File**: `/Users/ryanr/Code/hevy-planner/src/index.ts:829`, `/Users/ryanr/Code/hevy-planner/src/index.ts:896`
+
+Two call sites interpolate `mapping.hevy_routine_id` and `created.id` directly into a JavaScript string inside `executeScript()`:
+
+```typescript
+executeScript(`window.open('https://hevy.com/routine/${mapping.hevy_routine_id}', '_blank')`)
+executeScript(`window.open('https://hevy.com/routine/${created.id}', '_blank')`)
+```
+
+These IDs come from the Hevy API (line 829: from the `routine_mappings` D1 table which was populated from Hevy; line 896: directly from `client.createRoutine()` response). If Hevy ever returns a routine ID containing `'`, `</script>`, or similar, this becomes an XSS vector. The SSE `executeScript` helper wraps content in `<script>` tags (see `sse/helpers.ts:37`), so a malicious ID like `'); alert(1); ('` would execute arbitrary JS.
+
+While the Hevy API likely returns alphanumeric IDs, trusting third-party API output as safe for JS interpolation violates defense-in-depth.
+
+**Risk**: Medium -- requires Hevy API to return adversarial data, but the pattern is categorically unsafe.
+
+**Recommendation**: Escape the ID for JavaScript string context. A simple approach: `JSON.stringify(id)` to produce a safely-quoted JS string, or use `encodeURIComponent()` since it's a URL path segment. Example fix:
+
+```typescript
+executeScript(`window.open('https://hevy.com/routine/' + ${JSON.stringify(mapping.hevy_routine_id)}, '_blank')`)
+```
+
+---
+
+### [SECURITY-IMPORTANT] SC-04: CSS Injection via Unescaped `color` Field from Program JSON
+
+**Files**:
+- `/Users/ryanr/Code/hevy-planner/src/fragments/program.ts:98` -- `background:${color}`
+- `/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts:19` -- `background:${skill.color}22`
+- `/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts:20` -- `color:${iconColor}`
+- `/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts:29` -- `background:${skill.color ?? "var(--blue)"}`
+- `/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts:42` -- `style="${iconBg}; color:${iconColor}"`
+- `/Users/ryanr/Code/hevy-planner/src/fragments/today.ts:22` -- `style="color: ${labelColor}"`
+- `/Users/ryanr/Code/hevy-planner/src/fragments/today.ts:234` -- `style="background: ${dotColor}"`
+
+The `color` field from program JSON (type `"string"` in the schema with no pattern constraint) is interpolated directly into `style` attributes without sanitization. A malicious program JSON could set `color` to something like `red" onclick="alert(1)` to break out of the style attribute into an event handler, or use CSS exfiltration techniques.
+
+In `today.ts:22`, `escapeAttr` is used on `labelColor`, which is good. But in `program.ts:98`, raw `color` is used: `background:${color}`. In `progress.ts`, both `skill.color` and `iconColor` are used raw.
+
+**Risk**: A user importing a malicious program JSON can inject arbitrary HTML attributes or CSS. Since the user imports their own programs, this is primarily a self-XSS risk. However, if program sharing is ever added, this becomes a stored XSS vector.
+
+**Recommendation**: Either validate `color` against a CSS color pattern in the JSON Schema (e.g., `"pattern": "^(var\\(--[a-z-]+\\)|#[0-9a-fA-F]{3,8}|rgb\\([0-9, .]+\\)|[a-z]+)$"`), or use `escapeAttr()` on all color values before interpolation into style attributes. At minimum, apply `escapeAttr()` consistently.
+
+---
+
+### [SECURITY-IMPORTANT] SC-05: Error Message Leaks Internal Details to Client
+
+**File**: `/Users/ryanr/Code/hevy-planner/src/index.ts:291-297`
+
+The global catch handler returns the raw error message to the client:
+
+```typescript
+const message = err instanceof Error ? err.message : "Internal Server Error";
+return new Response(message, { status: 500 });
+```
+
+Error messages from D1, the Hevy API client, JSON parsing, etc. may contain internal details such as SQL table names, API endpoint URLs, Hevy error responses, or stack trace fragments. This information disclosure aids attackers in understanding the system internals.
+
+**Risk**: Information disclosure in production.
+
+**Recommendation**: Return a generic error message to the client; log the detailed message server-side (which is already done on line 295). Replace line 296 with:
+```typescript
+return new Response("Internal Server Error", { status: 500 });
+```
+
+---
+
+### [SECURITY-IMPORTANT] SC-06: No Rate Limiting on Webhook Endpoint
+
+**File**: `/Users/ryanr/Code/hevy-planner/src/index.ts:1088-1134`
+
+The `/api/webhooks/hevy` endpoint has no rate limiting. Each incoming request triggers a D1 lookup (`getUserByWebhookToken`) plus SHA-256 hashing. An attacker who discovers the endpoint URL (it is predictable: `<origin>/api/webhooks/hevy`) can flood it with arbitrary tokens, causing:
+
+1. CPU load from SHA-256 hashing on every request
+2. D1 read pressure from the `WHERE webhook_auth_token = ?` query on every request
+3. For valid tokens, each request triggers `performSync` via `ctx.waitUntil()`, causing Hevy API calls in the background
+
+Since Cloudflare Workers charges per request and D1 charges per read, this is also a financial denial-of-service vector.
+
+**Risk**: Denial-of-service and cost amplification.
+
+**Recommendation**: Add rate limiting. Options:
+- Use Cloudflare Rate Limiting rules (configured in the dashboard or `wrangler.toml`)
+- Track request counts per IP in a Cloudflare KV or D1 with a TTL
+- At minimum, validate the request has a non-empty `Authorization` header before doing any DB work (already done, but add IP-based throttling)
+
+---
+
+### [SECURITY-MINOR] SC-07: Webhook Endpoint Accepts Token from Both Header and Body
+
+**File**: `/Users/ryanr/Code/hevy-planner/src/index.ts:1094-1112`
+
+The handler first checks the `Authorization` header, then falls back to reading `auth_token` from the JSON body. This dual-extraction increases attack surface. If Hevy sends the token via the `Authorization` header (standard practice), the body fallback is unnecessary and could allow an attacker to craft requests with the token in an unexpected location, potentially bypassing WAF rules or logging that only inspect headers.
+
+**Risk**: Low -- marginal increase in attack surface.
+
+**Recommendation**: Confirm with Hevy documentation how the token is sent and remove the fallback path. If both are needed during a transition period, document why.
+
+---
+
+### [SECURITY-MINOR] SC-08: `CF_ACCESS_AUD` Not Set in wrangler.toml for Production
+
+**File**: `/Users/ryanr/Code/hevy-planner/wrangler.toml:17-24`
+
+The `[env.production]` section does not define `CF_ACCESS_AUD`. Without this variable, `getAuthenticatedUserOrDev` (in `/Users/ryanr/Code/hevy-planner/src/auth/access.ts:102-114`) will skip CF Access JWT verification. If `ENVIRONMENT` is `"production"`, the function will throw a 403, which is the correct fallback. However, the fact that `CF_ACCESS_AUD` is typed as optional (`string | undefined`) and must be set as a Cloudflare secret or environment variable outside `wrangler.toml` means there is no compile-time or deployment-time guarantee it is configured.
+
+**Risk**: If `CF_ACCESS_AUD` is accidentally unset in production and `ENVIRONMENT` is also misconfigured, all routes become inaccessible (403) or, if `ENVIRONMENT` were somehow `"development"`, fully open with a hardcoded `dev@local` identity.
+
+**Recommendation**: Add a startup check or a canary route that verifies `CF_ACCESS_AUD` is defined when `ENVIRONMENT === "production"`. Consider making it a required field via a custom type guard.
+
+---
+
+### [SECURITY-MINOR] SC-09: `ctx.waitUntil()` Silently Swallows Sync Errors
+
+**File**: `/Users/ryanr/Code/hevy-planner/src/index.ts:1126-1130`
+
+```typescript
+ctx.waitUntil(
+  performSync(env.DB, user.id, user.hevy_api_key).catch((err) => {
+    console.error("Webhook sync failed for user", user.id, err instanceof Error ? err.message : err);
+  })
+);
+```
+
+The `catch` handler logs the error and discards it. This is operationally correct (the webhook must return 200 quickly), but if `performSync` throws repeatedly (e.g., Hevy API is down or rate-limited), the user has no visibility into the failure. There is no retry mechanism, no dead-letter queue, and no user-facing notification.
+
+Additionally, the `user.id` is logged -- ensure production logs are not accessible to unauthorized parties. The user ID is an email address (from CF Access), so this is PII in logs.
+
+**Risk**: Low -- operational blind spot rather than a security vulnerability, plus PII in logs.
+
+**Recommendation**: Consider adding a `last_sync_error` column or a sync status field so the user can see if auto-sync is failing. Redact or hash the email in logs, or use a non-PII user identifier for logging.
+
+---
+
+### [SECURITY-MINOR] SC-10: Program JSON Size Unbounded
+
+**File**: `/Users/ryanr/Code/hevy-planner/src/index.ts:770-813` (handleImportProgram), `/Users/ryanr/Code/hevy-planner/src/index.ts:542-607` (handleSetup)
+
+The `programJson` field in the request body is parsed and stored in D1 without any size limit. A user could upload a multi-megabyte JSON blob. While `request.json()` has implicit limits from the Workers runtime (body size), and D1 has row size limits, there is no explicit check. The JSON schema validation (`validateProgram`) may be expensive on very large inputs.
+
+**Risk**: Low -- Cloudflare Workers enforces a request body limit (typically 100MB for paid plans), but validating a huge JSON schema is CPU-expensive within the 30ms/50ms CPU time limit.
+
+**Recommendation**: Add an explicit size check before parsing: `if (programJsonStr.length > 500_000) return error("Program JSON too large")`.
+
+---
+
+### [SECURITY-MINOR] SC-11: `escapeHtml` Does Not Escape Single Quotes
+
+**File**: `/Users/ryanr/Code/hevy-planner/src/utils/html.ts:1-7`
+
+The `escapeHtml` function escapes `&`, `<`, `>`, and `"` but not `'` (single quote). While `escapeAttr` does escape single quotes, `escapeHtml` is used in text content contexts where single quotes are generally safe in HTML body content. However, if `escapeHtml` is ever mistakenly used in an attribute context with single-quote delimiters, it would be insufficient. Currently, all attribute contexts appear to use `escapeAttr`, so this is a defensive observation.
+
+**Risk**: Low -- no current exploitable path, but violates defense-in-depth.
+
+**Recommendation**: Add `'` -> `&#39;` to `escapeHtml` for consistency, or document that `escapeHtml` is strictly for text node content.
+
+---
+
+### Positive Findings
+
+1. **All D1 queries use prepared statements with bind parameters** -- verified across all functions in `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts`. No string interpolation in SQL.
+
+2. **CF Access JWT verification is thorough** -- `/Users/ryanr/Code/hevy-planner/src/auth/access.ts` validates audience, expiry, and signature using the correct RSASSA-PKCS1-v1_5 algorithm. Key caching is bounded (5 minutes).
+
+3. **Webhook endpoint is correctly excluded from user auth** -- The `POST /api/webhooks/hevy` route is checked before `getAuthenticatedUserOrDev`, which is correct since webhook calls come from Hevy, not authenticated users.
+
+4. **Program validation uses a compiled JSON Schema validator** -- `/Users/ryanr/Code/hevy-planner/src/validation/validate-program.ts` uses a pre-compiled AJV validator, which is both performant and robust.
+
+5. **HTML output consistently uses `escapeHtml` and `escapeAttr`** -- All text content in fragments is escaped. User-facing strings go through proper escaping before being rendered.
+
+6. **Resource URLs use `escapeAttr` for href values** -- In `/Users/ryanr/Code/hevy-planner/src/fragments/program.ts:189`, resource URLs are escaped with `escapeAttr` and include `rel="noopener"`.
+
+---
+
+### Summary Table
+
+| ID | Severity | Finding | File |
+|----|----------|---------|------|
+| SC-01 | CRITICAL | Hevy API key stored plaintext in D1 | `migrations/0001_initial.sql:2` |
+| SC-02 | IMPORTANT | Unsalted SHA-256 for webhook tokens | `src/utils/crypto.ts:5-9` |
+| SC-03 | IMPORTANT | JS injection via unescaped routine IDs in executeScript | `src/index.ts:829,896` |
+| SC-04 | IMPORTANT | CSS/attribute injection via unescaped `color` field | `src/fragments/program.ts:98`, `src/fragments/progress.ts:19-42` |
+| SC-05 | IMPORTANT | Error messages leak internal details to client | `src/index.ts:293-296` |
+| SC-06 | IMPORTANT | No rate limiting on webhook endpoint | `src/index.ts:1088-1134` |
+| SC-07 | MINOR | Dual token extraction (header + body) widens attack surface | `src/index.ts:1094-1112` |
+| SC-08 | MINOR | `CF_ACCESS_AUD` not guaranteed in production config | `wrangler.toml:17-24` |
+| SC-09 | MINOR | `waitUntil` silently swallows errors; PII in logs | `src/index.ts:1126-1130` |
+| SC-10 | MINOR | Program JSON upload has no explicit size limit | `src/index.ts:770-813` |
+| SC-11 | MINOR | `escapeHtml` does not escape single quotes | `src/utils/html.ts:1-7` |
+
+**Recommended prioritization**: SC-01 (encrypt API keys), SC-03 (escape routine IDs in JS), and SC-05 (stop leaking error details) are the three fastest wins with the highest impact.</result>
+<usage><total_tokens>56467</total_tokens><tool_uses>39</tool_uses><duration_ms>175629</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/7ab120b0-f4c9-4f9f-8902-25b504e255ad/tasks/a7ae3c2e6a96fbb2a.output
+
+---
+
+Fix all
+
+---
+
+Fix critical + important items now. Create issues and add to this milestone for the deferred tasks.
