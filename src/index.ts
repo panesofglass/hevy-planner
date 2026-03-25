@@ -1090,27 +1090,17 @@ async function handleWebhookEvent(
   env: Env,
   ctx: ExecutionContext
 ): Promise<Response> {
-  // Extract auth token — Hevy sends it in the Authorization header as "Bearer <token>"
-  // or as a plain token. Fall back to checking the request body.
-  let authToken: string | null = null;
+  // Require Authorization header — reject early without any DB or body work.
+  // This is the primary line of defence against unauthenticated flooding.
   const authHeader = request.headers.get("authorization");
-  if (authHeader) {
-    authToken = authHeader.replace(/^bearer\s+/i, "").trim();
+  if (!authHeader) {
+    return new Response("Unauthorized", { status: 401 });
   }
 
-  if (!authToken) {
-    // Try to extract from JSON body
-    try {
-      const body = await request.clone().json() as Record<string, unknown>;
-      if (typeof body.auth_token === "string") {
-        authToken = body.auth_token;
-      }
-    } catch {
-      // Body not JSON or already consumed — ignore
-    }
-  }
+  const authToken = authHeader.replace(/^bearer\s+/i, "").trim();
 
-  if (!authToken) {
+  // Reject obviously invalid tokens (too short to be a UUID) without hashing or DB work.
+  if (authToken.length < 36) {
     return new Response("Unauthorized", { status: 401 });
   }
 

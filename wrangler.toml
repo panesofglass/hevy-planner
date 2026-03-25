@@ -13,6 +13,10 @@ database_id = "856703c5-ee18-43c5-b910-4ee8f27742f4"
 [vars]
 ENVIRONMENT = "development"
 
+# Rate limiting: Configure Cloudflare Rate Limiting rules for /api/webhooks/hevy
+# Recommended: 10 requests per minute per IP
+# See: https://developers.cloudflare.com/waf/rate-limiting-rules/
+
 # Production deploy: wrangler deploy --env production
 [env.production]
 [[env.production.d1_databases]]
