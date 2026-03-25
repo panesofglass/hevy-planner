@@ -26,6 +26,10 @@ import {
   insertProgram,
   getActiveProgram,
   updateDailyCompleted,
+  updateWebhookState,
+  clearWebhookState,
+  updateLastSyncAt,
+  getUserByWebhookToken,
 } from "./storage/queries";
 import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "./domain/queue";
 import { computeUpcoming } from "./domain/reflow";
@@ -109,13 +113,20 @@ function redirect(location: string, status = 303): Response {
 // ──────────────────────────────────────────────────────────────────
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
-      const auth = await getAuthenticatedUserOrDev(request, env);
       const url = new URL(request.url);
       const path = url.pathname;
-      const tz = (request.cf as Record<string, unknown> | undefined)?.timezone as string | undefined;
       const method = request.method;
+
+      // ── POST /api/webhooks/hevy ────────────────────────────────
+      // Must be checked before auth — this comes from Hevy, not the app user
+      if (method === "POST" && path === "/api/webhooks/hevy") {
+        return await handleWebhookEvent(request, env, ctx);
+      }
+
+      const auth = await getAuthenticatedUserOrDev(request, env);
+      const tz = (request.cf as Record<string, unknown> | undefined)?.timezone as string | undefined;
 
       // ── GET /programs/default.json ─────────────────────────────
       if (method === "GET" && path === "/programs/default.json") {
@@ -241,6 +252,16 @@ export default {
       if (method === "POST" && completeMatch) {
         const itemId = parseInt(completeMatch[1], 10);
         return await handleManualComplete(env, auth.userId, itemId, tz);
+      }
+
+      // ── POST /api/webhooks/register ────────────────────────────
+      if (method === "POST" && path === "/api/webhooks/register") {
+        return await handleWebhookRegister(request, env, auth.userId, tz);
+      }
+
+      // ── POST /api/webhooks/unregister ──────────────────────────
+      if (method === "POST" && path === "/api/webhooks/unregister") {
+        return await handleWebhookUnregister(env, auth.userId, tz);
       }
 
       // ── 404 ────────────────────────────────────────────────────
@@ -372,7 +393,7 @@ async function handleTodaySSE(env: Env, userId: string, tz?: string): Promise<Re
 
   // Sync button at the bottom
   fragments.push(
-    patchElements(syncButton(), { selector: "#content", mode: "append" })
+    patchElements(syncButton(user.webhook_id, user.last_sync_at), { selector: "#content", mode: "append" })
   );
 
   return sseResponse(mergeFragments(fragments));
@@ -807,6 +828,75 @@ async function handleCleanupRoutines(env: Env, userId: string): Promise<Response
   );
 }
 
+/**
+ * Core sync logic — fetch recent Hevy workouts, match to pending queue items,
+ * mark completions, update daily CARs. Reused by both manual pull and webhook.
+ * Updates last_sync_at on successful completion.
+ */
+async function performSync(db: D1Database, userId: string, apiKey: string, tz?: string): Promise<void> {
+  const program = await loadProgram(db, userId);
+  const routineMap = new Map(program.routines.map((r) => [r.id, r]));
+  const client = new HevyClient(apiKey);
+
+  const [workouts, items] = await Promise.all([
+    client.getRecentWorkouts(),
+    getQueueItems(db, userId),
+  ]);
+
+  // Skip workouts already matched to a completed queue item
+  const usedWorkoutIds = new Set(
+    items.filter((i) => i.hevy_workout_id).map((i) => i.hevy_workout_id)
+  );
+  const newWorkouts = workouts.filter((w) => !usedWorkoutIds.has(w.id));
+
+  const pendingItems = items.filter((i) => i.status === "pending" && i.hevy_routine_id);
+
+  const nameToRoutineId = new Map<string, string>();
+  for (const item of pendingItems) {
+    const routine = routineMap.get(item.routine_id);
+    if (routine && item.hevy_routine_id) {
+      nameToRoutineId.set(routine.title, item.hevy_routine_id);
+    }
+  }
+
+  const matches = matchCompletions(
+    pendingItems,
+    newWorkouts,
+    (w) => nameToRoutineId.get(w.title) ?? null
+  );
+
+  // Build workout ID → local date map for accurate completion dates
+  const workoutDateMap = new Map<string, string>();
+  const workoutExercisesMap = new Map<string, string>();
+  for (const w of newWorkouts) {
+    const d = tz
+      ? new Date(w.start_time).toLocaleDateString("en-CA", { timeZone: tz })
+      : w.start_time.slice(0, 10);
+    workoutDateMap.set(w.id, d);
+    workoutExercisesMap.set(w.id, JSON.stringify(w.exercises));
+  }
+
+  for (const match of matches) {
+    const completedDate = workoutDateMap.get(match.workoutId) ?? todayString(tz);
+    const workoutData = workoutExercisesMap.get(match.workoutId);
+    await markQueueItemCompleted(db, match.queueItemId, completedDate, match.workoutId, workoutData);
+  }
+
+  // Check for daily routine completion (use workout date, not sync date)
+  const dailyRoutine = program.routines.find((r) => r.isDaily);
+  if (dailyRoutine) {
+    const dailyWorkout = workouts.find((w) => w.title === dailyRoutine.title);
+    if (dailyWorkout) {
+      const workoutDate = tz
+        ? new Date(dailyWorkout.start_time).toLocaleDateString("en-CA", { timeZone: tz })
+        : dailyWorkout.start_time.slice(0, 10);
+      await updateDailyCompleted(db, userId, workoutDate);
+    }
+  }
+
+  await updateLastSyncAt(db, userId, new Date().toISOString());
+}
+
 /** POST /api/pull — pull completions from Hevy */
 async function handlePull(env: Env, userId: string, tz?: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
@@ -819,68 +909,8 @@ async function handlePull(env: Env, userId: string, tz?: string): Promise<Respon
     );
   }
 
-  const program = await loadProgram(env.DB, userId);
-  const routineMap = new Map(program.routines.map((r) => [r.id, r]));
-  const client = new HevyClient(user.hevy_api_key);
-
   try {
-    const [workouts, items] = await Promise.all([
-      client.getRecentWorkouts(),
-      getQueueItems(env.DB, userId),
-    ]);
-
-    // Skip workouts already matched to a completed queue item
-    const usedWorkoutIds = new Set(
-      items.filter((i) => i.hevy_workout_id).map((i) => i.hevy_workout_id)
-    );
-    const newWorkouts = workouts.filter((w) => !usedWorkoutIds.has(w.id));
-
-    const pendingItems = items.filter((i) => i.status === "pending" && i.hevy_routine_id);
-
-    const nameToRoutineId = new Map<string, string>();
-    for (const item of pendingItems) {
-      const routine = routineMap.get(item.routine_id);
-      if (routine && item.hevy_routine_id) {
-        nameToRoutineId.set(routine.title, item.hevy_routine_id);
-      }
-    }
-
-    const matches = matchCompletions(
-      pendingItems,
-      newWorkouts,
-      (w) => nameToRoutineId.get(w.title) ?? null
-    );
-
-    // Build workout ID → local date map for accurate completion dates
-    const workoutDateMap = new Map<string, string>();
-    const workoutExercisesMap = new Map<string, string>();
-    for (const w of newWorkouts) {
-      const d = tz
-        ? new Date(w.start_time).toLocaleDateString("en-CA", { timeZone: tz })
-        : w.start_time.slice(0, 10);
-      workoutDateMap.set(w.id, d);
-      workoutExercisesMap.set(w.id, JSON.stringify(w.exercises));
-    }
-
-    for (const match of matches) {
-      const completedDate = workoutDateMap.get(match.workoutId) ?? todayString(tz);
-      const workoutData = workoutExercisesMap.get(match.workoutId);
-      await markQueueItemCompleted(env.DB, match.queueItemId, completedDate, match.workoutId, workoutData);
-    }
-
-    // Check for daily routine completion (use workout date, not sync date)
-    const dailyRoutine = program.routines.find((r) => r.isDaily);
-    if (dailyRoutine) {
-      const dailyWorkout = workouts.find((w) => w.title === dailyRoutine.title);
-      if (dailyWorkout) {
-        const workoutDate = tz
-          ? new Date(dailyWorkout.start_time).toLocaleDateString("en-CA", { timeZone: tz })
-          : dailyWorkout.start_time.slice(0, 10);
-        await updateDailyCompleted(env.DB, userId, workoutDate);
-      }
-    }
-
-    // Re-render today page
+    await performSync(env.DB, userId, user.hevy_api_key, tz);
     return await handleTodaySSE(env, userId, tz);
   } catch (err) {
     const msg = escapeHtml(err instanceof Error ? err.message : "Pull failed");
@@ -891,6 +921,123 @@ async function handlePull(env: Env, userId: string, tz?: string): Promise<Respon
       )
     );
   }
+}
+
+/** POST /api/webhooks/register — subscribe to Hevy webhooks for auto-sync */
+async function handleWebhookRegister(
+  request: Request,
+  env: Env,
+  userId: string,
+  tz?: string
+): Promise<Response> {
+  const user = await getUser(env.DB, userId);
+  if (!user || !user.hevy_api_key) {
+    return sseResponse(
+      patchElements(`<div class="card"><p>Connect your Hevy API key first.</p></div>`, {
+        selector: "#content",
+        mode: "prepend",
+      })
+    );
+  }
+
+  try {
+    const authToken = crypto.randomUUID();
+    const webhookUrl = `${new URL(request.url).origin}/api/webhooks/hevy`;
+    const client = new HevyClient(user.hevy_api_key);
+    const sub = await client.createWebhookSubscription(webhookUrl, authToken);
+    await updateWebhookState(env.DB, userId, sub.id, authToken);
+    return await handleTodaySSE(env, userId, tz);
+  } catch (err) {
+    const msg = escapeHtml(err instanceof Error ? err.message : "Failed to enable auto-sync");
+    return sseResponse(
+      patchElements(
+        `<div class="card"><p style="color:var(--orange)">${msg}</p></div>`,
+        { selector: "#content", mode: "prepend" }
+      )
+    );
+  }
+}
+
+/** POST /api/webhooks/unregister — remove Hevy webhook subscription */
+async function handleWebhookUnregister(
+  env: Env,
+  userId: string,
+  tz?: string
+): Promise<Response> {
+  const user = await getUser(env.DB, userId);
+  if (!user) {
+    return sseResponse(
+      patchElements(`<div class="card"><p>User not found.</p></div>`, {
+        selector: "#content",
+        mode: "prepend",
+      })
+    );
+  }
+
+  try {
+    if (user.hevy_api_key && user.webhook_id) {
+      const client = new HevyClient(user.hevy_api_key);
+      await client.deleteWebhookSubscription(user.webhook_id);
+    }
+    await clearWebhookState(env.DB, userId);
+    return await handleTodaySSE(env, userId, tz);
+  } catch (err) {
+    const msg = escapeHtml(err instanceof Error ? err.message : "Failed to disable auto-sync");
+    return sseResponse(
+      patchElements(
+        `<div class="card"><p style="color:var(--orange)">${msg}</p></div>`,
+        { selector: "#content", mode: "prepend" }
+      )
+    );
+  }
+}
+
+/** POST /api/webhooks/hevy — incoming event from Hevy (no app auth) */
+async function handleWebhookEvent(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext
+): Promise<Response> {
+  // Extract auth token — Hevy sends it in the Authorization header as "Bearer <token>"
+  // or as a plain token. Fall back to checking the request body.
+  let authToken: string | null = null;
+  const authHeader = request.headers.get("authorization");
+  if (authHeader) {
+    authToken = authHeader.replace(/^bearer\s+/i, "").trim();
+  }
+
+  if (!authToken) {
+    // Try to extract from JSON body
+    try {
+      const body = await request.clone().json() as Record<string, unknown>;
+      if (typeof body.auth_token === "string") {
+        authToken = body.auth_token;
+      }
+    } catch {
+      // Body not JSON or already consumed — ignore
+    }
+  }
+
+  if (!authToken) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  const user = await getUserByWebhookToken(env.DB, authToken);
+  if (!user) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  // Acknowledge immediately — Hevy expects a fast 2xx
+  // Run sync in the background via waitUntil so the response is not delayed
+  if (user.hevy_api_key) {
+    ctx.waitUntil(
+      performSync(env.DB, user.id, user.hevy_api_key).catch((err) => {
+        console.error("Webhook sync failed for user", user.id, err instanceof Error ? err.message : err);
+      })
+    );
+  }
+
+  return new Response(null, { status: 200 });
 }
 
 /** POST /api/complete/:id — manual complete, re-render today */
