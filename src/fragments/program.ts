@@ -1,9 +1,9 @@
 // ──────────────────────────────────────────────────────────────────
 // Program page fragments — overview, progressions, routines,
-// foundations, resources, BODi
+// foundations, resources, BODi, import
 // ──────────────────────────────────────────────────────────────────
 
-import type { Program, Progression, Foundation, Resource, BodiIntegration, UserRow } from "../types";
+import type { Program, Progression, Foundation, Resource, BodiIntegration, UserRow, WeekTemplate } from "../types";
 import { escapeHtml, escapeAttr } from "../utils/html";
 import { findActiveProgression } from "../domain/schedule";
 
@@ -219,5 +219,104 @@ export function bodiSection(items: BodiIntegration[]): string {
   return `<div class="section-header">BODi Integration</div>
 <div class="card">
 ${itemsHtml}
+</div>`;
+}
+
+// ── Import Program section ──────────────────────────────────────────
+
+/**
+ * Collapsible "Import New Program" section shown at the bottom of the
+ * Program page. Mirrors the setup page upload/validate flow but posts
+ * to /api/validate-import-program and /api/import-program.
+ *
+ * Signals used (all scoped to this element via data-signals):
+ *   $import_open        — whether the section is expanded
+ *   $import_program_json — the uploaded JSON string
+ *   $import_template_id  — the selected week template ID
+ */
+export function importProgramSection(): string {
+  return `<div data-signals:import-open="false" data-signals:import-program-json="''" data-signals:import-template-id="''">
+  <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
+    <span>Import Program</span>
+    <button
+      class="btn btn-blue"
+      style="font-size:12px;padding:4px 12px;height:auto"
+      data-on:click="$importOpen = !$importOpen"
+    >
+      <span data-text="$importOpen ? 'Cancel' : 'Upload JSON'">Upload JSON</span>
+    </button>
+  </div>
+
+  <div data-show="$importOpen">
+    <div class="card" style="margin-bottom:12px">
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Program JSON File</label>
+        <input type="file" accept=".json" class="form-input"
+          data-on:change="
+            const f = evt.target.files[0];
+            if (!f) return;
+            f.text().then(t => {
+              const el = document.getElementById('importProgramData');
+              el.value = t;
+              el.dispatchEvent(new Event('input', {bubbles: true}));
+              $importTemplateId = '';
+              document.getElementById('import-validation-result').innerHTML = '';
+            });
+          " />
+        <input type="text" id="importProgramData" data-bind:import-program-json style="display:none" />
+      </div>
+      <button
+        class="btn btn-blue btn-block"
+        data-on:click="@post('/api/validate-import-program')"
+      >
+        Validate &amp; Preview
+      </button>
+    </div>
+
+    <div id="import-validation-result"></div>
+
+    <div data-show="$importTemplateId !== ''" style="margin-top:12px">
+      <button
+        class="btn btn-blue btn-block"
+        data-on:click="@post('/api/import-program')"
+      >
+        Apply Program
+      </button>
+    </div>
+  </div>
+</div>`;
+}
+
+/**
+ * SSE fragment: week template selection cards for the import flow.
+ * Rendered inside #import-validation-result after successful validation.
+ * Clicking a card sets $importTemplateId and shows the Apply button.
+ */
+export function importTemplateSelectionFragment(templates: WeekTemplate[]): string {
+  const sorted = [...templates].sort(
+    (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+  );
+
+  const templateCards = sorted
+    .map(
+      (t) =>
+        `<div
+  class="template-card"
+  data-on:click="$importTemplateId = '${escapeAttr(t.id)}'"
+  data-class:selected="$importTemplateId === '${escapeAttr(t.id)}'"
+>
+  <div class="template-name">${escapeHtml(t.name)}</div>
+  ${t.description ? `<div class="template-desc">${escapeHtml(t.description)}</div>` : ""}
+</div>`
+    )
+    .join("\n    ");
+
+  return `<div class="card" style="margin-bottom:0">
+  <div class="form-group" style="margin-bottom:0">
+    <label class="form-label">Choose Schedule</label>
+    <div class="template-grid">
+    ${templateCards}
+    </div>
+  </div>
 </div>`;
 }

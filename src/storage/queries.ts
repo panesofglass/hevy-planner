@@ -235,3 +235,14 @@ export async function getUserByWebhookToken(
     .bind(authToken)
     .first<UserRow>();
 }
+
+/** Delete only pending queue items for a user (preserve completed for history) */
+export async function clearPendingQueueItems(db: D1Database, userId: string): Promise<void> {
+  await db.prepare("DELETE FROM queue_items WHERE user_id = ? AND status = 'pending'").bind(userId).run();
+}
+
+/** Clear all exercise template and routine mappings for a user */
+export async function clearMappings(db: D1Database, userId: string): Promise<void> {
+  await db.prepare("DELETE FROM exercise_template_mappings WHERE user_id = ?").bind(userId).run();
+  await db.prepare("DELETE FROM routine_mappings WHERE user_id = ?").bind(userId).run();
+}
