@@ -7,19 +7,20 @@ export async function getUser(db: D1Database, userId: string): Promise<UserRow |
 
 export async function upsertUser(
   db: D1Database,
-  user: { id: string; active_program: string; template_id: string; start_date: string; hevy_api_key?: string }
+  user: { id: string; active_program: string; template_id: string; start_date: string; hevy_api_key?: string; timezone?: string }
 ): Promise<void> {
   await db
     .prepare(
-      `INSERT INTO users (id, active_program, template_id, start_date, hevy_api_key)
-       VALUES (?, ?, ?, ?, ?)
+      `INSERT INTO users (id, active_program, template_id, start_date, hevy_api_key, timezone)
+       VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          active_program = excluded.active_program,
          template_id = excluded.template_id,
          start_date = excluded.start_date,
-         hevy_api_key = COALESCE(excluded.hevy_api_key, users.hevy_api_key)`
+         hevy_api_key = COALESCE(excluded.hevy_api_key, users.hevy_api_key),
+         timezone = COALESCE(excluded.timezone, users.timezone)`
     )
-    .bind(user.id, user.active_program, user.template_id, user.start_date, user.hevy_api_key ?? null)
+    .bind(user.id, user.active_program, user.template_id, user.start_date, user.hevy_api_key ?? null, user.timezone ?? null)
     .run();
 }
 
@@ -72,6 +73,23 @@ export async function markQueueItemCompleted(
     )
     .bind(completedDate, hevyWorkoutId ?? null, workoutData ?? null, itemId)
     .run();
+}
+
+/** Batch-mark multiple queue items as completed in a single D1 roundtrip */
+export async function batchMarkQueueItemsCompleted(
+  db: D1Database,
+  items: Array<{ itemId: number; completedDate: string; workoutId: string; workoutData?: string }>
+): Promise<void> {
+  if (items.length === 0) return;
+  await db.batch(
+    items.map((item) =>
+      db
+        .prepare(
+          "UPDATE queue_items SET status = 'completed', completed_date = ?, hevy_workout_id = ?, hevy_workout_data = ? WHERE id = ?"
+        )
+        .bind(item.completedDate, item.workoutId, item.workoutData ?? null, item.itemId)
+    )
+  );
 }
 
 export async function markQueueItemCompletedForUser(
@@ -255,14 +273,10 @@ export async function getUserByWebhookToken(
     .first<UserRow>();
 }
 
-/** Delete only pending queue items for a user (preserve completed for history) */
-export async function clearPendingQueueItems(db: D1Database, userId: string): Promise<void> {
-  await db.prepare("DELETE FROM queue_items WHERE user_id = ? AND status = 'pending'").bind(userId).run();
-}
-
-/** Clear all exercise template and routine mappings for a user */
-export async function clearMappings(db: D1Database, userId: string): Promise<void> {
+/** Clear pending queue items and all mappings in a single batch (preserve completed history) */
+export async function clearPendingStateForUser(db: D1Database, userId: string): Promise<void> {
   await db.batch([
+    db.prepare("DELETE FROM queue_items WHERE user_id = ? AND status = 'pending'").bind(userId),
     db.prepare("DELETE FROM exercise_template_mappings WHERE user_id = ?").bind(userId),
     db.prepare("DELETE FROM routine_mappings WHERE user_id = ?").bind(userId),
   ]);

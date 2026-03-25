@@ -95,7 +95,7 @@ export function routinesSection(program: Program): string {
 
     return `<a href="/routine/${encodeURIComponent(r.id)}" style="text-decoration:none;color:inherit;display:block">
   <div style="padding:12px 0;display:flex;align-items:center;gap:12px">
-    <div style="width:4px;height:36px;border-radius:2px;background:${color};flex-shrink:0"></div>
+    <div style="width:4px;height:36px;border-radius:2px;background:${escapeAttr(color)};flex-shrink:0"></div>
     <div style="flex:1;min-width:0">
       <div style="font-size:15px;font-weight:600">${escapeHtml(r.title)}</div>
       <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">${exCount} exercise${exCount !== 1 ? "s" : ""}${muscles ? ` \u00B7 ${escapeHtml(muscles)}` : ""}</div>
@@ -231,9 +231,9 @@ ${itemsHtml}
  * to /api/validate-import-program and /api/import-program.
  *
  * Signals used (all scoped to this element via data-signals):
- *   $import_open        — whether the section is expanded
- *   $import_program_json — the uploaded JSON string
- *   $import_template_id  — the selected week template ID
+ *   $importOpen        — whether the section is expanded
+ *   $importProgramJson — the uploaded JSON string (Datastar converts kebab to camelCase)
+ *   $importTemplateId  — the selected week template ID
  */
 export function importProgramSection(): string {
   return `<div data-signals:import-open="false" data-signals:import-program-json="''" data-signals:import-template-id="''">

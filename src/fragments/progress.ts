@@ -3,7 +3,7 @@
 // ──────────────────────────────────────────────────────────────────
 
 import type { Skill, RoadmapPhase, Benchmark } from "../types";
-import { escapeHtml } from "../utils/html";
+import { escapeHtml, escapeAttr } from "../utils/html";
 
 /**
  * Skill cards — expandable cards with icon, name, timeline, priority badge.
@@ -16,8 +16,8 @@ export function skillCards(skills: Skill[]): string {
   const cards = skills.map((skill, index) => {
     const expanded = index === 0;
     const signalName = `skill_${skill.id.replace(/[^a-zA-Z0-9]/g, "_")}`;
-    const iconBg = skill.color ? `background:${skill.color}22` : "background:rgba(255,255,255,0.06)";
-    const iconColor = skill.color ?? "var(--text)";
+    const iconBg = skill.color ? `background:${escapeAttr(skill.color)}22` : "background:rgba(255,255,255,0.06)";
+    const iconColor = escapeAttr(skill.color ?? "var(--text)");
     const priorityLabel = skill.priority != null ? `#${skill.priority}` : "";
 
     const milestonesHtml =
@@ -26,7 +26,7 @@ export function skillCards(skills: Skill[]): string {
             .map(
               (m) =>
                 `<li class="milestone-item">
-  <div class="milestone-dot" style="background:${skill.color ?? "var(--blue)"}"></div>
+  <div class="milestone-dot" style="background:${escapeAttr(skill.color ?? "var(--blue)")}"></div>
   <div>
     <div class="milestone-name">${escapeHtml(m.name)}</div>
     ${m.description ? `<div class="milestone-desc">${escapeHtml(m.description)}</div>` : ""}

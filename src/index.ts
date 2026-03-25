@@ -15,7 +15,7 @@ import {
   upsertUser,
   getQueueItems,
   insertQueueItems,
-  markQueueItemCompleted,
+  batchMarkQueueItemsCompleted,
   markQueueItemCompletedForUser,
   updateQueueItemHevyRoutineId,
   getExerciseTemplateMappings,
@@ -30,8 +30,7 @@ import {
   clearWebhookState,
   updateLastSyncAt,
   getUserByWebhookToken,
-  clearPendingQueueItems,
-  clearMappings,
+  clearPendingStateForUser,
   updateUserProgram,
 } from "./storage/queries";
 import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "./domain/queue";
@@ -290,10 +289,8 @@ export default {
       return new Response("Not Found", { status: 404 });
     } catch (err) {
       if (err instanceof Response) return err;
-      const message = err instanceof Error ? err.message : "Internal Server Error";
-      const stack = err instanceof Error ? err.stack : "";
-      console.error("Unhandled error:", message, stack);
-      return new Response(message, { status: 500 });
+      console.error("Unhandled error:", err instanceof Error ? err.message : err, err instanceof Error ? err.stack : "");
+      return new Response("Internal Server Error", { status: 500 });
     }
   },
 };
@@ -555,7 +552,7 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
   const programJsonStr = body.programJson || JSON.stringify(defaultProgramJson);
 
   if (!templateId) {
-    return new Response("Template ID is required", { status: 400 });
+    return sseErrorCard("Template ID is required.");
   }
 
   // Parse and validate program
@@ -564,16 +561,16 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
     const parsed = JSON.parse(programJsonStr);
     const result = validateProgram(parsed);
     if (!result.valid) {
-      return new Response(`Invalid program: ${result.errors.join(", ")}`, { status: 400 });
+      return sseErrorCard(`Invalid program: ${result.errors.join(", ")}`);
     }
     program = result.program;
   } catch {
-    return new Response("Invalid program JSON", { status: 400 });
+    return sseErrorCard("Invalid program JSON.");
   }
 
   const template = program.weekTemplates.find((t) => t.id === templateId);
   if (!template) {
-    return new Response("Invalid template ID", { status: 400 });
+    return sseErrorCard("Invalid template ID.");
   }
 
   // Validate API key against Hevy before proceeding
@@ -597,6 +594,7 @@ async function handleSetup(request: Request, env: Env, userId: string, urlTempla
     template_id: templateId,
     start_date: startDate,
     hevy_api_key: apiKey,
+    timezone: tz,
   });
 
   // a-j. Store program, sync Hevy templates/routines, generate queue
@@ -622,9 +620,8 @@ async function activateProgram(
   const template = program.weekTemplates.find((t) => t.id === templateId);
   if (!template) throw new Error(`Week template "${templateId}" not found in program`);
 
-  // 1. Clear existing pending queue items and mappings (preserve completed history)
-  await clearPendingQueueItems(db, userId);
-  await clearMappings(db, userId);
+  // 1. Clear existing pending queue items and mappings atomically (preserve completed history)
+  await clearPendingStateForUser(db, userId);
 
   // 2. Insert program (deactivates previous via batch in insertProgram)
   await insertProgram(db, userId, programJsonStr);
@@ -762,27 +759,29 @@ async function activateProgram(
 /** POST /api/validate-import-program — validate uploaded JSON for the import flow */
 async function handleValidateImportProgram(request: Request): Promise<Response> {
   const body = (await request.json()) as Record<string, unknown>;
-  const programJsonStr = body.programJson as string | undefined;
+  // Datastar converts data-signals:import-program-json to importProgramJson
+  const programJsonStr = body.importProgramJson as string | undefined;
   return validateAndRespond(programJsonStr, "#import-validation-result", importTemplateSelectionFragment);
 }
 
 /** POST /api/import-program — replace active program, re-sync Hevy, regenerate queue */
 async function handleImportProgram(request: Request, env: Env, userId: string, tz?: string): Promise<Response> {
-  let body: { programJson?: string; templateId?: string } = {};
+  // Datastar sends camelCase signal names: importProgramJson, importTemplateId
+  let body: { importProgramJson?: string; importTemplateId?: string } = {};
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return new Response("Invalid request body", { status: 400 });
+    return sseErrorCard("Invalid request body.", "#import-validation-result", "inner");
   }
 
-  const { programJson: programJsonStr, templateId } = body;
+  const { importProgramJson: programJsonStr, importTemplateId: templateId } = body;
 
   if (!programJsonStr) {
     return sseErrorCard("No program JSON provided.", "#import-validation-result", "inner");
   }
 
   if (!templateId) {
-    return new Response("Template ID is required", { status: 400 });
+    return sseErrorCard("Template ID is required.", "#import-validation-result", "inner");
   }
 
   // Parse and validate program
@@ -791,15 +790,15 @@ async function handleImportProgram(request: Request, env: Env, userId: string, t
     const parsed = JSON.parse(programJsonStr);
     const result = validateProgram(parsed);
     if (!result.valid) {
-      return new Response(`Invalid program: ${result.errors.join(", ")}`, { status: 400 });
+      return sseErrorCard(`Invalid program: ${result.errors.join(", ")}`, "#import-validation-result", "inner");
     }
     program = result.program;
   } catch {
-    return new Response("Invalid program JSON", { status: 400 });
+    return sseErrorCard("Invalid program JSON.", "#import-validation-result", "inner");
   }
 
   if (!program.weekTemplates.find((t) => t.id === templateId)) {
-    return new Response("Invalid template ID", { status: 400 });
+    return sseErrorCard("Invalid template ID.", "#import-validation-result", "inner");
   }
 
   // Update user program fields and get existing API key in one pass
@@ -826,7 +825,7 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
   if (mapping) {
     // Routine already exists in Hevy — open it directly
     return sseResponse(
-      executeScript(`window.open('https://hevy.com/routine/${mapping.hevy_routine_id}', '_blank')`)
+      executeScript(`window.open('https://hevy.com/routine/' + ${JSON.stringify(mapping.hevy_routine_id)}, '_blank')`)
     );
   }
 
@@ -893,7 +892,7 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
     }
 
     return sseResponse(
-      executeScript(`window.open('https://hevy.com/routine/${created.id}', '_blank')`)
+      executeScript(`window.open('https://hevy.com/routine/' + ${JSON.stringify(created.id)}, '_blank')`)
     );
   } catch (err) {
     return sseErrorCard(err instanceof Error ? err.message : "Push failed");
@@ -998,18 +997,18 @@ async function performSync(db: D1Database, userId: string, apiKey: string, tz?: 
   }
 
   // Batch-mark completions
-  if (matches.length > 0) {
-    await db.batch(
-      matches.map((match) => {
-        const info = workoutInfo.get(match.workoutId);
-        return db
-          .prepare(
-            "UPDATE queue_items SET status = 'completed', completed_date = ?, hevy_workout_id = ?, hevy_workout_data = ? WHERE id = ?"
-          )
-          .bind(info?.date ?? todayString(tz), match.workoutId, info?.exercisesJson ?? null, match.queueItemId);
-      })
-    );
-  }
+  await batchMarkQueueItemsCompleted(
+    db,
+    matches.map((match) => {
+      const info = workoutInfo.get(match.workoutId);
+      return {
+        itemId: match.queueItemId,
+        completedDate: info?.date ?? todayString(tz),
+        workoutId: match.workoutId,
+        workoutData: info?.exercisesJson,
+      };
+    })
+  );
 
   // Check for daily routine completion (use workout date, not sync date)
   const dailyRoutine = program.routines.find((r) => r.isDaily);
@@ -1124,13 +1123,13 @@ async function handleWebhookEvent(
   // Run sync in the background via waitUntil so the response is not delayed
   if (user.hevy_api_key) {
     ctx.waitUntil(
-      performSync(env.DB, user.id, user.hevy_api_key).catch((err) => {
-        console.error("Webhook sync failed for user", user.id, err instanceof Error ? err.message : err);
+      performSync(env.DB, user.id, user.hevy_api_key, user.timezone ?? undefined).catch((err) => {
+        console.error("Webhook sync failed:", err instanceof Error ? err.message : err);
       })
     );
   }
 
-  return new Response(null, { status: 200 });
+  return new Response(null, { status: 204 });
 }
 
 /** POST /api/complete/:id — manual complete, re-render today */
