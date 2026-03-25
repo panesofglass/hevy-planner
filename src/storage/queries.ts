@@ -40,23 +40,29 @@ export async function updateUserProgram(
   return row?.hevy_api_key ?? null;
 }
 
-export async function getQueueItems(db: D1Database, userId: string): Promise<QueueItemRow[]> {
-  const result = await db
-    .prepare("SELECT * FROM queue_items WHERE user_id = ? ORDER BY position")
-    .bind(userId)
-    .all<QueueItemRow>();
+export async function getQueueItems(db: D1Database, userId: string, programId?: number): Promise<QueueItemRow[]> {
+  const result = programId != null
+    ? await db
+        .prepare("SELECT * FROM queue_items WHERE user_id = ? AND program_id = ? ORDER BY position")
+        .bind(userId, programId)
+        .all<QueueItemRow>()
+    : await db
+        .prepare("SELECT * FROM queue_items WHERE user_id = ? ORDER BY position")
+        .bind(userId)
+        .all<QueueItemRow>();
   return result.results;
 }
 
 export async function insertQueueItems(
   db: D1Database,
   userId: string,
-  items: Array<{ routine_id: string; position: number }>
+  items: Array<{ routine_id: string; position: number }>,
+  programId?: number
 ): Promise<void> {
   const stmt = db.prepare(
-    "INSERT INTO queue_items (user_id, routine_id, position) VALUES (?, ?, ?)"
+    "INSERT INTO queue_items (user_id, routine_id, position, program_id) VALUES (?, ?, ?, ?)"
   );
-  const batch = items.map((item) => stmt.bind(userId, item.routine_id, item.position));
+  const batch = items.map((item) => stmt.bind(userId, item.routine_id, item.position, programId ?? null));
   await db.batch(batch);
 }
 
@@ -120,12 +126,18 @@ export async function updateQueueItemHevyRoutineId(
 
 export async function getExerciseTemplateMappings(
   db: D1Database,
-  userId: string
+  userId: string,
+  programId?: number
 ): Promise<ExerciseTemplateMappingRow[]> {
-  const result = await db
-    .prepare("SELECT * FROM exercise_template_mappings WHERE user_id = ?")
-    .bind(userId)
-    .all<ExerciseTemplateMappingRow>();
+  const result = programId != null
+    ? await db
+        .prepare("SELECT * FROM exercise_template_mappings WHERE user_id = ? AND program_id = ?")
+        .bind(userId, programId)
+        .all<ExerciseTemplateMappingRow>()
+    : await db
+        .prepare("SELECT * FROM exercise_template_mappings WHERE user_id = ?")
+        .bind(userId)
+        .all<ExerciseTemplateMappingRow>();
   return result.results;
 }
 
@@ -135,24 +147,31 @@ export async function upsertExerciseTemplateMapping(
 ): Promise<void> {
   await db
     .prepare(
-      `INSERT INTO exercise_template_mappings (user_id, program_template_id, hevy_template_id, is_custom)
-       VALUES (?, ?, ?, ?)
+      `INSERT INTO exercise_template_mappings (user_id, program_template_id, hevy_template_id, is_custom, program_id)
+       VALUES (?, ?, ?, ?, ?)
        ON CONFLICT(user_id, program_template_id) DO UPDATE SET
          hevy_template_id = excluded.hevy_template_id,
-         is_custom = excluded.is_custom`
+         is_custom = excluded.is_custom,
+         program_id = excluded.program_id`
     )
-    .bind(mapping.user_id, mapping.program_template_id, mapping.hevy_template_id, mapping.is_custom)
+    .bind(mapping.user_id, mapping.program_template_id, mapping.hevy_template_id, mapping.is_custom, mapping.program_id ?? null)
     .run();
 }
 
 export async function getRoutineMappings(
   db: D1Database,
-  userId: string
+  userId: string,
+  programId?: number
 ): Promise<RoutineMappingRow[]> {
-  const result = await db
-    .prepare("SELECT * FROM routine_mappings WHERE user_id = ?")
-    .bind(userId)
-    .all<RoutineMappingRow>();
+  const result = programId != null
+    ? await db
+        .prepare("SELECT * FROM routine_mappings WHERE user_id = ? AND program_id = ?")
+        .bind(userId, programId)
+        .all<RoutineMappingRow>()
+    : await db
+        .prepare("SELECT * FROM routine_mappings WHERE user_id = ?")
+        .bind(userId)
+        .all<RoutineMappingRow>();
   return result.results;
 }
 
@@ -162,12 +181,13 @@ export async function upsertRoutineMapping(
 ): Promise<void> {
   await db
     .prepare(
-      `INSERT INTO routine_mappings (user_id, program_routine_id, hevy_routine_id)
-       VALUES (?, ?, ?)
+      `INSERT INTO routine_mappings (user_id, program_routine_id, hevy_routine_id, program_id)
+       VALUES (?, ?, ?, ?)
        ON CONFLICT(user_id, program_routine_id) DO UPDATE SET
-         hevy_routine_id = excluded.hevy_routine_id`
+         hevy_routine_id = excluded.hevy_routine_id,
+         program_id = excluded.program_id`
     )
-    .bind(mapping.user_id, mapping.program_routine_id, mapping.hevy_routine_id)
+    .bind(mapping.user_id, mapping.program_routine_id, mapping.hevy_routine_id, mapping.program_id ?? null)
     .run();
 }
 
@@ -273,11 +293,47 @@ export async function getUserByWebhookToken(
     .first<UserRow>();
 }
 
-/** Clear pending queue items and all mappings in a single batch (preserve completed history) */
-export async function clearPendingStateForUser(db: D1Database, userId: string): Promise<void> {
+/** Clear pending queue items and all mappings in a single batch (preserve completed history).
+ * When programId is provided, only clears data for that program. */
+export async function clearPendingStateForUser(db: D1Database, userId: string, programId?: number): Promise<void> {
+  if (programId != null) {
+    await db.batch([
+      db.prepare("DELETE FROM queue_items WHERE user_id = ? AND program_id = ? AND status = 'pending'").bind(userId, programId),
+      db.prepare("DELETE FROM exercise_template_mappings WHERE user_id = ? AND program_id = ?").bind(userId, programId),
+      db.prepare("DELETE FROM routine_mappings WHERE user_id = ? AND program_id = ?").bind(userId, programId),
+    ]);
+  } else {
+    await db.batch([
+      db.prepare("DELETE FROM queue_items WHERE user_id = ? AND status = 'pending'").bind(userId),
+      db.prepare("DELETE FROM exercise_template_mappings WHERE user_id = ?").bind(userId),
+      db.prepare("DELETE FROM routine_mappings WHERE user_id = ?").bind(userId),
+    ]);
+  }
+}
+
+/** Return all programs for a user, ordered by creation date descending. */
+export async function getPrograms(db: D1Database, userId: string): Promise<ProgramRow[]> {
+  const result = await db
+    .prepare("SELECT * FROM programs WHERE user_id = ? ORDER BY created_at DESC")
+    .bind(userId)
+    .all<ProgramRow>();
+  return result.results;
+}
+
+/** Deactivate all programs for user, then activate the specified one. */
+export async function setActiveProgram(db: D1Database, userId: string, programId: number): Promise<void> {
   await db.batch([
-    db.prepare("DELETE FROM queue_items WHERE user_id = ? AND status = 'pending'").bind(userId),
-    db.prepare("DELETE FROM exercise_template_mappings WHERE user_id = ?").bind(userId),
-    db.prepare("DELETE FROM routine_mappings WHERE user_id = ?").bind(userId),
+    db.prepare("UPDATE programs SET is_active = 0 WHERE user_id = ?").bind(userId),
+    db.prepare("UPDATE programs SET is_active = 1 WHERE id = ? AND user_id = ?").bind(programId, userId),
+  ]);
+}
+
+/** Delete a program and its associated queue items and mappings. */
+export async function deleteProgram(db: D1Database, userId: string, programId: number): Promise<void> {
+  await db.batch([
+    db.prepare("DELETE FROM queue_items WHERE user_id = ? AND program_id = ?").bind(userId, programId),
+    db.prepare("DELETE FROM exercise_template_mappings WHERE user_id = ? AND program_id = ?").bind(userId, programId),
+    db.prepare("DELETE FROM routine_mappings WHERE user_id = ? AND program_id = ?").bind(userId, programId),
+    db.prepare("DELETE FROM programs WHERE id = ? AND user_id = ?").bind(programId, userId),
   ]);
 }

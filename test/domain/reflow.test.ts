@@ -27,9 +27,9 @@ const template: WeekTemplate = {
 describe("computeUpcoming", () => {
   it("interleaves spacer days between main routines based on template rhythm", () => {
     const pending: QueueItemRow[] = [
-      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null },
-      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null },
-      { id: 4, user_id: "u", routine_id: "recovery", position: 3, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null },
+      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+      { id: 4, user_id: "u", routine_id: "recovery", position: 3, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
     ];
 
     const upcoming = computeUpcoming(pending, template, routines, 5);
@@ -41,8 +41,8 @@ describe("computeUpcoming", () => {
 
   it("derives spacer title from the daily routine's title", () => {
     const pending: QueueItemRow[] = [
-      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null },
-      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null },
+      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
     ];
 
     const upcoming = computeUpcoming(pending, template, routines, 5);
@@ -59,8 +59,8 @@ describe("computeUpcoming", () => {
       { id: "recovery", title: "Recovery", exercises: [] },
     ];
     const pending: QueueItemRow[] = [
-      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null },
-      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null },
+      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
     ];
 
     const upcoming = computeUpcoming(pending, template, noDaily, 5);
@@ -72,7 +72,7 @@ describe("computeUpcoming", () => {
     const pending: QueueItemRow[] = Array.from({ length: 10 }, (_, i) => ({
       id: i, user_id: "u", routine_id: "a", position: i,
       status: "pending" as const, completed_date: null,
-      hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null,
+      hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null,
     }));
     const upcoming = computeUpcoming(pending, template, routines, 3);
     const sessionCount = upcoming.filter((u) => u.type === "routine").length;

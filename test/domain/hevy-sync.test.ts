@@ -14,8 +14,8 @@ describe("buildRoutinePayload", () => {
       ],
     };
     const mappings: ExerciseTemplateMappingRow[] = [
-      { user_id: "u", program_template_id: "dead-hangs", hevy_template_id: "hevy-1", is_custom: 0 },
-      { user_id: "u", program_template_id: "scapular-pushups", hevy_template_id: "hevy-2", is_custom: 0 },
+      { user_id: "u", program_template_id: "dead-hangs", hevy_template_id: "hevy-1", is_custom: 0, program_id: null },
+      { user_id: "u", program_template_id: "scapular-pushups", hevy_template_id: "hevy-2", is_custom: 0, program_id: null },
     ];
     const result = buildRoutinePayload(routine, mappings);
     expect(result.title).toBe("Routine A");
@@ -33,7 +33,7 @@ describe("buildRoutinePayload", () => {
       ],
     };
     const mappings: ExerciseTemplateMappingRow[] = [
-      { user_id: "u", program_template_id: "dead-hangs", hevy_template_id: "hevy-1", is_custom: 0 },
+      { user_id: "u", program_template_id: "dead-hangs", hevy_template_id: "hevy-1", is_custom: 0, program_id: null },
     ];
     const result = buildRoutinePayload(routine, mappings);
     expect(result.unmapped).toEqual(["unknown-exercise"]);
@@ -43,8 +43,8 @@ describe("buildRoutinePayload", () => {
 describe("matchCompletions", () => {
   it("matches workouts to queue items by routine ID", () => {
     const items = [
-      { id: 1, user_id: "u", routine_id: "a", position: 0, status: "pending" as const, completed_date: null, hevy_routine_id: "r-1", hevy_workout_id: null, hevy_workout_data: null },
-      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending" as const, completed_date: null, hevy_routine_id: "r-2", hevy_workout_id: null, hevy_workout_data: null },
+      { id: 1, user_id: "u", routine_id: "a", position: 0, status: "pending" as const, completed_date: null, hevy_routine_id: "r-1", hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending" as const, completed_date: null, hevy_routine_id: "r-2", hevy_workout_id: null, hevy_workout_data: null, program_id: null },
     ];
     const workouts = [
       { id: "w-1", short_id: "s1", title: "Routine A", start_time: "2026-03-21T08:00:00Z", end_time: "2026-03-21T08:30:00Z", exercises: [] },

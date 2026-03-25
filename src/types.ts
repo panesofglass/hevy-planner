@@ -26,6 +26,7 @@ export interface QueueItemRow {
   readonly hevy_routine_id: string | null;
   readonly hevy_workout_id: string | null;
   readonly hevy_workout_data: string | null;
+  readonly program_id: number | null;
 }
 
 export interface ExerciseTemplateMappingRow {
@@ -33,12 +34,14 @@ export interface ExerciseTemplateMappingRow {
   readonly program_template_id: string;
   readonly hevy_template_id: string;
   readonly is_custom: number;
+  readonly program_id: number | null;
 }
 
 export interface RoutineMappingRow {
   readonly user_id: string;
   readonly program_routine_id: string;
   readonly hevy_routine_id: string;
+  readonly program_id: number | null;
 }
 
 export interface ProgramRow {

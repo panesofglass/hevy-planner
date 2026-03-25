@@ -25,6 +25,9 @@ import {
   bulkSetQueueItemRoutineIds,
   insertProgram,
   getActiveProgram,
+  getPrograms,
+  setActiveProgram,
+  deleteProgram,
   updateDailyCompleted,
   updateWebhookState,
   clearWebhookState,
@@ -45,7 +48,7 @@ import { carsCard, heroRoutineCard, completedSection, upcomingSection, syncButto
 import { routineDetailPage } from "./fragments/routine-detail";
 import { skillCards, roadmapSection, benchmarksSection } from "./fragments/progress";
 import { setupPage, templateSelectionFragment } from "./fragments/setup";
-import { programOverview, progressionsSection, routinesSection, foundationsSection, resourcesSection, bodiSection, importProgramSection, importTemplateSelectionFragment } from "./fragments/program";
+import { programOverview, progressionsSection, routinesSection, foundationsSection, resourcesSection, bodiSection, importProgramSection, importTemplateSelectionFragment, programLibrarySection } from "./fragments/program";
 import type { Program } from "./types";
 import { escapeHtml } from "./utils/html";
 import { todayString, toLocalDate } from "./utils/date";
@@ -88,18 +91,18 @@ function sseErrorCard(
 /** Load the subtitle from the active program, or undefined on failure. */
 async function loadSubtitle(db: D1Database, userId: string): Promise<string | undefined> {
   try {
-    const prog = await loadProgram(db, userId);
-    return prog.meta.subtitle;
+    const { program } = await loadProgram(db, userId);
+    return program.meta.subtitle;
   } catch {
     return undefined;
   }
 }
 
-/** Load the active program from D1 for a given user. */
-async function loadProgram(db: D1Database, userId: string): Promise<Program> {
+/** Load the active program from D1 for a given user. Returns the program and its D1 row ID. */
+async function loadProgram(db: D1Database, userId: string): Promise<{ program: Program; programId: number }> {
   const row = await getActiveProgram(db, userId);
   if (!row) throw new Error("No active program found");
-  return JSON.parse(row.json_data) as Program;
+  return { program: JSON.parse(row.json_data) as Program, programId: row.id };
 }
 
 function htmlResponse(body: string): Response {
@@ -289,6 +292,18 @@ export default {
         return await handleWebhookUnregister(env, auth.userId, tz);
       }
 
+      // ── POST /api/switch-program/:id ───────────────────────────
+      let switchMatch: RegExpMatchArray | null;
+      if (method === "POST" && (switchMatch = path.match(/^\/api\/switch-program\/(\d+)$/))) {
+        return await handleSwitchProgram(env, auth.userId, parseInt(switchMatch[1], 10), tz);
+      }
+
+      // ── POST /api/delete-program/:id ───────────────────────────
+      let deleteMatch: RegExpMatchArray | null;
+      if (method === "POST" && (deleteMatch = path.match(/^\/api\/delete-program\/(\d+)$/))) {
+        return await handleDeleteProgram(env, auth.userId, parseInt(deleteMatch[1], 10));
+      }
+
       // ── 404 ────────────────────────────────────────────────────
       return new Response("Not Found", { status: 404 });
     } catch (err) {
@@ -369,15 +384,15 @@ async function handleTodaySSE(env: Env, userId: string, tz?: string): Promise<Re
     );
   }
 
-  const program = await loadProgram(env.DB, userId);
+  const { program, programId } = await loadProgram(env.DB, userId);
   const routineMap = new Map(program.routines.map((r) => [r.id, r]));
   const dailyRoutine = program.routines.find((r) => r.isDaily);
 
-  const items = await getQueueItems(env.DB, userId);
+  const items = await getQueueItems(env.DB, userId, programId);
   const today = todayString(tz);
 
   // Look up routine mappings for deep links
-  const routineMappings = await getRoutineMappings(env.DB, userId);
+  const routineMappings = await getRoutineMappings(env.DB, userId, programId);
   const routineToHevyId = new Map(
     routineMappings.map((m) => [m.program_routine_id, m.hevy_routine_id])
   );
@@ -441,7 +456,7 @@ async function handleTodaySSE(env: Env, userId: string, tz?: string): Promise<Re
 
 /** SSE: Progress page — skills, roadmap, benchmarks */
 async function handleProgressSSE(env: Env, userId: string): Promise<Response> {
-  const program = await loadProgram(env.DB, userId);
+  const { program } = await loadProgram(env.DB, userId);
   const fragments: string[] = [];
   let isFirst = true;
 
@@ -469,11 +484,16 @@ async function handleProgressSSE(env: Env, userId: string): Promise<Response> {
 async function handleProgramSSE(env: Env, userId: string): Promise<Response> {
   let program: Program;
   let user: Awaited<ReturnType<typeof getUser>>;
+  let allPrograms: Awaited<ReturnType<typeof getPrograms>>;
   try {
-    [program, user] = await Promise.all([
+    const [loaded, userRow, programRows] = await Promise.all([
       loadProgram(env.DB, userId),
       getUser(env.DB, userId),
+      getPrograms(env.DB, userId),
     ]);
+    program = loaded.program;
+    user = userRow;
+    allPrograms = programRows;
   } catch {
     return sseResponse(
       patchElements(`<div class="card"><p style="color:var(--text-secondary)">No active program. Upload a program to get started.</p></div>`, {
@@ -490,6 +510,11 @@ async function handleProgramSSE(env: Env, userId: string): Promise<Response> {
   };
 
   const week = user ? currentWeek(user.start_date) : null;
+
+  // Program Library section — always shown first (only when > 1 program exists)
+  if (allPrograms.length > 1) {
+    addFragment(programLibrarySection(allPrograms));
+  }
 
   addFragment(programOverview(program, user, week));
 
@@ -519,7 +544,7 @@ async function handleProgramSSE(env: Env, userId: string): Promise<Response> {
 
 /** SSE: Routine detail — exercise list with coaching context */
 async function handleRoutineSSE(env: Env, userId: string, routineId: string): Promise<Response> {
-  const program = await loadProgram(env.DB, userId);
+  const { program } = await loadProgram(env.DB, userId);
   const routine = program.routines.find((r) => r.id === routineId);
   if (!routine) {
     return sseResponse(
@@ -627,10 +652,11 @@ async function activateProgram(
   if (!template) throw new Error(`Week template "${templateId}" not found in program`);
 
   // 1. Clear existing pending queue items and mappings atomically (preserve completed history)
+  // Clear globally (no programId) since we're replacing the active program
   await clearPendingStateForUser(db, userId);
 
-  // 2. Insert program (deactivates previous via batch in insertProgram)
-  await insertProgram(db, userId, programJsonStr);
+  // 2. Insert program (deactivates previous via batch in insertProgram) — get the new row ID
+  const programId = await insertProgram(db, userId, programJsonStr);
 
   // 3. Hevy exercise template & routine creation (only with API key)
   const routineIdMap = new Map<string, string>();
@@ -660,14 +686,15 @@ async function activateProgram(
       }
     }
 
-    // e. Save all exercise template mappings (batched)
+    // e. Save all exercise template mappings (batched), scoped to new programId
     if (matched.size > 0) {
       const upsertTemplateStmt = db.prepare(
-        `INSERT INTO exercise_template_mappings (user_id, program_template_id, hevy_template_id, is_custom)
-         VALUES (?, ?, ?, ?)
+        `INSERT INTO exercise_template_mappings (user_id, program_template_id, hevy_template_id, is_custom, program_id)
+         VALUES (?, ?, ?, ?, ?)
          ON CONFLICT(user_id, program_template_id) DO UPDATE SET
            hevy_template_id = excluded.hevy_template_id,
-           is_custom = excluded.is_custom`
+           is_custom = excluded.is_custom,
+           program_id = excluded.program_id`
       );
       await db.batch(
         [...matched.entries()].map(([programTemplateId, hevyTemplateId]) =>
@@ -675,15 +702,16 @@ async function activateProgram(
             userId,
             programTemplateId,
             hevyTemplateId,
-            customCreated.has(programTemplateId) ? 1 : 0
+            customCreated.has(programTemplateId) ? 1 : 0,
+            programId
           )
         )
       );
     }
 
     // f. Create or update Hevy routines with folder grouping + dedup
-    const allMappings = await getExerciseTemplateMappings(db, userId);
-    const existingRoutineMappings = await getRoutineMappings(db, userId);
+    const allMappings = await getExerciseTemplateMappings(db, userId, programId);
+    const existingRoutineMappings = await getRoutineMappings(db, userId, programId);
     const existingMappingsMap = new Map(
       existingRoutineMappings.map((m) => [m.program_routine_id, m.hevy_routine_id])
     );
@@ -733,27 +761,28 @@ async function activateProgram(
       }
     }
 
-    // g. Save all routine mappings (batched)
+    // g. Save all routine mappings (batched), scoped to new programId
     if (routineIdMap.size > 0) {
       const upsertRoutineStmt = db.prepare(
-        `INSERT INTO routine_mappings (user_id, program_routine_id, hevy_routine_id)
-         VALUES (?, ?, ?)
+        `INSERT INTO routine_mappings (user_id, program_routine_id, hevy_routine_id, program_id)
+         VALUES (?, ?, ?, ?)
          ON CONFLICT(user_id, program_routine_id) DO UPDATE SET
-           hevy_routine_id = excluded.hevy_routine_id`
+           hevy_routine_id = excluded.hevy_routine_id,
+           program_id = excluded.program_id`
       );
       await db.batch(
         [...routineIdMap.entries()].map(([programRoutineId, hevyRoutineId]) =>
-          upsertRoutineStmt.bind(userId, programRoutineId, hevyRoutineId)
+          upsertRoutineStmt.bind(userId, programRoutineId, hevyRoutineId, programId)
         )
       );
     }
   }
 
-  // 4. Generate queue playlist and insert items
+  // 4. Generate queue playlist and insert items, scoped to new programId
   const weeks = program.meta.durationWeeks || 8;
   const playlist = generatePlaylist(template, program.routines, weeks);
   if (playlist.length > 0) {
-    await insertQueueItems(db, userId, playlist);
+    await insertQueueItems(db, userId, playlist, programId);
   }
 
   // 5. Bulk-set hevy_routine_id on queue items via routine_mappings
@@ -825,8 +854,10 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
     return sseErrorCard("Connect your Hevy API key first.", "#content", "inner");
   }
 
-  // Look up existing routine mapping from setup
-  const routineMappings = await getRoutineMappings(env.DB, userId);
+  const { program, programId } = await loadProgram(env.DB, userId);
+
+  // Look up existing routine mapping from setup (scoped to active program)
+  const routineMappings = await getRoutineMappings(env.DB, userId, programId);
   const mapping = routineMappings.find((m) => m.program_routine_id === routineId);
 
   if (mapping) {
@@ -837,7 +868,6 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
   }
 
   // Fallback: no mapping exists (edge case — setup didn't create this routine)
-  const program = await loadProgram(env.DB, userId);
   const routine = program.routines.find((r) => r.id === routineId);
   if (!routine) {
     return new Response("Routine not found", { status: 404 });
@@ -849,8 +879,8 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
   }
   const client = new HevyClient(apiKey);
 
-  // Get or auto-create exercise template mappings
-  let mappings = await getExerciseTemplateMappings(env.DB, userId);
+  // Get or auto-create exercise template mappings (scoped to active program)
+  let mappings = await getExerciseTemplateMappings(env.DB, userId, programId);
   if (mappings.length === 0) {
     try {
       const hevyTemplates = await client.getAllExerciseTemplates();
@@ -862,9 +892,10 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
           program_template_id: programTemplateId,
           hevy_template_id: hevyTemplateId,
           is_custom: 0,
+          program_id: programId,
         });
       }
-      mappings = await getExerciseTemplateMappings(env.DB, userId);
+      mappings = await getExerciseTemplateMappings(env.DB, userId, programId);
     } catch {
       // If auto-match fails, continue with empty mappings
     }
@@ -891,10 +922,11 @@ async function handlePush(env: Env, userId: string, routineId: string): Promise<
       user_id: userId,
       program_routine_id: routineId,
       hevy_routine_id: created.id,
+      program_id: programId,
     });
 
-    // Also update the queue item if there is one
-    const items = await getQueueItems(env.DB, userId);
+    // Also update the queue item if there is one (scoped to active program)
+    const items = await getQueueItems(env.DB, userId, programId);
     const queueItem = items.find(
       (i) => i.routine_id === routineId && i.status === "pending"
     );
@@ -971,13 +1003,13 @@ async function handleCleanupRoutines(env: Env, userId: string): Promise<Response
  * Updates last_sync_at on successful completion.
  */
 async function performSync(db: D1Database, userId: string, apiKey: string, tz?: string): Promise<void> {
-  const program = await loadProgram(db, userId);
+  const { program, programId } = await loadProgram(db, userId);
   const routineMap = new Map(program.routines.map((r) => [r.id, r]));
   const client = new HevyClient(apiKey);
 
   const [workouts, items] = await Promise.all([
     client.getRecentWorkouts(),
-    getQueueItems(db, userId),
+    getQueueItems(db, userId, programId),
   ]);
 
   // Skip workouts already matched to a completed queue item
@@ -1164,4 +1196,50 @@ async function handleManualComplete(
   const today = todayString(tz);
   await markQueueItemCompletedForUser(env.DB, itemId, userId, today);
   return await handleTodaySSE(env, userId, tz);
+}
+
+/** POST /api/switch-program/:id — switch the active program and re-render the Program page */
+async function handleSwitchProgram(
+  env: Env,
+  userId: string,
+  programId: number,
+  _tz?: string
+): Promise<Response> {
+  try {
+    await setActiveProgram(env.DB, userId, programId);
+    // Update the active_program label on the users row for subtitle display
+    const row = await getActiveProgram(env.DB, userId);
+    if (row) {
+      const prog = JSON.parse(row.json_data) as Program;
+      await env.DB.prepare("UPDATE users SET active_program = ? WHERE id = ?")
+        .bind(prog.meta.title, userId)
+        .run();
+    }
+  } catch (err) {
+    return sseErrorCard(err instanceof Error ? err.message : "Failed to switch program");
+  }
+  return await handleProgramSSE(env, userId);
+}
+
+/** POST /api/delete-program/:id — delete an inactive program */
+async function handleDeleteProgram(
+  env: Env,
+  userId: string,
+  programId: number
+): Promise<Response> {
+  // Verify the program is not active before deleting
+  const programs = await getPrograms(env.DB, userId);
+  const target = programs.find((p) => p.id === programId);
+  if (!target) {
+    return sseErrorCard("Program not found.");
+  }
+  if (target.is_active) {
+    return sseErrorCard("Cannot delete the active program. Switch to another program first.");
+  }
+  try {
+    await deleteProgram(env.DB, userId, programId);
+  } catch (err) {
+    return sseErrorCard(err instanceof Error ? err.message : "Failed to delete program");
+  }
+  return await handleProgramSSE(env, userId);
 }

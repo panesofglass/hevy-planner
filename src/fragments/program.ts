@@ -3,7 +3,7 @@
 // foundations, resources, BODi, import
 // ──────────────────────────────────────────────────────────────────
 
-import type { Program, Progression, Foundation, Resource, BodiIntegration, UserRow, WeekTemplate } from "../types";
+import type { Program, Progression, Foundation, Resource, BodiIntegration, UserRow, WeekTemplate, ProgramRow } from "../types";
 import { escapeHtml, escapeAttr } from "../utils/html";
 import { findActiveProgression } from "../domain/schedule";
 import { renderTemplateGrid } from "./template-grid";
@@ -220,6 +220,56 @@ export function bodiSection(items: BodiIntegration[]): string {
   return `<div class="section-header">BODi Integration</div>
 <div class="card">
 ${itemsHtml}
+</div>`;
+}
+
+// ── Program Library section ──────────────────────────────────────────
+
+/**
+ * Lists all programs in the user's library with switch/delete actions.
+ * Only shown when more than one program exists.
+ */
+export function programLibrarySection(programs: ProgramRow[]): string {
+  const items = programs.map((p) => {
+    const parsed = (() => {
+      try {
+        return JSON.parse(p.json_data) as { meta?: { title?: string; subtitle?: string } };
+      } catch {
+        return null;
+      }
+    })();
+    const title = parsed?.meta?.title ?? `Program #${p.id}`;
+    const subtitle = parsed?.meta?.subtitle;
+    const isActive = p.is_active === 1;
+    const uploadedDate = p.created_at.slice(0, 10);
+
+    const activeBadge = isActive
+      ? `<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--green);background:rgba(48,209,88,0.12);padding:2px 8px;border-radius:4px;margin-left:8px">Active</span>`
+      : "";
+
+    const actions = isActive
+      ? ""
+      : `<div style="display:flex;gap:8px;margin-top:8px">
+  <button class="btn btn-blue" style="font-size:12px;padding:4px 14px;height:auto"
+    data-on:click="@post('/api/switch-program/${p.id}')">Switch To</button>
+  <button class="btn" style="font-size:12px;padding:4px 14px;height:auto;color:var(--orange);border-color:var(--orange)"
+    data-on:click="@post('/api/delete-program/${p.id}')">Delete</button>
+</div>`;
+
+    return `<div style="padding:12px 0;${isActive ? "" : "opacity:0.75"}">
+  <div style="display:flex;align-items:center">
+    <span style="font-size:15px;font-weight:600">${escapeHtml(title)}</span>
+    ${activeBadge}
+  </div>
+  ${subtitle ? `<div style="font-size:13px;color:var(--text-secondary);margin-top:2px">${escapeHtml(subtitle)}</div>` : ""}
+  <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">Imported ${escapeHtml(uploadedDate)}</div>
+  ${actions}
+</div>`;
+  }).join(`<div style="border-top:1px solid var(--separator)"></div>`);
+
+  return `<div class="section-header">Program Library</div>
+<div class="card">
+${items}
 </div>`;
 }
 
