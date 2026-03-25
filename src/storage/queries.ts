@@ -1,4 +1,4 @@
-import type { UserRow, QueueItemRow, ExerciseTemplateMappingRow, RoutineMappingRow, ProgramRow } from "../types";
+import type { UserRow, QueueItemRow, ExerciseTemplateMappingRow, RoutineMappingRow, ProgramRow, Program } from "../types";
 import { sha256Hex } from "../utils/crypto";
 
 export async function getUser(db: D1Database, userId: string): Promise<UserRow | null> {
@@ -326,6 +326,13 @@ export async function setActiveProgram(db: D1Database, userId: string, programId
     db.prepare("UPDATE programs SET is_active = 0 WHERE user_id = ?").bind(userId),
     db.prepare("UPDATE programs SET is_active = 1 WHERE id = ? AND user_id = ?").bind(programId, userId),
   ]);
+}
+
+/** Load the active program from D1 for a given user. Returns the program and its D1 row ID. */
+export async function loadProgram(db: D1Database, userId: string): Promise<{ program: Program; programId: number }> {
+  const row = await getActiveProgram(db, userId);
+  if (!row) throw new Error("No active program found");
+  return { program: JSON.parse(row.json_data) as Program, programId: row.id };
 }
 
 /** Delete a program and its associated queue items and mappings. */
