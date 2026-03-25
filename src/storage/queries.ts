@@ -46,13 +46,14 @@ export async function markQueueItemCompleted(
   db: D1Database,
   itemId: number,
   completedDate: string,
-  hevyWorkoutId?: string
+  hevyWorkoutId?: string,
+  workoutData?: string
 ): Promise<void> {
   await db
     .prepare(
-      "UPDATE queue_items SET status = 'completed', completed_date = ?, hevy_workout_id = ? WHERE id = ?"
+      "UPDATE queue_items SET status = 'completed', completed_date = ?, hevy_workout_id = ?, hevy_workout_data = ? WHERE id = ?"
     )
-    .bind(completedDate, hevyWorkoutId ?? null, itemId)
+    .bind(completedDate, hevyWorkoutId ?? null, workoutData ?? null, itemId)
     .run();
 }
 
