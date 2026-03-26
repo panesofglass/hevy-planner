@@ -10,6 +10,14 @@ const routines: Routine[] = [
   { id: "recovery", title: "Recovery", exercises: [] },
 ];
 
+// Template dayOfWeek: 0=Mon … 6=Sun
+// Day 0 (Mon): a
+// Day 1 (Tue): b
+// Day 2 (Wed): CARs only (spacer)
+// Day 3 (Thu): c
+// Day 4 (Fri): recovery
+// Day 5 (Sat): rest
+// Day 6 (Sun): rest
 const template: WeekTemplate = {
   id: "5day",
   name: "5-Day",
@@ -24,30 +32,58 @@ const template: WeekTemplate = {
   ],
 };
 
-describe("computeUpcoming", () => {
-  it("interleaves spacer days between main routines based on template rhythm", () => {
-    const pending: QueueItemRow[] = [
-      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
-      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
-      { id: 4, user_id: "u", routine_id: "recovery", position: 3, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
-    ];
+function makePending(routineId: string, position: number): QueueItemRow {
+  return {
+    id: position, user_id: "u", routine_id: routineId, position,
+    status: "pending", completed_date: null,
+    hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null,
+  };
+}
 
-    const upcoming = computeUpcoming(pending, template, routines, 5);
-    const types = upcoming.map((u) => u.type);
-    expect(types[0]).toBe("routine");   // b
-    expect(types[1]).toBe("spacer");    // daily-only day
-    expect(types[2]).toBe("routine");   // c
+describe("computeUpcoming", () => {
+  it("on schedule: shows spacer between hero day and next session", () => {
+    // Hero = b on Tuesday (day 1). Tomorrow = Wednesday (day 2) = CARs spacer.
+    const pending = [makePending("c", 2), makePending("recovery", 3), makePending("a", 4)];
+    const todayDow = 1; // Tuesday
+
+    const upcoming = computeUpcoming(pending, template, routines, 5, todayDow);
+
+    expect(upcoming[0]).toMatchObject({ type: "spacer", title: "CARs" });
+    expect(upcoming[1]).toMatchObject({ type: "routine", routineId: "c" });
+    expect(upcoming[2]).toMatchObject({ type: "routine", routineId: "recovery" });
+  });
+
+  it("smart shift: consumes spacer when session slides past it", () => {
+    // Hero = b but today is Wednesday (day 2) — slid from Tuesday.
+    // Tomorrow = Thursday (day 3) = routine day. Spacer consumed.
+    const pending = [makePending("c", 2), makePending("recovery", 3), makePending("a", 4)];
+    const todayDow = 2; // Wednesday (the CARs day — consumed by the slide)
+
+    const upcoming = computeUpcoming(pending, template, routines, 5, todayDow);
+
+    expect(upcoming[0]).toMatchObject({ type: "routine", routineId: "c" });
+    expect(upcoming[1]).toMatchObject({ type: "routine", routineId: "recovery" });
+  });
+
+  it("wraps correctly across week boundary", () => {
+    // Hero = recovery on Friday (day 4). Tomorrow = Saturday (day 5) = rest, then Sunday = rest, then Monday = a.
+    const pending = [makePending("a", 5), makePending("b", 6), makePending("c", 7)];
+    const todayDow = 4; // Friday
+
+    const upcoming = computeUpcoming(pending, template, routines, 3, todayDow);
+
+    // Sat + Sun are rest (skipped), Monday = a, Tuesday = b, Wed = spacer, Thu = c
+    expect(upcoming[0]).toMatchObject({ type: "routine", routineId: "a" });
+    expect(upcoming[1]).toMatchObject({ type: "routine", routineId: "b" });
+    expect(upcoming[2]).toMatchObject({ type: "spacer", title: "CARs" });
   });
 
   it("derives spacer title from the daily routine's title", () => {
-    const pending: QueueItemRow[] = [
-      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
-      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
-    ];
+    const pending = [makePending("c", 2), makePending("recovery", 3)];
+    const todayDow = 1; // Tuesday — tomorrow is CARs spacer
 
-    const upcoming = computeUpcoming(pending, template, routines, 5);
+    const upcoming = computeUpcoming(pending, template, routines, 5, todayDow);
     const spacer = upcoming.find((u) => u.type === "spacer");
-    // routines[0] has isDaily: true and title: "CARs"
     expect(spacer?.title).toBe("CARs");
   });
 
@@ -58,52 +94,19 @@ describe("computeUpcoming", () => {
       { id: "c", title: "Routine C", exercises: [] },
       { id: "recovery", title: "Recovery", exercises: [] },
     ];
-    const pending: QueueItemRow[] = [
-      { id: 2, user_id: "u", routine_id: "b", position: 1, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
-      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
-    ];
+    const pending = [makePending("c", 2), makePending("recovery", 3)];
+    const todayDow = 1; // Tuesday
 
-    const upcoming = computeUpcoming(pending, template, noDaily, 5);
+    const upcoming = computeUpcoming(pending, template, noDaily, 5, todayDow);
     const spacer = upcoming.find((u) => u.type === "spacer");
     expect(spacer?.title).toBe("Rest");
   });
 
-  it("preserves spacer between hero and next session when startAfterRoutineId is provided", () => {
-    // Hero = b (rhythm index 1). Upcoming should start at rhythm index 2 (spacer).
-    const pending: QueueItemRow[] = [
-      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
-      { id: 4, user_id: "u", routine_id: "recovery", position: 3, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
-    ];
-
-    const upcoming = computeUpcoming(pending, template, routines, 3, "b");
-
-    // After b (index 1), next is spacer (index 2), then c (index 3), then recovery (index 4)
-    expect(upcoming[0]).toMatchObject({ type: "spacer", title: "CARs" });
-    expect(upcoming[1]).toMatchObject({ type: "routine", routineId: "c" });
-    expect(upcoming[2]).toMatchObject({ type: "routine", routineId: "recovery" });
-  });
-
-  it("wraps rhythm correctly across week boundary with startAfterRoutineId", () => {
-    // Hero = recovery (last routine, rhythm index 4). Next wraps to a (index 0).
-    const pending: QueueItemRow[] = [
-      { id: 5, user_id: "u", routine_id: "a", position: 4, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
-      { id: 6, user_id: "u", routine_id: "b", position: 5, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
-    ];
-
-    const upcoming = computeUpcoming(pending, template, routines, 3, "recovery");
-
-    // After recovery (index 4), wraps to a (index 0), then b (index 1)
-    expect(upcoming[0]).toMatchObject({ type: "routine", routineId: "a" });
-    expect(upcoming[1]).toMatchObject({ type: "routine", routineId: "b" });
-  });
-
   it("limits to requested count of main sessions", () => {
-    const pending: QueueItemRow[] = Array.from({ length: 10 }, (_, i) => ({
-      id: i, user_id: "u", routine_id: "a", position: i,
-      status: "pending" as const, completed_date: null,
-      hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null,
-    }));
-    const upcoming = computeUpcoming(pending, template, routines, 3);
+    const pending = Array.from({ length: 10 }, (_, i) => makePending("a", i));
+    const todayDow = 0; // Monday
+
+    const upcoming = computeUpcoming(pending, template, routines, 3, todayDow);
     const sessionCount = upcoming.filter((u) => u.type === "routine").length;
     expect(sessionCount).toBe(3);
   });
