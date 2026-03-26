@@ -70,7 +70,7 @@ export async function handleTodaySSE(env: Env, userId: string, tz?: string): Pro
     const pendingItems = items.filter((i) => i.status === "pending").sort((a, b) => a.position - b.position);
     // Skip the first pending (already shown as hero) for upcoming
     const upcomingPending = pendingItems.slice(1);
-    const upcoming = computeUpcoming(upcomingPending, template, program.routines, 5);
+    const upcoming = computeUpcoming(upcomingPending, template, program.routines, 5, nextItem?.routine_id);
     if (upcoming.length > 0) {
       fragments.push(
         patchElements(upcomingSection(upcoming), { selector: "#content", mode: "append" })

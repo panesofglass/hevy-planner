@@ -13,7 +13,8 @@ export function computeUpcoming(
   pendingItems: QueueItemRow[],
   template: WeekTemplate,
   routines: Routine[],
-  maxSessions: number
+  maxSessions: number,
+  startAfterRoutineId?: string
 ): UpcomingItem[] {
   const routineMap = new Map(routines.map((r) => [r.id, r]));
   const dailyRoutine = routines.find((r) => r.isDaily);
@@ -39,11 +40,14 @@ export function computeUpcoming(
   let rhythmIndex = 0;
   let sessionCount = 0;
 
-  const firstPending = pendingItems[0];
-  if (firstPending) {
+  // Sync rhythm to the position after the hero (if provided), so spacers
+  // between hero and next session are preserved. Fall back to syncing to
+  // the first pending item's position.
+  const anchorId = startAfterRoutineId ?? pendingItems[0]?.routine_id;
+  if (anchorId) {
     for (let i = 0; i < templateRhythm.length; i++) {
-      if (templateRhythm[i].routineId === firstPending.routine_id) {
-        rhythmIndex = i;
+      if (templateRhythm[i].routineId === anchorId) {
+        rhythmIndex = startAfterRoutineId ? i + 1 : i;
         break;
       }
     }

@@ -231,48 +231,4 @@ export class HevyClient {
     return data.workouts;
   }
 
-  async createWebhookSubscription(url: string, authToken: string): Promise<{ id: string }> {
-    const data = await this.request<{ webhook_subscription: { id: string; url: string } }>(
-      "/webhook_subscriptions",
-      {
-        method: "POST",
-        body: JSON.stringify({ webhook_subscription: { url, auth_token: authToken } }),
-      }
-    );
-    return { id: data.webhook_subscription.id };
-  }
-
-  async getWebhookSubscription(): Promise<{ id: string; url: string } | null> {
-    try {
-      const data = await this.request<{ webhook_subscriptions: Array<{ id: string; url: string }> }>(
-        "/webhook_subscriptions"
-      );
-      const subs = data.webhook_subscriptions;
-      return Array.isArray(subs) && subs.length > 0 ? subs[0] : null;
-    } catch {
-      return null;
-    }
-  }
-
-  async deleteWebhookSubscription(webhookId: string): Promise<void> {
-    // Use a custom request path: the response body may be empty (204 No Content),
-    // so we call fetch directly rather than this.request() which tries to parse JSON.
-    const url = `${this.baseUrl}/webhook_subscriptions/${webhookId}`;
-    const res = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        "api-key": this.apiKey,
-        "accept": "application/json",
-        "content-type": "application/json",
-      },
-    });
-    if (res.status === 429) {
-      throw new Error("RATE_LIMITED");
-    }
-    if (!res.ok) {
-      const errorBody = await res.text().catch(() => "");
-      console.error(`Hevy API ${res.status} ${res.statusText} ${url}: ${errorBody}`);
-      throw new Error(`Hevy API error: ${res.status} ${res.statusText}: ${errorBody}`);
-    }
-  }
 }

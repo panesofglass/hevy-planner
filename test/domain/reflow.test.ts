@@ -68,6 +68,35 @@ describe("computeUpcoming", () => {
     expect(spacer?.title).toBe("Rest");
   });
 
+  it("preserves spacer between hero and next session when startAfterRoutineId is provided", () => {
+    // Hero = b (rhythm index 1). Upcoming should start at rhythm index 2 (spacer).
+    const pending: QueueItemRow[] = [
+      { id: 3, user_id: "u", routine_id: "c", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+      { id: 4, user_id: "u", routine_id: "recovery", position: 3, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+    ];
+
+    const upcoming = computeUpcoming(pending, template, routines, 3, "b");
+
+    // After b (index 1), next is spacer (index 2), then c (index 3), then recovery (index 4)
+    expect(upcoming[0]).toMatchObject({ type: "spacer", title: "CARs" });
+    expect(upcoming[1]).toMatchObject({ type: "routine", routineId: "c" });
+    expect(upcoming[2]).toMatchObject({ type: "routine", routineId: "recovery" });
+  });
+
+  it("wraps rhythm correctly across week boundary with startAfterRoutineId", () => {
+    // Hero = recovery (last routine, rhythm index 4). Next wraps to a (index 0).
+    const pending: QueueItemRow[] = [
+      { id: 5, user_id: "u", routine_id: "a", position: 4, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+      { id: 6, user_id: "u", routine_id: "b", position: 5, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+    ];
+
+    const upcoming = computeUpcoming(pending, template, routines, 3, "recovery");
+
+    // After recovery (index 4), wraps to a (index 0), then b (index 1)
+    expect(upcoming[0]).toMatchObject({ type: "routine", routineId: "a" });
+    expect(upcoming[1]).toMatchObject({ type: "routine", routineId: "b" });
+  });
+
   it("limits to requested count of main sessions", () => {
     const pending: QueueItemRow[] = Array.from({ length: 10 }, (_, i) => ({
       id: i, user_id: "u", routine_id: "a", position: i,

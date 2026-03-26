@@ -808,7 +808,9 @@
         {
           "dayOfWeek": 1,
           "note": "CARs only or rest",
-          "routineIDs": []
+          "routineIDs": [
+            "daily"
+          ]
         },
         {
           "dayOfWeek": 2,
@@ -820,7 +822,9 @@
         {
           "dayOfWeek": 3,
           "note": "Strength training day — do CARs as warmup",
-          "routineIDs": []
+          "routineIDs": [
+            "daily"
+          ]
         },
         {
           "dayOfWeek": 4,
@@ -838,7 +842,9 @@
         {
           "dayOfWeek": 6,
           "note": "Full rest",
-          "routineIDs": []
+          "routineIDs": [
+            "daily"
+          ]
         }
       ]
     },

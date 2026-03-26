@@ -179,12 +179,12 @@ ${rows}
  * @param lastSyncAt - ISO timestamp of the most recent auto-sync, if any
  * @param tz         - IANA timezone for formatting lastSyncAt (defaults to UTC)
  */
-export function syncButton(webhookId?: string | null, lastSyncAt?: string | null, tz?: string): string {
+export function syncButton(webhookUrl?: string | null, lastSyncAt?: string | null, tz?: string): string {
   const manualSync = `<button class="btn btn-ghost" data-on:click="@post('/api/pull')" style="font-size:13px">
     Sync from Hevy
   </button>`;
 
-  if (webhookId) {
+  if (webhookUrl) {
     const lastSyncLabel = lastSyncAt
       ? `<div style="font-size:11px; color:var(--text-tertiary); margin-top:4px">Last synced: ${escapeHtml(new Date(lastSyncAt).toLocaleString("en-US", { timeZone: tz ?? "UTC" }))}</div>`
       : "";
@@ -195,6 +195,10 @@ export function syncButton(webhookId?: string | null, lastSyncAt?: string | null
     <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/unregister')" style="font-size:12px; padding:4px 10px">
       Disable
     </button>
+  </div>
+  <div style="margin-top:6px">
+    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:4px">Paste this URL in <a href="https://hevy.com/settings?developer" target="_blank" style="color:var(--blue)">Hevy developer settings</a>:</div>
+    <code style="font-size:11px; word-break:break-all; color:var(--text-secondary); user-select:all">${escapeHtml(webhookUrl)}</code>
   </div>
   ${lastSyncLabel}
   <div style="margin-top:8px">
