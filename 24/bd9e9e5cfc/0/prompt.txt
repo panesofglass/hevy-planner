@@ -1,0 +1,5 @@
+Daily CARs is back in the schedule. Thank you.
+
+---
+
+Today just refreshed (after midnight) and kept the session I missed from yesterday. Unfortunately, the Daily CARs only day is still there for tomorrow. It did not get merged into the shift of yesterday’s session into today. I should see Daily CARs only removed now. The current implementation merely used the conveyor belt, not the smart shift
