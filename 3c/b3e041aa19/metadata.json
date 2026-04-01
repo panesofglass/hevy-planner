@@ -1,0 +1,28 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "3cb3e041aa19",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 5,
+  "files_touched": [
+    "migrations/0010_update_program_sets.sql",
+    "package-lock.json",
+    "package.json",
+    "programs/mobility-joint-restoration.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/3c/b3e041aa19/0/metadata.json",
+      "transcript": "/3c/b3e041aa19/0/full.jsonl",
+      "content_hash": "/3c/b3e041aa19/0/content_hash.txt",
+      "prompt": "/3c/b3e041aa19/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 62,
+    "cache_creation_tokens": 137786,
+    "cache_read_tokens": 3957423,
+    "output_tokens": 58898,
+    "api_call_count": 41
+  }
+}
