@@ -23,6 +23,7 @@ export interface UserRow {
   readonly created_at: string;
   readonly daily_completed_date: string | null;
   readonly webhook_id: string | null;
+  readonly webhook_bearer_token: string | null;
   readonly webhook_auth_token: string | null;
   readonly last_sync_at: string | null;
   readonly timezone: string | null;

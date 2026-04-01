@@ -6,9 +6,10 @@ import { computeUpcoming } from "../domain/reflow";
 import { setupPage } from "../fragments/setup";
 import { carsCard, heroRoutineCard, completedSection, upcomingSection, syncButton } from "../fragments/today";
 import { todayString } from "../utils/date";
+import { decryptAesGcm } from "../utils/crypto";
 
 /** SSE: Today page — CARs card, hero session, completed, upcoming */
-export async function handleTodaySSE(env: Env, userId: string, tz?: string): Promise<Response> {
+export async function handleTodaySSE(env: Env, userId: string, tz?: string, opts?: { showCredentials?: boolean }): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user) {
     return sseResponse(
@@ -81,9 +82,13 @@ export async function handleTodaySSE(env: Env, userId: string, tz?: string): Pro
     }
   }
 
-  // Sync button at the bottom
+  // Sync button at the bottom — only decrypt bearer token when just registered
+  let bearerToken: string | null = null;
+  if (opts?.showCredentials && user.webhook_bearer_token) {
+    bearerToken = await decryptAesGcm(user.webhook_bearer_token, env.ENCRYPTION_KEY);
+  }
   fragments.push(
-    patchElements(syncButton(user.webhook_id, user.last_sync_at, tz), { selector: "#content", mode: "append" })
+    patchElements(syncButton(user.webhook_id, bearerToken, user.last_sync_at, tz), { selector: "#content", mode: "append" })
   );
 
   return sseResponse(mergeFragments(fragments));

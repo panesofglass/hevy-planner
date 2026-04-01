@@ -289,15 +289,15 @@
       "searchTerms": "ATG split squat beginner regression",
       "progressionByPhase": {
         "Foundation": {
-          "sets": "3×8 each leg",
+          "sets": "2×8 each leg",
           "notes": "Use bench support, partial depth only."
         },
         "Build": {
-          "sets": "3×8 each leg",
+          "sets": "2×8 each leg",
           "notes": "Reduce bench support, increase depth."
         },
         "Load": {
-          "sets": "3×8 each leg",
+          "sets": "2×8 each leg",
           "notes": "Light dumbbells, no support."
         }
       }
@@ -317,15 +317,15 @@
       "searchTerms": "Cossack squat progression beginner",
       "progressionByPhase": {
         "Foundation": {
-          "sets": "3×6 each side",
+          "sets": "2×6 each side",
           "notes": "Hold doorframe, go only as deep as comfortable."
         },
         "Build": {
-          "sets": "3×6 each side",
+          "sets": "2×6 each side",
           "notes": "Less support, aim for parallel thigh depth."
         },
         "Load": {
-          "sets": "3×6 each side",
+          "sets": "2×6 each side",
           "notes": "Goblet Cossack Squats with light dumbbell."
         }
       }
@@ -603,7 +603,7 @@
       "exercises": [
         {
           "exerciseTemplateId": "dead-hangs",
-          "sets": "3×20-30 sec"
+          "sets": "2×20-30 sec"
         },
         {
           "exerciseTemplateId": "tspine-extension-foam-roller",
@@ -615,11 +615,11 @@
         },
         {
           "exerciseTemplateId": "scapular-pushups",
-          "sets": "3×10"
+          "sets": "2×10"
         },
         {
           "exerciseTemplateId": "banded-external-rotation",
-          "sets": "3×12 each side"
+          "sets": "2×12 each side"
         },
         {
           "exerciseTemplateId": "prone-ytw-raises",
@@ -627,7 +627,7 @@
         },
         {
           "exerciseTemplateId": "wall-slides",
-          "sets": "3×10"
+          "sets": "2×10"
         },
         {
           "exerciseTemplateId": "shoulder-sleeper-stretch",
@@ -635,7 +635,7 @@
         },
         {
           "exerciseTemplateId": "hollow-body-hold",
-          "sets": "3×20-30 sec"
+          "sets": "2×20-30 sec"
         }
       ]
     },
@@ -650,31 +650,31 @@
       "exercises": [
         {
           "exerciseTemplateId": "ninety-ninety-hip-switches",
-          "sets": "3×8 each side"
+          "sets": "2×8 each side"
         },
         {
           "exerciseTemplateId": "glute-bridge",
-          "sets": "3×12"
+          "sets": "2×12"
         },
         {
           "exerciseTemplateId": "banded-clamshells",
-          "sets": "3×15 each side"
+          "sets": "2×15 each side"
         },
         {
           "exerciseTemplateId": "tibialis-raises",
-          "sets": "3×15"
+          "sets": "2×15"
         },
         {
           "exerciseTemplateId": "banded-tke",
-          "sets": "3×15 each leg"
+          "sets": "2×15 each leg"
         },
         {
           "exerciseTemplateId": "atg-split-squat",
-          "sets": "3×8 each leg"
+          "sets": "2×8 each leg"
         },
         {
           "exerciseTemplateId": "cossack-squat",
-          "sets": "3×6 each side"
+          "sets": "2×6 each side"
         },
         {
           "exerciseTemplateId": "active-frog-stretch",
@@ -682,7 +682,7 @@
         },
         {
           "exerciseTemplateId": "copenhagen-plank",
-          "sets": "3×15-20 sec each side"
+          "sets": "2×15-20 sec each side"
         }
       ]
     },
@@ -701,23 +701,23 @@
         },
         {
           "exerciseTemplateId": "eccentric-calf-raises",
-          "sets": "3×15 each leg"
+          "sets": "2×15 each leg"
         },
         {
           "exerciseTemplateId": "wall-dorsiflexion",
-          "sets": "3×30 sec each side"
+          "sets": "2×30 sec each side"
         },
         {
           "exerciseTemplateId": "single-leg-balance",
-          "sets": "3×30 sec each leg"
+          "sets": "2×30 sec each leg"
         },
         {
           "exerciseTemplateId": "supported-deep-squat",
-          "sets": "3×30-45 sec"
+          "sets": "2×30-45 sec"
         },
         {
           "exerciseTemplateId": "dead-bugs",
-          "sets": "3×8 each side"
+          "sets": "2×8 each side"
         },
         {
           "exerciseTemplateId": "bear-crawl",
@@ -736,30 +736,30 @@
       "exercises": [
         {
           "exerciseTemplateId": "dead-bugs",
-          "sets": "3×10 each side",
+          "sets": "2×10 each side",
           "notes": "The king of core exercises for your situation. Lie on back, arms up, knees at 90°. Press lower back into floor — this is the cue that matters. Extend opposite arm and leg while maintaining ZERO low back movement. Slow and controlled — 3 seconds out, 3 seconds back. If your back arches, shorten the range. Progress by holding a light dumbbell overhead or adding a band around your feet."
         },
         {
           "exerciseTemplateId": "pallof-press",
-          "sets": "3×10 each side"
+          "sets": "2×10 each side"
         },
         {
           "exerciseTemplateId": "bird-dogs",
-          "sets": "3×8 each side"
+          "sets": "2×8 each side"
         },
         {
           "exerciseTemplateId": "hollow-body-hold",
-          "sets": "3×30 sec",
+          "sets": "2×30 sec",
           "notes": "Arms overhead, legs extended, low back pressed into floor, shoulders and feet lifted. Scale it: bent knees with arms at sides (easiest) → straight legs with arms at sides → straight legs with arms overhead (hardest). If you can hold 30s at the hardest version, you can progress to hollow body rocks."
         },
         {
           "exerciseTemplateId": "copenhagen-plank",
-          "sets": "3×20-30 sec each side",
+          "sets": "2×20-30 sec each side",
           "notes": "Side plank with top leg on bench, bottom leg free. Trains lateral core and adductors simultaneously. Regression: bend bottom knee to floor, or use a shorter bench so you're supporting from the knee instead of the foot. Progression: add hip dips (lower and lift hips while holding). This exercise alone can fix a lot of your lateral movement issues."
         },
         {
           "exerciseTemplateId": "suitcase-carry",
-          "sets": "3×30 sec each side"
+          "sets": "2×30 sec each side"
         }
       ]
     },

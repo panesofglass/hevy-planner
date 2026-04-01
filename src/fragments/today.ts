@@ -175,19 +175,47 @@ ${rows}
 /**
  * Sync controls — manual sync button plus auto-sync (webhook) status/toggle.
  *
- * @param webhookId  - non-null if a webhook subscription is active
- * @param lastSyncAt - ISO timestamp of the most recent auto-sync, if any
- * @param tz         - IANA timezone for formatting lastSyncAt (defaults to UTC)
+ * @param callbackUrl  - non-null if a webhook subscription is active (the URL Hevy calls)
+ * @param bearerToken  - decrypted bearer token, only set immediately after registration
+ * @param lastSyncAt   - ISO timestamp of the most recent auto-sync, if any
+ * @param tz           - IANA timezone for formatting lastSyncAt (defaults to UTC)
  */
-export function syncButton(webhookUrl?: string | null, lastSyncAt?: string | null, tz?: string): string {
+export function syncButton(callbackUrl?: string | null, bearerToken?: string | null, lastSyncAt?: string | null, tz?: string): string {
   const manualSync = `<button class="btn btn-ghost" data-on:click="@post('/api/pull')" style="font-size:13px">
     Sync from Hevy
   </button>`;
 
-  if (webhookUrl) {
-    const lastSyncLabel = lastSyncAt
+  if (callbackUrl && bearerToken) {
+    // Just registered — show credentials for the user to paste into Hevy
+    return `<div style="text-align:center; margin-top:20px">
+  <div style="display:inline-flex; align-items:center; gap:8px; margin-bottom:8px">
+    <span style="font-size:12px; color:var(--green); font-weight:500">&#9679; Auto-sync enabled</span>
+    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/unregister')" style="font-size:12px; padding:4px 10px">
+      Disable
+    </button>
+  </div>
+  <div style="margin-top:6px; text-align:left; display:inline-block">
+    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:4px">Paste these into <a href="https://hevy.com/settings?developer" target="_blank" style="color:var(--blue)">Hevy developer settings</a>:</div>
+    <div style="margin-bottom:6px">
+      <div style="font-size:10px; color:var(--text-tertiary); margin-bottom:2px">Callback URL</div>
+      <code style="font-size:11px; word-break:break-all; color:var(--text-secondary); user-select:all">${escapeHtml(callbackUrl)}</code>
+    </div>
+    <div>
+      <div style="font-size:10px; color:var(--text-tertiary); margin-bottom:2px">Bearer token</div>
+      <code style="font-size:11px; word-break:break-all; color:var(--text-secondary); user-select:all">${escapeHtml(bearerToken)}</code>
+    </div>
+  </div>
+  <div style="margin-top:8px">
+    ${manualSync}
+  </div>
+</div>`;
+  }
+
+  if (callbackUrl) {
+    // Already registered — show status only
+    const statusLabel = lastSyncAt
       ? `<div style="font-size:11px; color:var(--text-tertiary); margin-top:4px">Last synced: ${escapeHtml(new Date(lastSyncAt).toLocaleString("en-US", { timeZone: tz ?? "UTC" }))}</div>`
-      : "";
+      : `<div style="font-size:11px; color:var(--text-tertiary); margin-top:4px">Waiting for first sync from Hevy&hellip;</div>`;
 
     return `<div style="text-align:center; margin-top:20px">
   <div style="display:inline-flex; align-items:center; gap:8px; margin-bottom:8px">
@@ -196,11 +224,7 @@ export function syncButton(webhookUrl?: string | null, lastSyncAt?: string | nul
       Disable
     </button>
   </div>
-  <div style="margin-top:6px">
-    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:4px">Paste this URL in <a href="https://hevy.com/settings?developer" target="_blank" style="color:var(--blue)">Hevy developer settings</a>:</div>
-    <code style="font-size:11px; word-break:break-all; color:var(--text-secondary); user-select:all">${escapeHtml(webhookUrl)}</code>
-  </div>
-  ${lastSyncLabel}
+  ${statusLabel}
   <div style="margin-top:8px">
     ${manualSync}
   </div>

@@ -1,5 +1,5 @@
 import type { UserRow, QueueItemRow, ExerciseTemplateMappingRow, RoutineMappingRow, ProgramRow, Program } from "../types";
-import { sha256Hex } from "../utils/crypto";
+import { sha256Hex, encryptAesGcm } from "../utils/crypto";
 
 export async function getUser(db: D1Database, userId: string): Promise<UserRow | null> {
   return db.prepare("SELECT * FROM users WHERE id = ?").bind(userId).first<UserRow>();
@@ -251,13 +251,15 @@ export async function getActiveProgram(
 export async function updateWebhookState(
   db: D1Database,
   userId: string,
-  webhookId: string,
-  authToken: string
+  callbackUrl: string,
+  bearerToken: string,
+  encryptionKey: string
 ): Promise<void> {
-  const hashed = await sha256Hex(authToken);
+  const hashed = await sha256Hex(bearerToken);
+  const encrypted = await encryptAesGcm(bearerToken, encryptionKey);
   await db
-    .prepare("UPDATE users SET webhook_id = ?, webhook_auth_token = ? WHERE id = ?")
-    .bind(webhookId, hashed, userId)
+    .prepare("UPDATE users SET webhook_id = ?, webhook_bearer_token = ?, webhook_auth_token = ? WHERE id = ?")
+    .bind(callbackUrl, encrypted, hashed, userId)
     .run();
 }
 
@@ -266,7 +268,7 @@ export async function clearWebhookState(
   userId: string
 ): Promise<void> {
   await db
-    .prepare("UPDATE users SET webhook_id = NULL, webhook_auth_token = NULL WHERE id = ?")
+    .prepare("UPDATE users SET webhook_id = NULL, webhook_bearer_token = NULL, webhook_auth_token = NULL WHERE id = ?")
     .bind(userId)
     .run();
 }

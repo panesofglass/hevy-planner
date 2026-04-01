@@ -60,11 +60,10 @@ export default {
       const path = url.pathname;
       const method = request.method;
 
-      // ── POST /api/webhooks/hevy/:token ────────────────────────
+      // ── POST /api/webhooks/hevy ────────────────────────────────
       // Must be checked before auth — this comes from Hevy, not the app user
-      const webhookMatch = path.match(/^\/api\/webhooks\/hevy\/([^/]+)$/);
-      if (method === "POST" && webhookMatch) {
-        return await handleWebhookEvent(env, ctx, decodeURIComponent(webhookMatch[1]));
+      if (method === "POST" && path === "/api/webhooks/hevy") {
+        return await handleWebhookEvent(request, env, ctx);
       }
 
       const auth = await getAuthenticatedUserOrDev(request, env);

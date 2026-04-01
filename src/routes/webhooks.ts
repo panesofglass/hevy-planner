@@ -18,11 +18,11 @@ export async function handleWebhookRegister(
   }
 
   try {
-    const authToken = crypto.randomUUID();
+    const bearerToken = crypto.randomUUID();
     const origin = new URL(request.url).origin;
-    const webhookUrl = `${origin}/api/webhooks/hevy/${authToken}`;
-    await updateWebhookState(env.DB, userId, webhookUrl, authToken);
-    return await handleTodaySSE(env, userId, tz);
+    const callbackUrl = `${origin}/api/webhooks/hevy`;
+    await updateWebhookState(env.DB, userId, callbackUrl, bearerToken, env.ENCRYPTION_KEY);
+    return await handleTodaySSE(env, userId, tz, { showCredentials: true });
   } catch (err) {
     return sseErrorCard(err instanceof Error ? err.message : "Failed to enable auto-sync");
   }
@@ -47,13 +47,17 @@ export async function handleWebhookUnregister(
   }
 }
 
-/** POST /api/webhooks/hevy/:token — incoming event from Hevy */
+/** POST /api/webhooks/hevy — incoming event from Hevy (bearer token auth) */
 export async function handleWebhookEvent(
+  request: Request,
   env: Env,
-  ctx: ExecutionContext,
-  token: string
+  ctx: ExecutionContext
 ): Promise<Response> {
-  // Reject obviously invalid tokens (too short to be a UUID) without hashing or DB work.
+  const authHeader = request.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+  const token = authHeader.slice(7);
   if (token.length < 36) {
     return new Response("Unauthorized", { status: 401 });
   }
