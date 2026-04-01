@@ -87,6 +87,10 @@ hevy-planner/
 - When building Maps from queue items for matching, use first-match-wins (`if (!map.has(key))`) so the front of the queue is matched, not the end. Multiple queue items share the same `hevy_routine_id`.
 - When marking completions from Hevy, use the workout's `start_time` converted to user timezone (`request.cf.timezone`) — not `todayString()`. Users sync after midnight UTC but before local midnight, or sync the next day.
 - Before matching workouts to queue items in sync, filter out workouts whose ID already appears as `hevy_workout_id` on a completed queue item. Otherwise each sync re-matches the same workout to a new pending item.
+- Hevy API rejects `repRange: {start: null, end: null}` — use `{start: 0, end: 0}` instead. The schema says nullable but the API disagrees.
+- Hevy `update-routine` replaces ALL exercises — always send the complete exercise list, not just changed exercises. Omitted exercises are deleted from the routine.
+- `wrangler d1 execute --file` uses the /import API endpoint which can fail with OAuth token auth (error 10000). Use `--command` for small queries or `d1 migrations apply` for larger SQL.
+- The `migrations/` directory is for schema migrations only — do NOT commit data-only migrations (UPDATE statements). For one-off data fixes, use `wrangler d1 execute --command` directly.
 
 ## Current Phase
 
