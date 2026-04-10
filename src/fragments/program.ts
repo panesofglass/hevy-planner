@@ -3,7 +3,7 @@
 // foundations, resources, BODi, import
 // ──────────────────────────────────────────────────────────────────
 
-import type { Program, Progression, Foundation, Resource, BodiIntegration, UserRow, WeekTemplate, ProgramRow } from "../types";
+import type { Program, Progression, Foundation, Resource, BodiIntegration, BodiRecommendedProgram, BodiHybridSchedule, BodiIntegrationRule, UserRow, WeekTemplate, ProgramRow } from "../types";
 import { escapeHtml, escapeAttr } from "../utils/html";
 import { findActiveProgression } from "../domain/schedule";
 import { renderTemplateGrid } from "./template-grid";
@@ -208,18 +208,137 @@ ${sections}
 export function bodiSection(items: BodiIntegration[]): string {
   if (items.length === 0) return "";
 
-  const itemsHtml = items.map((b) =>
-    `<div style="padding:10px 0;border-top:1px solid var(--separator)">
+  let html = "";
+
+  for (const b of items) {
+    // Section header + description
+    html += `<div class="section-header">BODi Integration</div>`;
+    if (b.description) {
+      html += `<div class="card"><div style="font-size:14px;color:var(--text-secondary);line-height:1.5">${escapeHtml(b.description)}</div></div>`;
+    }
+
+    // Recommended programs
+    if (b.recommendedPrograms && b.recommendedPrograms.length > 0) {
+      html += bodiRecommendedProgramsHtml(b.recommendedPrograms);
+    }
+
+    // Hybrid schedules
+    if (b.hybridSchedules && b.hybridSchedules.length > 0) {
+      html += bodiHybridSchedulesHtml(b.hybridSchedules);
+    }
+
+    // Integration rules
+    if (b.integrationRules && b.integrationRules.length > 0) {
+      html += bodiIntegrationRulesHtml(b.integrationRules);
+    }
+
+    // Legacy flat fields (backward compat)
+    if (!b.recommendedPrograms && !b.hybridSchedules && !b.integrationRules) {
+      html += `<div class="card">
   <div style="font-size:15px;font-weight:600">${escapeHtml(b.title)}</div>
-  ${b.description ? `<div style="font-size:13px;color:var(--text-secondary);line-height:1.45;margin-top:2px">${escapeHtml(b.description)}</div>` : ""}
   ${b.schedule ? `<div style="font-size:13px;color:var(--blue);margin-top:4px">${escapeHtml(b.schedule)}</div>` : ""}
   ${b.notes ? `<div style="font-size:13px;color:var(--text-tertiary);margin-top:4px">${escapeHtml(b.notes)}</div>` : ""}
-</div>`
-  ).join("");
+</div>`;
+    }
+  }
 
-  return `<div class="section-header">BODi Integration</div>
+  return html;
+}
+
+function bodiRecommendedProgramsHtml(programs: BodiRecommendedProgram[]): string {
+  const cards = programs.map((p) => {
+    const labelColor = p.fitLabelColor ?? "var(--blue)";
+    const badge = p.fitLabel
+      ? `<span style="display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:${escapeAttr(labelColor)};background:${escapeAttr(labelColor)}1a;padding:2px 8px;border-radius:4px">${escapeHtml(p.fitLabel)}</span>`
+      : "";
+
+    const meta: string[] = [];
+    if (p.trainer) meta.push(escapeHtml(p.trainer));
+    if (p.duration) meta.push(escapeHtml(p.duration));
+    const metaLine = meta.length > 0
+      ? `<div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">${meta.join(" \u00B7 ")}</div>`
+      : "";
+
+    return `<div style="padding:12px 0;border-top:1px solid var(--separator)">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div style="font-size:15px;font-weight:600">${escapeHtml(p.name)}</div>
+    ${badge}
+  </div>
+  ${metaLine}
+  ${p.description ? `<div style="font-size:13px;color:var(--text-secondary);line-height:1.45;margin-top:6px">${escapeHtml(p.description)}</div>` : ""}
+  ${p.whenToUse ? `<div style="font-size:13px;color:var(--green);line-height:1.45;margin-top:6px">${escapeHtml(p.whenToUse)}</div>` : ""}
+  ${p.cautions ? `<div style="font-size:13px;color:var(--orange);line-height:1.45;margin-top:4px">${escapeHtml(p.cautions)}</div>` : ""}
+</div>`;
+  }).join("");
+
+  return `<div class="section-header" style="font-size:13px">Recommended Programs</div>
 <div class="card">
-${itemsHtml}
+${cards}
+</div>`;
+}
+
+function bodiHybridSchedulesHtml(schedules: BodiHybridSchedule[]): string {
+  const sections = schedules.map((sched, index) => {
+    const signalName = `bodi_sched_${index}`;
+
+    const rows = sched.days.map((d) => {
+      const cells: string[] = [];
+      cells.push(`<div style="font-size:13px;font-weight:600;min-width:80px">${escapeHtml(d.day)}</div>`);
+
+      const sessions: string[] = [];
+      if (d.mobilitySession) sessions.push(`<span style="color:var(--green)">${escapeHtml(d.mobilitySession)}</span>`);
+      if (d.bodiSession) sessions.push(`<span style="color:var(--blue)">${escapeHtml(d.bodiSession)}</span>`);
+      if (sessions.length === 0 && d.notes) sessions.push(`<span style="color:var(--text-tertiary)">${escapeHtml(d.notes)}</span>`);
+
+      cells.push(`<div style="font-size:13px;flex:1">${sessions.join(`<span style="color:var(--text-tertiary)"> + </span>`)}</div>`);
+
+      if (sessions.length > 0 && d.notes) {
+        cells.push(`<div style="font-size:12px;color:var(--text-tertiary);max-width:200px;text-align:right">${escapeHtml(d.notes)}</div>`);
+      }
+
+      return `<div style="display:flex;align-items:baseline;gap:12px;padding:8px 0;border-top:1px solid var(--separator)">${cells.join("")}</div>`;
+    }).join("");
+
+    return `<div class="skill-card" data-signals:${signalName}="${index === 0}">
+  <div class="skill-header" data-on:click="$${signalName} = !$${signalName}">
+    <span class="skill-name">${escapeHtml(sched.name)}</span>
+  </div>
+  <div class="skill-body" data-show="$${signalName}">
+    ${sched.description ? `<div style="font-size:13px;color:var(--text-secondary);line-height:1.45;margin-bottom:8px">${escapeHtml(sched.description)}</div>` : ""}
+    ${rows}
+  </div>
+</div>`;
+  }).join("\n");
+
+  return `<div class="section-header" style="font-size:13px">Hybrid Schedules</div>\n${sections}`;
+}
+
+function bodiIntegrationRulesHtml(rules: BodiIntegrationRule[]): string {
+  const sorted = [...rules].sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
+
+  const categoryColors: Record<string, string> = {
+    ordering: "var(--blue)",
+    safety: "var(--orange)",
+    timing: "var(--green)",
+  };
+
+  const items = sorted.map((r) => {
+    const catColor = r.category ? (categoryColors[r.category] ?? "var(--text-tertiary)") : "var(--text-tertiary)";
+    const catBadge = r.category
+      ? `<span style="display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:${catColor};margin-right:6px">${escapeHtml(r.category)}</span>`
+      : "";
+
+    return `<div style="padding:8px 0;border-top:1px solid var(--separator);display:flex;align-items:baseline;gap:8px">
+  <div style="font-size:13px;font-weight:700;color:var(--text-tertiary);min-width:18px">${r.priority ?? ""}</div>
+  <div style="flex:1">
+    ${catBadge}<span style="font-size:13px;line-height:1.45">${escapeHtml(r.rule)}</span>
+  </div>
+</div>`;
+  }).join("");
+
+  return `<div class="section-header" style="font-size:13px">Integration Rules</div>
+<div class="card">
+${items}
 </div>`;
 }
 

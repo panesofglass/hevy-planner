@@ -519,7 +519,82 @@
         "title": { "type": "string" },
         "description": { "type": "string" },
         "schedule": { "type": "string" },
-        "notes": { "type": "string" }
+        "notes": { "type": "string" },
+        "recommendedPrograms": {
+          "type": "array",
+          "description": "External training programs recommended to pair with this program.",
+          "items": { "$ref": "#/$defs/bodiRecommendedProgram" }
+        },
+        "hybridSchedules": {
+          "type": "array",
+          "description": "Day-by-day hybrid schedule templates showing how external workouts interleave with program sessions.",
+          "items": { "$ref": "#/$defs/bodiHybridSchedule" }
+        },
+        "integrationRules": {
+          "type": "array",
+          "description": "Ordering and safety rules for combining external workouts with program sessions.",
+          "items": { "$ref": "#/$defs/bodiIntegrationRule" }
+        }
+      }
+    },
+
+    "bodiRecommendedProgram": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "description": "Program name (e.g., '645 Cardio & Strength')." },
+        "trainer": { "type": "string", "description": "Lead trainer name." },
+        "duration": { "type": "string", "description": "Program length (e.g., '6 weeks')." },
+        "fitLabel": { "type": "string", "description": "Fitness category label (e.g., 'Strength', 'Cardio', 'Hybrid')." },
+        "fitLabelColor": { "type": "string", "description": "CSS color for the fit label badge." },
+        "description": { "type": "string", "description": "What the program offers and why it pairs well." },
+        "whenToUse": { "type": "string", "description": "Guidance on when in the mobility protocol this program fits best." },
+        "cautions": { "type": "string", "description": "Safety notes or contraindications." },
+        "coupleFriendly": { "type": "boolean", "description": "Whether this program works well for couples training together." }
+      }
+    },
+
+    "bodiHybridSchedule": {
+      "type": "object",
+      "required": ["id", "name", "days"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "description": "Schedule name (e.g., 'Mobility + 645 Hybrid')." },
+        "bodiProgramId": { "type": "string", "description": "Reference to a recommendedProgram id." },
+        "description": { "type": "string" },
+        "days": {
+          "type": "array",
+          "description": "Day-by-day breakdown of the hybrid schedule.",
+          "items": { "$ref": "#/$defs/bodiHybridDay" },
+          "minItems": 1
+        }
+      }
+    },
+
+    "bodiHybridDay": {
+      "type": "object",
+      "required": ["day"],
+      "additionalProperties": false,
+      "properties": {
+        "day": { "type": "string", "description": "Day label (e.g., 'Monday', 'Day 1')." },
+        "mobilitySession": { "type": "string", "description": "Mobility protocol session for this day (e.g., 'CARs + Session A')." },
+        "bodiSession": { "type": "string", "description": "BODi workout for this day (e.g., '645 Cardio')." },
+        "notes": { "type": "string", "description": "Timing or ordering notes (e.g., 'AM: BODi, PM: Mobility')." }
+      }
+    },
+
+    "bodiIntegrationRule": {
+      "type": "object",
+      "required": ["id", "rule"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "rule": { "type": "string", "description": "The rule text (e.g., 'Always do CARs before BODi')." },
+        "category": { "type": "string", "description": "Rule category (e.g., 'ordering', 'safety', 'timing')." },
+        "priority": { "type": "integer", "minimum": 1, "description": "Priority ranking (1 = most important)." }
       }
     },
 

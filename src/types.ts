@@ -146,12 +146,50 @@ export interface Resource {
   category?: string;
 }
 
+export interface BodiRecommendedProgram {
+  id: string;
+  name: string;
+  trainer?: string;
+  duration?: string;
+  fitLabel?: string;
+  fitLabelColor?: string;
+  description?: string;
+  whenToUse?: string;
+  cautions?: string;
+  coupleFriendly?: boolean;
+}
+
+export interface BodiHybridDay {
+  day: string;
+  mobilitySession?: string;
+  bodiSession?: string;
+  notes?: string;
+}
+
+export interface BodiHybridSchedule {
+  id: string;
+  name: string;
+  bodiProgramId?: string;
+  description?: string;
+  days: BodiHybridDay[];
+}
+
+export interface BodiIntegrationRule {
+  id: string;
+  rule: string;
+  category?: string;
+  priority?: number;
+}
+
 export interface BodiIntegration {
   id: string;
   title: string;
   description?: string;
   schedule?: string;
   notes?: string;
+  recommendedPrograms?: BodiRecommendedProgram[];
+  hybridSchedules?: BodiHybridSchedule[];
+  integrationRules?: BodiIntegrationRule[];
 }
 
 export interface Program {

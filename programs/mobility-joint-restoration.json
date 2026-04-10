@@ -1529,6 +1529,90 @@
       }
     }
   ],
+  "bodi": [
+    {
+      "id": "bodi-main",
+      "title": "BODi Integration",
+      "description": "Recommended BODi programs that pair well with this mobility protocol. Use these for strength and cardio training while the mobility program handles joint health and movement quality.",
+      "recommendedPrograms": [
+        {
+          "id": "bodi-645",
+          "name": "645 Cardio & Strength",
+          "trainer": "Amoila Cesar",
+          "duration": "6 weeks",
+          "fitLabel": "Hybrid",
+          "fitLabelColor": "var(--blue)",
+          "description": "Alternates cardio and strength days in 45-minute sessions. The strength days complement mobility work without overlapping joint stress. Cardio days build conditioning that supports recovery between mobility sessions.",
+          "whenToUse": "Best starting in Phase 2 (weeks 3-4) once baseline mobility is established. Use the strength days for lower body loading and the cardio days for active recovery.",
+          "cautions": "Avoid doubling up on upper body if shoulder rehab sessions are in your weekly rotation. On 645 strength days, do your mobility session first as a warmup.",
+          "coupleFriendly": true
+        },
+        {
+          "id": "bodi-liift-more",
+          "name": "LIIFT MORE",
+          "trainer": "Joel Freeman",
+          "duration": "8 weeks",
+          "fitLabel": "Strength",
+          "fitLabelColor": "var(--orange)",
+          "description": "Progressive strength training with compound lifts. Pairs well because it builds the raw strength needed for advanced mobility positions like pistol squats and muscle-ups.",
+          "whenToUse": "Best for Phase 3 (weeks 5-8) when loading capacity improves. Use for lower body days and replace upper body BODi days with skill-prep work from the roadmap.",
+          "cautions": "Heavy deadlift and squat days require extra attention to hip and ankle mobility. Always do CARs and prehab before LIIFT MORE sessions."
+        },
+        {
+          "id": "bodi-body-beast",
+          "name": "Body Beast",
+          "trainer": "Sagi Kalev",
+          "duration": "12 weeks",
+          "fitLabel": "Hypertrophy",
+          "fitLabelColor": "var(--purple)",
+          "description": "High-volume hypertrophy program. The additional muscle mass supports joint stability when combined with mobility work. Focus on the Build phase for best pairing.",
+          "whenToUse": "Best for users who have completed Phase 1-2 and want to add mass while maintaining mobility gains. Pairs well with the 5-day schedule template.",
+          "cautions": "High volume can compete with recovery. Limit to 3 Body Beast sessions per week when running alongside the full mobility protocol.",
+          "coupleFriendly": true
+        }
+      ],
+      "hybridSchedules": [
+        {
+          "id": "hybrid-645",
+          "name": "Mobility + 645 Hybrid",
+          "bodiProgramId": "bodi-645",
+          "description": "5-day schedule interleaving 645 sessions with mobility work. CARs daily, mobility sessions on non-645 strength days.",
+          "days": [
+            { "day": "Monday", "mobilitySession": "CARs + Session A", "bodiSession": "645 Cardio", "notes": "AM: CARs (15 min), PM: 645 Cardio (45 min)" },
+            { "day": "Tuesday", "mobilitySession": "CARs", "bodiSession": "645 Strength", "notes": "AM: CARs as warmup, then 645 Strength" },
+            { "day": "Wednesday", "mobilitySession": "CARs + Session B", "notes": "Mobility focus day — no BODi" },
+            { "day": "Thursday", "mobilitySession": "CARs", "bodiSession": "645 Cardio", "notes": "AM: CARs (15 min), PM: 645 Cardio (45 min)" },
+            { "day": "Friday", "mobilitySession": "CARs", "bodiSession": "645 Strength", "notes": "AM: CARs as warmup, then 645 Strength" },
+            { "day": "Saturday", "mobilitySession": "CARs + Active Recovery", "notes": "Light mobility and recovery — no BODi" },
+            { "day": "Sunday", "notes": "Full rest day" }
+          ]
+        },
+        {
+          "id": "hybrid-liift",
+          "name": "Mobility + LIIFT MORE Hybrid",
+          "bodiProgramId": "bodi-liift-more",
+          "description": "4-day schedule pairing LIIFT MORE strength days with dedicated mobility sessions. Prioritizes recovery between heavy lifting.",
+          "days": [
+            { "day": "Monday", "mobilitySession": "CARs + Session A", "notes": "Mobility focus — no BODi" },
+            { "day": "Tuesday", "mobilitySession": "CARs", "bodiSession": "LIIFT MORE Upper", "notes": "AM: CARs as warmup, then LIIFT MORE" },
+            { "day": "Wednesday", "mobilitySession": "CARs + Session B", "notes": "Mobility focus — no BODi" },
+            { "day": "Thursday", "mobilitySession": "CARs", "bodiSession": "LIIFT MORE Lower", "notes": "AM: CARs + hip prehab, then LIIFT MORE" },
+            { "day": "Friday", "mobilitySession": "CARs + Active Recovery", "notes": "Light mobility and recovery" },
+            { "day": "Saturday", "mobilitySession": "CARs", "bodiSession": "LIIFT MORE Full Body", "notes": "AM: Full CARs, then LIIFT MORE" },
+            { "day": "Sunday", "notes": "Full rest day" }
+          ]
+        }
+      ],
+      "integrationRules": [
+        { "id": "rule-cars-first", "rule": "Always do CARs before any BODi session", "category": "ordering", "priority": 1 },
+        { "id": "rule-prehab-before-strength", "rule": "Do prehab exercises before BODi strength sessions — especially hip and shoulder prehab", "category": "ordering", "priority": 2 },
+        { "id": "rule-mobility-day-priority", "rule": "On days with both mobility and BODi sessions, complete the mobility session first", "category": "ordering", "priority": 3 },
+        { "id": "rule-lava-gated", "rule": "LAVA (Loaded Active Vascular Activation) exercises are gated to weeks 4-6 — do not add them to BODi warmups before this phase", "category": "safety", "priority": 4 },
+        { "id": "rule-no-upper-double", "rule": "Avoid doubling up on upper body work — if your mobility session includes shoulder rehab, skip BODi upper body that day", "category": "safety", "priority": 5 },
+        { "id": "rule-recovery-spacing", "rule": "Allow at least 4 hours between a BODi strength session and a mobility session targeting the same body region", "category": "timing", "priority": 6 }
+      ]
+    }
+  ],
   "theme": {
     "backgroundColor": "#141210",
     "textColor": "#e8e4df",
