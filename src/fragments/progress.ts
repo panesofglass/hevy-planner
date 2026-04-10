@@ -10,7 +10,7 @@ import { escapeHtml, escapeAttr } from "../utils/html";
  * The first card is expanded by default; others are collapsed.
  * Uses Datastar signals for expand/collapse toggling.
  */
-export function skillCards(skills: Skill[]): string {
+export function skillCards(skills: Skill[], assessments?: Map<string, string>): string {
   if (skills.length === 0) return "";
 
   const cards = skills.map((skill, index) => {
@@ -37,7 +37,7 @@ export function skillCards(skills: Skill[]): string {
             .join("")}</ul>`
         : "";
 
-    const currentStateText = skill.currentState;
+    const currentStateText = assessments?.get(skill.id) ?? skill.currentState;
     const currentStateHtml = currentStateText
       ? `<div class="skill-current-state" id="assess-${escapeAttr(skill.id)}">
   <div class="current-state-label">Where You Are</div>

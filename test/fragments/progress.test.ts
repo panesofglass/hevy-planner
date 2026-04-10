@@ -23,4 +23,17 @@ describe("skillCards", () => {
     const html = skillCards([skill]);
     expect(html).not.toContain("skill-current-state");
   });
+
+  it("prefers user assessment over program default", () => {
+    const assessments = new Map([["muscle-up", "Can do 5 strict pull-ups now."]]);
+    const html = skillCards([baseSkill], assessments);
+    expect(html).toContain("Can do 5 strict pull-ups now.");
+    expect(html).not.toContain("3-5 pull-ups. No muscle-up experience.");
+  });
+
+  it("falls back to program default when no user assessment exists", () => {
+    const assessments = new Map([["other-skill", "Some text"]]);
+    const html = skillCards([baseSkill], assessments);
+    expect(html).toContain("3-5 pull-ups. No muscle-up experience.");
+  });
 });
