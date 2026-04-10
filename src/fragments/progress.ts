@@ -45,7 +45,24 @@ export function skillCards(skills: Skill[], assessments?: Map<string, string>): 
 </div>`
       : "";
 
-    return `<div class="skill-card" data-signals:${signalName}="${expanded}">
+    const editSignal = `editing_${signalName}`;
+    const textSignal = `assess_${signalName}`;
+    const jsText = JSON.stringify(currentStateText ?? "");
+
+    const editHtml = currentStateText != null
+      ? `<div class="skill-edit-row" data-show="!$${editSignal}">
+  <button class="btn-link" data-on:click="$${editSignal} = true">Edit</button>
+</div>
+<div class="skill-edit-form" data-show="$${editSignal}">
+  <textarea class="form-input" rows="3" data-bind:${textSignal}></textarea>
+  <div class="skill-edit-actions">
+    <button class="btn btn-blue btn-sm" data-on:click="@post('/api/skill-assessment/${escapeAttr(skill.id)}')">Save</button>
+    <button class="btn btn-ghost btn-sm" data-on:click="$${editSignal} = false">Cancel</button>
+  </div>
+</div>`
+      : "";
+
+    return `<div class="skill-card" data-signals:${signalName}="${expanded}" data-signals:${editSignal}="false" data-signals:${textSignal}="${escapeAttr(jsText)}">
   <div class="skill-header" data-on:click="$${signalName} = !$${signalName}">
     <div class="skill-icon" style="${iconBg}; color:${iconColor}">${escapeHtml(skill.icon ?? "")}</div>
     <span class="skill-name">${escapeHtml(skill.name)}</span>
@@ -53,6 +70,7 @@ export function skillCards(skills: Skill[], assessments?: Map<string, string>): 
   </div>
   <div class="skill-body" data-show="$${signalName}">
     ${currentStateHtml}
+    ${editHtml}
     ${skill.timeline ? `<div class="skill-timeline">${escapeHtml(skill.timeline)}</div>` : ""}
     ${milestonesHtml}
   </div>

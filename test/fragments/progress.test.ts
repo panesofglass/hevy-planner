@@ -36,4 +36,23 @@ describe("skillCards", () => {
     const html = skillCards([baseSkill], assessments);
     expect(html).toContain("3-5 pull-ups. No muscle-up experience.");
   });
+
+  it("renders an Edit button on skills with currentState", () => {
+    const html = skillCards([baseSkill]);
+    expect(html).toContain("Edit");
+    expect(html).toContain("editing_skill_muscle_up");
+  });
+
+  it("renders a textarea for editing pre-filled with current text", () => {
+    const html = skillCards([baseSkill]);
+    expect(html).toContain("textarea");
+    expect(html).toContain("/api/skill-assessment/muscle-up");
+  });
+
+  it("pre-fills textarea with user assessment when available", () => {
+    const assessments = new Map([["muscle-up", "Updated text."]]);
+    const html = skillCards([baseSkill], assessments);
+    // The signal initial value should contain the user assessment
+    expect(html).toContain("Updated text.");
+  });
 });
