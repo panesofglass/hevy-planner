@@ -346,3 +346,36 @@ export async function deleteProgram(db: D1Database, userId: string, programId: n
     db.prepare("DELETE FROM programs WHERE id = ? AND user_id = ?").bind(programId, userId),
   ]);
 }
+
+/** Load all skill assessments for a user's active program as a Map<skillId, currentState>. */
+export async function getUserSkillAssessments(
+  db: D1Database,
+  userId: string,
+  programId: number
+): Promise<Map<string, string>> {
+  const result = await db
+    .prepare("SELECT skill_id, current_state FROM skill_assessments WHERE user_id = ? AND program_id = ?")
+    .bind(userId, programId)
+    .all<{ skill_id: string; current_state: string }>();
+  return new Map(result.results.map((r) => [r.skill_id, r.current_state]));
+}
+
+/** Insert or update a user's skill assessment text. */
+export async function upsertSkillAssessment(
+  db: D1Database,
+  userId: string,
+  programId: number,
+  skillId: string,
+  currentState: string
+): Promise<void> {
+  await db
+    .prepare(
+      `INSERT INTO skill_assessments (user_id, program_id, skill_id, current_state)
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(user_id, program_id, skill_id) DO UPDATE SET
+         current_state = excluded.current_state,
+         updated_at = datetime('now')`
+    )
+    .bind(userId, programId, skillId, currentState)
+    .run();
+}
