@@ -1,11 +1,12 @@
 import type { Env } from "../types";
 import { sseResponse, patchElements, mergeFragments } from "../sse/helpers";
-import { loadProgram } from "../storage/queries";
+import { loadProgram, getUserSkillAssessments } from "../storage/queries";
 import { skillCards, roadmapSection, benchmarksSection } from "../fragments/progress";
 
 /** SSE: Progress page — skills, roadmap, benchmarks */
 export async function handleProgressSSE(env: Env, userId: string): Promise<Response> {
-  const { program } = await loadProgram(env.DB, userId);
+  const { program, programId } = await loadProgram(env.DB, userId);
+  const assessments = await getUserSkillAssessments(env.DB, userId, programId);
   const fragments: string[] = [];
   let isFirst = true;
 
@@ -15,7 +16,7 @@ export async function handleProgressSSE(env: Env, userId: string): Promise<Respo
   };
 
   if (program.skills && program.skills.length > 0) {
-    addFragment(skillCards(program.skills));
+    addFragment(skillCards(program.skills, assessments));
   }
 
   if (program.roadmap && program.roadmap.length > 0) {
