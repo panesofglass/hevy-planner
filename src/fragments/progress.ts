@@ -37,6 +37,14 @@ export function skillCards(skills: Skill[]): string {
             .join("")}</ul>`
         : "";
 
+    const currentStateText = skill.currentState;
+    const currentStateHtml = currentStateText
+      ? `<div class="skill-current-state" id="assess-${escapeAttr(skill.id)}">
+  <div class="current-state-label">Where You Are</div>
+  <div class="current-state-text">${escapeHtml(currentStateText)}</div>
+</div>`
+      : "";
+
     return `<div class="skill-card" data-signals:${signalName}="${expanded}">
   <div class="skill-header" data-on:click="$${signalName} = !$${signalName}">
     <div class="skill-icon" style="${iconBg}; color:${iconColor}">${escapeHtml(skill.icon ?? "")}</div>
@@ -44,6 +52,7 @@ export function skillCards(skills: Skill[]): string {
     ${priorityLabel ? `<span class="skill-priority">${escapeHtml(priorityLabel)}</span>` : ""}
   </div>
   <div class="skill-body" data-show="$${signalName}">
+    ${currentStateHtml}
     ${skill.timeline ? `<div class="skill-timeline">${escapeHtml(skill.timeline)}</div>` : ""}
     ${milestonesHtml}
   </div>
