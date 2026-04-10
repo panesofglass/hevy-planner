@@ -2,8 +2,9 @@
 // Progress page fragments — skills, roadmap, benchmarks
 // ──────────────────────────────────────────────────────────────────
 
-import type { Skill, RoadmapPhase, Benchmark } from "../types";
+import type { Skill, RoadmapPhase, Benchmark, BenchmarkResultRow } from "../types";
 import { escapeHtml, escapeAttr } from "../utils/html";
+import { evaluateGateTests, isRetestDue, formatTrend } from "../domain/benchmarks";
 
 /**
  * Render a single skill card. Used by skillCards() for the full list,
@@ -93,9 +94,13 @@ export function skillCards(skills: Skill[], assessments?: Map<string, string>): 
 }
 
 /**
- * Roadmap section — static phase list with current phase highlighted.
+ * Roadmap section — phase list with current phase highlighted and gate test checklist.
  */
-export function roadmapSection(phases: RoadmapPhase[]): string {
+export function roadmapSection(
+  phases: RoadmapPhase[],
+  results: BenchmarkResultRow[],
+  benchmarks: Benchmark[]
+): string {
   if (phases.length === 0) return "";
 
   const sorted = [...phases].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
@@ -111,12 +116,36 @@ export function roadmapSection(phases: RoadmapPhase[]): string {
           ? "var(--green)"
           : "var(--text-tertiary)";
 
+      let gateHtml = "";
+      if (phase.gateTests && phase.gateTests.length > 0) {
+        const evaluation = evaluateGateTests(phase.gateTests, results);
+        const gateItems = evaluation.tests
+          .map((t) => {
+            const name =
+              benchmarks.find((bm) => bm.id === t.benchmarkId)?.name ?? t.benchmarkId;
+            const icon = t.passed ? "\u2713" : "\u2717";
+            const itemCls = t.passed ? "gate-passed" : "gate-not-passed";
+            return `<div class="gate-item ${itemCls}">${icon} ${escapeHtml(name)}</div>`;
+          })
+          .join("\n");
+
+        const allPassedBadge = evaluation.allPassed
+          ? `<div class="gate-all-passed">All gates passed</div>`
+          : "";
+
+        gateHtml = `<div class="gate-checklist">
+${gateItems}
+${allPassedBadge}
+</div>`;
+      }
+
       return `<div class="roadmap-item${cls}">
   <div class="roadmap-indicator" style="background:${dotColor}"></div>
   <div>
     <div class="roadmap-name">${escapeHtml(phase.name)}</div>
     ${phase.weeks ? `<div class="roadmap-weeks">${escapeHtml(phase.weeks)}</div>` : ""}
     ${phase.summary ? `<div class="roadmap-summary">${escapeHtml(phase.summary)}</div>` : ""}
+    ${gateHtml}
   </div>
 </div>`;
     })
@@ -128,21 +157,102 @@ ${items}
 </div>`;
 }
 
+/** Render a single benchmark card with results, trend, and log form. */
+export function benchmarkCard(
+  b: Benchmark,
+  results: BenchmarkResultRow[],
+  today: string
+): string {
+  const leftResults = results.filter((r) => r.side === "left");
+  const rightResults = results.filter((r) => r.side === "right");
+  const nullSideResults = results.filter((r) => r.side === null);
+  const hasBilateral = leftResults.length > 0 || rightResults.length > 0;
+
+  const latestResult =
+    results.length > 0
+      ? results.reduce((a, c) => (a.tested_at > c.tested_at ? a : c))
+      : null;
+
+  const retestDue = isRetestDue(latestResult?.tested_at ?? null, b.frequencyDays, today);
+
+  const daysAgo =
+    latestResult != null
+      ? Math.floor(
+          (new Date(today).getTime() - new Date(latestResult.tested_at).getTime()) /
+            (1000 * 60 * 60 * 24)
+        )
+      : null;
+
+  // Trend display
+  let trendHtml: string;
+  if (hasBilateral) {
+    const leftTrend = formatTrend(leftResults);
+    const rightTrend = formatTrend(rightResults);
+    trendHtml = `<div class="benchmark-trend">L: ${escapeHtml(leftTrend)}</div>
+<div class="benchmark-trend">R: ${escapeHtml(rightTrend)}</div>`;
+  } else {
+    trendHtml = `<div class="benchmark-trend">${escapeHtml(formatTrend(nullSideResults))}</div>`;
+  }
+
+  const retestHtml = retestDue
+    ? `<div class="benchmark-retest">Due for retest</div>`
+    : "";
+
+  const lastTestedHtml =
+    daysAgo != null
+      ? `<div class="benchmark-last-tested">Last tested: ${daysAgo} day${daysAgo !== 1 ? "s" : ""} ago</div>`
+      : "";
+
+  // Show side selector if already has bilateral results or target mentions "each side"
+  const showSideSelector = hasBilateral || (b.target != null && /each side/i.test(b.target));
+
+  // Log form — Datastar signals for toggle, $$post for SSE form submission
+  const sig = `bench_${b.id.replace(/[^a-zA-Z0-9]/g, "_")}`;
+
+  const formHtml = `<div data-signals-${sig}_open="false">
+  <button class="btn btn-sm" data-on-click="$${sig}_open = !$${sig}_open">Log Result</button>
+  <form data-show="$${sig}_open"
+        data-on-submit__prevent="$$post('/api/log-benchmark/${escapeAttr(b.id)}')"
+        style="margin-top:8px">
+    <input type="text" name="value" placeholder="${escapeAttr(b.unit ?? "Value")}" required style="width:100%;margin-bottom:4px">
+    ${showSideSelector ? `<select name="side" style="width:100%;margin-bottom:4px">
+      <option value="">No side</option>
+      <option value="left">Left</option>
+      <option value="right">Right</option>
+    </select>` : ""}
+    <label style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+      <input type="checkbox" name="passed" value="true"> Target met
+    </label>
+    <input type="text" name="notes" placeholder="Notes (optional)" style="width:100%;margin-bottom:4px">
+    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+  </form>
+</div>`;
+
+  return `<div class="benchmark-item" id="benchmark-${escapeAttr(b.id)}">
+  <div class="benchmark-name">${escapeHtml(b.name)}</div>
+  ${b.target ? `<div class="benchmark-target">${escapeHtml(b.target)}</div>` : ""}
+  ${trendHtml}
+  ${lastTestedHtml}
+  ${retestHtml}
+  ${formHtml}
+</div>`;
+}
+
 /**
- * Benchmarks section — static list with name, target, how-to.
+ * Benchmarks section — list with name, target, trend, retest indicator, and log form.
  */
-export function benchmarksSection(benchmarks: Benchmark[]): string {
+export function benchmarksSection(
+  benchmarks: Benchmark[],
+  results: BenchmarkResultRow[],
+  today: string
+): string {
   if (benchmarks.length === 0) return "";
 
   const items = benchmarks
-    .map(
-      (b) =>
-        `<div class="benchmark-item">
-  <div class="benchmark-name">${escapeHtml(b.name)}</div>
-  ${b.target ? `<div class="benchmark-target">${escapeHtml(b.target)}</div>` : ""}
-  <div class="benchmark-howto">${escapeHtml(b.howTo)}</div>
-</div>`
-    )
+    .map((b) => {
+      const benchResults = results.filter((r) => r.benchmark_id === b.id);
+      return benchmarkCard(b, benchResults, today);
+    })
     .join("\n");
 
   return `<div class="section-header">Benchmarks</div>
