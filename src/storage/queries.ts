@@ -1,4 +1,4 @@
-import type { UserRow, QueueItemRow, ExerciseTemplateMappingRow, RoutineMappingRow, ProgramRow, Program } from "../types";
+import type { UserRow, QueueItemRow, ExerciseTemplateMappingRow, RoutineMappingRow, ProgramRow, Program, BenchmarkResultRow } from "../types";
 import { sha256Hex, encryptAesGcm } from "../utils/crypto";
 
 export async function getUser(db: D1Database, userId: string): Promise<UserRow | null> {
@@ -379,4 +379,53 @@ export async function upsertSkillAssessment(
     )
     .bind(userId, programId, skillId, currentState)
     .run();
+}
+
+/** Insert a single benchmark result. */
+export async function insertBenchmarkResult(
+  db: D1Database,
+  result: {
+    userId: string;
+    programId: number;
+    benchmarkId: string;
+    value: string;
+    passed: boolean;
+    side: string | null;
+    notes: string | null;
+    testedAt: string;
+  }
+): Promise<void> {
+  await db
+    .prepare(
+      `INSERT INTO benchmark_results (user_id, program_id, benchmark_id, value, passed, side, notes, tested_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .bind(
+      result.userId,
+      result.programId,
+      result.benchmarkId,
+      result.value,
+      result.passed ? 1 : 0,
+      result.side,
+      result.notes,
+      result.testedAt
+    )
+    .run();
+}
+
+/** Load all benchmark results for a user+program, ordered by benchmark then newest first. */
+export async function getBenchmarkResults(
+  db: D1Database,
+  userId: string,
+  programId: number
+): Promise<BenchmarkResultRow[]> {
+  const result = await db
+    .prepare(
+      `SELECT * FROM benchmark_results
+       WHERE user_id = ? AND program_id = ?
+       ORDER BY benchmark_id, tested_at DESC`
+    )
+    .bind(userId, programId)
+    .all<BenchmarkResultRow>();
+  return result.results;
 }
