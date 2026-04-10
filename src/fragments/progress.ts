@@ -38,7 +38,8 @@ export function skillCards(skills: Skill[], assessments?: Map<string, string>): 
         : "";
 
     const currentStateText = assessments?.get(skill.id) ?? skill.currentState;
-    const currentStateHtml = currentStateText
+    const hasCurrentState = !!currentStateText;
+    const currentStateHtml = hasCurrentState
       ? `<div class="skill-current-state" id="assess-${escapeAttr(skill.id)}">
   <div class="current-state-label">Where You Are</div>
   <div class="current-state-text">${escapeHtml(currentStateText)}</div>
@@ -49,7 +50,7 @@ export function skillCards(skills: Skill[], assessments?: Map<string, string>): 
     const textSignal = `assess_${signalName}`;
     const jsText = JSON.stringify(currentStateText ?? "");
 
-    const editHtml = currentStateText != null
+    const editHtml = hasCurrentState
       ? `<div class="skill-edit-row" data-show="!$${editSignal}">
   <button class="btn-link" data-on:click="$${editSignal} = true">Edit</button>
 </div>
@@ -62,7 +63,11 @@ export function skillCards(skills: Skill[], assessments?: Map<string, string>): 
 </div>`
       : "";
 
-    return `<div class="skill-card" data-signals:${signalName}="${expanded}" data-signals:${editSignal}="false" data-signals:${textSignal}="${escapeAttr(jsText)}">
+    const editSignalsAttr = hasCurrentState
+      ? ` data-signals:${editSignal}="false" data-signals:${textSignal}="${escapeAttr(jsText)}"`
+      : "";
+
+    return `<div class="skill-card" data-signals:${signalName}="${expanded}"${editSignalsAttr}>
   <div class="skill-header" data-on:click="$${signalName} = !$${signalName}">
     <div class="skill-icon" style="${iconBg}; color:${iconColor}">${escapeHtml(skill.icon ?? "")}</div>
     <span class="skill-name">${escapeHtml(skill.name)}</span>
@@ -138,4 +143,3 @@ export function benchmarksSection(benchmarks: Benchmark[]): string {
 ${items}
 </div>`;
 }
-

@@ -24,6 +24,13 @@ describe("skillCards", () => {
     expect(html).not.toContain("skill-current-state");
   });
 
+  it("does not render edit affordance when currentState is empty string", () => {
+    const skill: Skill = { id: "test", name: "Test", currentState: "" };
+    const html = skillCards([skill]);
+    expect(html).not.toContain("skill-edit-row");
+    expect(html).not.toContain("editing_skill_test");
+  });
+
   it("prefers user assessment over program default", () => {
     const assessments = new Map([["muscle-up", "Can do 5 strict pull-ups now."]]);
     const html = skillCards([baseSkill], assessments);
