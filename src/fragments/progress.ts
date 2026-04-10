@@ -6,26 +6,25 @@ import type { Skill, RoadmapPhase, Benchmark } from "../types";
 import { escapeHtml, escapeAttr } from "../utils/html";
 
 /**
- * Skill cards — expandable cards with icon, name, timeline, priority badge.
- * The first card is expanded by default; others are collapsed.
- * Uses Datastar signals for expand/collapse toggling.
+ * Render a single skill card. Used by skillCards() for the full list,
+ * and by the POST handler to patch a single card via SSE.
  */
-export function skillCards(skills: Skill[], assessments?: Map<string, string>): string {
-  if (skills.length === 0) return "";
+export function skillCardHtml(
+  skill: Skill,
+  expanded: boolean,
+  assessments?: Map<string, string>
+): string {
+  const signalName = `skill_${skill.id.replace(/[^a-zA-Z0-9]/g, "_")}`;
+  const iconBg = skill.color ? `background:${escapeAttr(skill.color)}22` : "background:rgba(255,255,255,0.06)";
+  const iconColor = escapeAttr(skill.color ?? "var(--text)");
+  const priorityLabel = skill.priority != null ? `#${skill.priority}` : "";
 
-  const cards = skills.map((skill, index) => {
-    const expanded = index === 0;
-    const signalName = `skill_${skill.id.replace(/[^a-zA-Z0-9]/g, "_")}`;
-    const iconBg = skill.color ? `background:${escapeAttr(skill.color)}22` : "background:rgba(255,255,255,0.06)";
-    const iconColor = escapeAttr(skill.color ?? "var(--text)");
-    const priorityLabel = skill.priority != null ? `#${skill.priority}` : "";
-
-    const milestonesHtml =
-      skill.milestones && skill.milestones.length > 0
-        ? `<ul class="milestone-list">${skill.milestones
-            .map(
-              (m) =>
-                `<li class="milestone-item">
+  const milestonesHtml =
+    skill.milestones && skill.milestones.length > 0
+      ? `<ul class="milestone-list">${skill.milestones
+          .map(
+            (m) =>
+              `<li class="milestone-item">
   <div class="milestone-dot" style="background:${escapeAttr(skill.color ?? "var(--blue)")}"></div>
   <div>
     <div class="milestone-name">${escapeHtml(m.name)}</div>
@@ -33,25 +32,25 @@ export function skillCards(skills: Skill[], assessments?: Map<string, string>): 
     ${m.targetWeek != null ? `<div class="milestone-week">Week ${m.targetWeek}</div>` : ""}
   </div>
 </li>`
-            )
-            .join("")}</ul>`
-        : "";
+          )
+          .join("")}</ul>`
+      : "";
 
-    const currentStateText = assessments?.get(skill.id) ?? skill.currentState;
-    const hasCurrentState = !!currentStateText;
-    const currentStateHtml = hasCurrentState
-      ? `<div class="skill-current-state" id="assess-${escapeAttr(skill.id)}">
+  const currentStateText = assessments?.get(skill.id) ?? skill.currentState;
+  const hasCurrentState = !!currentStateText;
+  const currentStateHtml = hasCurrentState
+    ? `<div class="skill-current-state" id="assess-${escapeAttr(skill.id)}">
   <div class="current-state-label">Where You Are</div>
   <div class="current-state-text">${escapeHtml(currentStateText)}</div>
 </div>`
-      : "";
+    : "";
 
-    const editSignal = `editing_${signalName}`;
-    const textSignal = `assess_${signalName}`;
-    const jsText = JSON.stringify(currentStateText ?? "");
+  const editSignal = `editing_${signalName}`;
+  const textSignal = `assess_${signalName}`;
+  const jsText = JSON.stringify(currentStateText ?? "");
 
-    const editHtml = hasCurrentState
-      ? `<div class="skill-edit-row" data-show="!$${editSignal}">
+  const editHtml = hasCurrentState
+    ? `<div class="skill-edit-row" data-show="!$${editSignal}">
   <button class="btn-link" data-on:click="$${editSignal} = true">Edit</button>
 </div>
 <div class="skill-edit-form" data-show="$${editSignal}">
@@ -61,13 +60,13 @@ export function skillCards(skills: Skill[], assessments?: Map<string, string>): 
     <button class="btn btn-ghost btn-sm" data-on:click="$${editSignal} = false">Cancel</button>
   </div>
 </div>`
-      : "";
+    : "";
 
-    const editSignalsAttr = hasCurrentState
-      ? ` data-signals:${editSignal}="false" data-signals:${textSignal}="${escapeAttr(jsText)}"`
-      : "";
+  const editSignalsAttr = hasCurrentState
+    ? ` data-signals:${editSignal}="false" data-signals:${textSignal}="${escapeAttr(jsText)}"`
+    : "";
 
-    return `<div class="skill-card" data-signals:${signalName}="${expanded}"${editSignalsAttr}>
+  return `<div class="skill-card" data-signals:${signalName}="${expanded}"${editSignalsAttr}>
   <div class="skill-header" data-on:click="$${signalName} = !$${signalName}">
     <div class="skill-icon" style="${iconBg}; color:${iconColor}">${escapeHtml(skill.icon ?? "")}</div>
     <span class="skill-name">${escapeHtml(skill.name)}</span>
@@ -80,8 +79,16 @@ export function skillCards(skills: Skill[], assessments?: Map<string, string>): 
     ${milestonesHtml}
   </div>
 </div>`;
-  });
+}
 
+/**
+ * Skill cards — expandable cards with icon, name, timeline, priority badge.
+ * The first card is expanded by default; others are collapsed.
+ * Uses Datastar signals for expand/collapse toggling.
+ */
+export function skillCards(skills: Skill[], assessments?: Map<string, string>): string {
+  if (skills.length === 0) return "";
+  const cards = skills.map((skill, index) => skillCardHtml(skill, index === 0, assessments));
   return `<div class="section-header">Skills</div>\n${cards.join("\n")}`;
 }
 

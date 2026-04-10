@@ -343,6 +343,7 @@ export async function deleteProgram(db: D1Database, userId: string, programId: n
     db.prepare("DELETE FROM queue_items WHERE user_id = ? AND program_id = ?").bind(userId, programId),
     db.prepare("DELETE FROM exercise_template_mappings WHERE user_id = ? AND program_id = ?").bind(userId, programId),
     db.prepare("DELETE FROM routine_mappings WHERE user_id = ? AND program_id = ?").bind(userId, programId),
+    db.prepare("DELETE FROM skill_assessments WHERE user_id = ? AND program_id = ?").bind(userId, programId),
     db.prepare("DELETE FROM programs WHERE id = ? AND user_id = ?").bind(programId, userId),
   ]);
 }
