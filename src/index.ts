@@ -17,6 +17,7 @@ import { handleSetup } from "./routes/setup";
 import { handlePush, handlePull, handleCleanupRoutines, handleManualComplete } from "./routes/sync";
 import { handleWebhookEvent, handleWebhookRegister, handleWebhookUnregister } from "./routes/webhooks";
 import { handleSkillAssessment } from "./routes/skill-assessment";
+import { handleLogBenchmark } from "./routes/benchmarks";
 
 import defaultProgramJson from "../programs/mobility-joint-restoration.json";
 
@@ -111,7 +112,7 @@ export default {
       // ── GET /progress ──────────────────────────────────────────
       if (method === "GET" && path === "/progress") {
         if (isSSERequest(request)) {
-          return await handleProgressSSE(env, auth.userId);
+          return await handleProgressSSE(env, auth.userId, tz);
         }
 
         const subtitle = await loadSubtitle(env.DB, auth.userId);
@@ -233,6 +234,13 @@ export default {
       if (method === "POST" && assessMatch) {
         const skillId = decodeURIComponent(assessMatch[1]);
         return await handleSkillAssessment(request, env, auth.userId, skillId);
+      }
+
+      // ── POST /api/log-benchmark/:id ─────────────────────────────
+      const benchmarkMatch = path.match(/^\/api\/log-benchmark\/([^/]+)$/);
+      if (method === "POST" && benchmarkMatch) {
+        const benchmarkId = decodeURIComponent(benchmarkMatch[1]);
+        return await handleLogBenchmark(request, env, auth.userId, benchmarkId, tz);
       }
 
       // ── 404 ────────────────────────────────────────────────────
