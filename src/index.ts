@@ -16,6 +16,7 @@ import { handleRoutineSSE } from "./routes/routine";
 import { handleSetup } from "./routes/setup";
 import { handlePush, handlePull, handleCleanupRoutines, handleManualComplete } from "./routes/sync";
 import { handleWebhookEvent, handleWebhookRegister, handleWebhookUnregister } from "./routes/webhooks";
+import { handleSkillAssessment } from "./routes/skill-assessment";
 
 import defaultProgramJson from "../programs/mobility-joint-restoration.json";
 
@@ -225,6 +226,13 @@ export default {
       let deleteMatch: RegExpMatchArray | null;
       if (method === "POST" && (deleteMatch = path.match(/^\/api\/delete-program\/(\d+)$/))) {
         return await handleDeleteProgram(env, auth.userId, parseInt(deleteMatch[1], 10));
+      }
+
+      // ── POST /api/skill-assessment/:id ─────────────────────────
+      const assessMatch = path.match(/^\/api\/skill-assessment\/([a-zA-Z0-9_-]+)$/);
+      if (method === "POST" && assessMatch) {
+        const skillId = decodeURIComponent(assessMatch[1]);
+        return await handleSkillAssessment(request, env, auth.userId, skillId);
       }
 
       // ── 404 ────────────────────────────────────────────────────
