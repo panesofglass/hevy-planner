@@ -1276,7 +1276,8 @@
       "howTo": "Face wall, foot back from wall. Drive knee forward keeping heel down. Measure max distance (inches) where knee touches wall and heel stays down.",
       "target": "Left: 4-5 inches. Right (Achilles): will start lower — track improvement, don't compare sides.",
       "frequency": "Test day 1, then every 2 weeks",
-      "unit": "inches"
+      "unit": "inches",
+      "frequencyDays": 14
     },
     {
       "id": "single-leg-balance-test",
@@ -1284,7 +1285,8 @@
       "howTo": "Stand on one foot, close eyes, time how long before you touch down or open eyes.",
       "target": "30 seconds each side. Right ankle will lag — that's expected.",
       "frequency": "Test day 1, then every 2 weeks",
-      "unit": "seconds"
+      "unit": "seconds",
+      "frequencyDays": 14
     },
     {
       "id": "hollow-body-hold-test",
@@ -1292,35 +1294,40 @@
       "howTo": "Full position (arms overhead, legs straight). Time until low back lifts off floor.",
       "target": "Week 1: 10-15s is normal. Week 8 goal: 30-45s.",
       "frequency": "Test day 1, then every 3 weeks",
-      "unit": "seconds"
+      "unit": "seconds",
+      "frequencyDays": 21
     },
     {
       "id": "overhead-reach-test",
       "name": "Overhead Reach (Wall Test)",
       "howTo": "Stand with back, butt, and head against wall. Raise arms overhead trying to touch thumbs to wall without arching your low back off the wall.",
       "target": "Thumbs touch wall with back flat = good t-spine and shoulder mobility. If back arches, that's your t-spine restriction.",
-      "frequency": "Test day 1, then every 3 weeks"
+      "frequency": "Test day 1, then every 3 weeks",
+      "frequencyDays": 21
     },
     {
       "id": "deep-squat-test",
       "name": "Deep Squat Assessment",
       "howTo": "Feet shoulder width, squat as deep as possible without any support. Note: heels lifting, excessive forward lean, knees caving, inability to keep chest up.",
       "target": "Hips below parallel, heels down, chest up, no pain. Use a phone to film yourself — you'll miss compensations otherwise.",
-      "frequency": "Test day 1, film it. Re-film every 4 weeks."
+      "frequency": "Test day 1, film it. Re-film every 4 weeks.",
+      "frequencyDays": 28
     },
     {
       "id": "ninety-ninety-hip-test",
       "name": "90/90 Hip Test",
       "howTo": "Sit in 90/90 position (both legs at 90°). Can you sit tall with both knees touching or near the floor?",
       "target": "Both knees within 3-4 inches of floor, spine upright without hands for support.",
-      "frequency": "Test day 1, then every 3 weeks"
+      "frequency": "Test day 1, then every 3 weeks",
+      "frequencyDays": 21
     },
     {
       "id": "cross-body-shoulder-reach",
       "name": "Cross-Body Shoulder Reach",
       "howTo": "Reach right hand behind your back from below, left hand from above. How close can your fingertips get? Repeat on the other side.",
       "target": "Fingers touching or overlapping. Note the difference between sides — your tighter side is the priority.",
-      "frequency": "Test day 1, then every 4 weeks"
+      "frequency": "Test day 1, then every 4 weeks",
+      "frequencyDays": 28
     },
     {
       "id": "pain-free-planks",

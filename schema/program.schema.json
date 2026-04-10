@@ -453,6 +453,11 @@
         "unit": {
           "type": "string",
           "description": "Optional measurement unit (e.g., 'inches', 'seconds')."
+        },
+        "frequencyDays": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Numeric frequency in days for retest scheduling. Use alongside the display 'frequency' string."
         }
       }
     },

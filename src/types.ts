@@ -245,6 +245,21 @@ export interface Benchmark {
   howTo: string;
   target?: string;
   frequency?: string;
+  unit?: string;
+  frequencyDays?: number;
+}
+
+export interface BenchmarkResultRow {
+  readonly id: number;
+  readonly user_id: string;
+  readonly program_id: number;
+  readonly benchmark_id: string;
+  readonly value: string;
+  readonly passed: number; // 0 or 1 (D1 stores booleans as integers)
+  readonly side: string | null; // 'left', 'right', or null
+  readonly notes: string | null;
+  readonly tested_at: string;
+  readonly created_at: string;
 }
 
 export interface Foundation {
