@@ -1,0 +1,662 @@
+/milestone-execute for Wave 2
+
+---
+
+Is issue content updated?
+
+---
+
+Launched.
+
+---
+
+Session complete. Need to merge to master and clean up worktree.
+
+---
+
+yes
+
+---
+
+Add PROMPT.md to .gitignore
+
+---
+
+<task-notification>
+<task-id>aa7d692f2a0893d01</task-id>
+<tool-use-id>toolu_01V5yDnqFoAyunVPAZQXsNkx</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/07d9b27e-22dd-4e38-94da-9809ab4f7a6c/tasks/aa7d692f2a0893d01.output</output-file>
+<status>completed</status>
+<summary>Agent "Code quality review" completed</summary>
+<result>Here are the code quality issues found across the diff, grouped by severity.
+
+---
+
+## Critical
+
+### 1. `advancePhase` wraps a single statement in `db.batch()` unnecessarily
+
+`/Users/ryanr/Code/hevy-planner/src/storage/queries.ts:346`
+
+`db.batch([single_statement])` adds a network roundtrip overhead and exists solely to batch multiple statements atomically. With one statement there is no atomicity benefit and the wrapper is misleading — it implies there is a transaction with multiple operations when there isn't.
+
+Suggested fix:
+```ts
+await db.prepare("UPDATE programs SET current_phase_id = ?, phase_advanced_at = datetime('now') WHERE id = ?")
+  .bind(newPhaseId, programId)
+  .run();
+```
+
+---
+
+## Important
+
+### 2. Duplicated sort logic in `phases.ts`
+
+`/Users/ryanr/Code/hevy-planner/src/domain/phases.ts:16` and `44`
+
+Both `resolvePhaseStatuses` and `validateAdvancement` independently perform `[...phases].sort(...)` with the same comparator. The diff description calls this out explicitly. The sort is a subtle operation (defensive copy + nullish `sortOrder`) and duplicating it creates a drift risk.
+
+Suggested fix: Extract a `sortPhases(phases: RoadmapPhase[]): RoadmapPhase[]` helper at the top of the file and call it from both functions.
+
+### 3. `advance-phase.ts` re-filters results with the same logic as `roadmapSection`
+
+`/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts:29-31` and `/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts:113-115`
+
+The `phaseAdvancedAt` date-filter on `results` is copy-pasted verbatim in two places. The route handler filters before calling `evaluateGateTests`, and the fragment re-filters for the same purpose. If the filtering rule changes (e.g., switching from `&gt;=` to `&gt;`), it must be updated in both places.
+
+The route handler's filter is correct for the pre-advance gate check. However the comment on line 68 of `advance-phase.ts` ("new phase has no phaseAdvancedAt filter yet") actually documents why `roadmapSection` is called without a `phaseAdvancedAt` argument — but it then passes `results` (all results) to `roadmapSection`. After advancing, the fragment will show old results for the new current phase's gate checklist until the user reloads. This is a functional inconsistency compounded by the duplicated logic.
+
+Suggested fix: Extract `filterResultsForPhase(results, phaseAdvancedAt)` into a shared utility (e.g., `src/domain/benchmarks.ts` alongside `evaluateGateTests`) and call it from both sites.
+
+### 4. `advance-phase.ts` line 65: silent last-phase semantics obscure a logic edge case
+
+`/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts:65`
+
+```ts
+const newPhaseId = validation.nextPhaseId ?? phaseId;
+```
+
+When the user is on the last phase and all gates pass, `validateAdvancement` returns `{ ok: true, nextPhaseId: null }`. The route handler then silently writes `phaseId` back as the new `current_phase_id` — the record is updated but nothing changes. This means "advance" on the last phase is a no-op write, the button stays visible, and the user can re-submit indefinitely. The `AdvancementResult` type already has the discriminant needed to detect this; the caller should handle `nextPhaseId === null` as a distinct case (hide the button or show "Program complete").
+
+Suggested fix: Add a `"last_phase"` error variant to `AdvancementResult`, return it from `validateAdvancement` when `phaseIndex + 1 &gt;= sorted.length`, and render a distinct "Program complete" message in the fragment.
+
+### 5. `roadmapSection` signature grown to 5 parameters — parameter sprawl
+
+`/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts:102-108`
+
+The function now takes `phases, results, benchmarks, currentPhaseId, phaseAdvancedAt`. Three of those (`results`, `currentPhaseId`, `phaseAdvancedAt`) exist purely to compute `currentPhaseResults` for the gate evaluation. These are tightly coupled phase-context fields that will likely grow together (e.g., if per-phase result windows are added). Consider grouping into a `PhaseContext` object or, simpler, pre-filtering `results` at the call site and passing only `filteredResults` in, dropping `phaseAdvancedAt` from the fragment's responsibility.
+
+This is already causing the problem in issue #3 — the `advance-phase.ts` call site at line 70-75 omits `phaseAdvancedAt` (intentionally per the comment), which means the two call sites have invisibly different behaviour for the same function.</result>
+<usage><total_tokens>24974</total_tokens><tool_uses>8</tool_uses><duration_ms>46081</duration_ms></usage>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>a4fe76d91b3da1d82</task-id>
+<tool-use-id>toolu_01Fvb7bZenyKwTuUoty5gjkA</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/07d9b27e-22dd-4e38-94da-9809ab4f7a6c/tasks/a4fe76d91b3da1d82.output</output-file>
+<status>completed</status>
+<summary>Agent "Efficiency review" completed</summary>
+<result>Now I have the full picture. Here are the findings:
+
+---
+
+**Reviewing efficiency issues in the diff (7f588ae..1be8f4d)**
+
+Files reviewed:
+- `/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts`
+- `/Users/ryanr/Code/hevy-planner/src/domain/phases.ts`
+- `/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts`
+- `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts`
+
+---
+
+**Issue 1 — Sequential D1 queries that can run in parallel (Confidence: 95)**
+
+`/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts`, lines 15 and 26.
+
+`loadProgram` and `getBenchmarkResults` are called sequentially with `await`. `loadProgram` fetches the program row to get `programId`, which `getBenchmarkResults` needs — so they cannot be fully parallelized as-is. However, `loadProgram` does two things: fetches `json_data` (large), and fetches `programId`/`phaseAdvancedAt`. The architecture forces the sequential dependency because `programId` comes from `loadProgram`.
+
+This is a real but structural limitation rather than a code mistake. The fix would be to have a cheaper `getActiveProgramMeta` query (returning only `id`, `current_phase_id`, `phase_advanced_at`) that you could race or use before fetching the full program JSON. For the advance-phase route specifically, you need the full program for `roadmapSection`, so `Promise.all` isn't directly applicable here. No actionable fix without a larger refactor — call this informational.
+
+---
+
+**Issue 2 — `advancePhase` uses `db.batch()` with a single statement (Confidence: 90)**
+
+`/Users/ryanr/Code/hevy-planner/src/storage/queries.ts`, lines 346-348.
+
+```ts
+await db.batch([
+  db.prepare("UPDATE programs SET current_phase_id = ?, phase_advanced_at = datetime('now') WHERE id = ?").bind(newPhaseId, programId),
+]);
+```
+
+`db.batch()` with one statement adds HTTP overhead versus `db.prepare(...).run()`. The D1 `batch()` API sends statements to a different endpoint that is slightly heavier than a single `.run()`. The comment says "atomically advance" but a single statement is inherently atomic — `batch()` buys nothing here. Fix: replace with `.run()` directly.
+
+---
+
+**Issue 3 — `validateAdvancement` sorts and does two `findIndex` calls on the same array (Confidence: 85)**
+
+`/Users/ryanr/Code/hevy-planner/src/domain/phases.ts`, lines 44-53.
+
+The array is sorted once, then `findIndex` is called twice on it — once for `phaseIdToAdvance` and once for `resolvedCurrentId`. For a 4-element array this is negligible CPU, but the second `findIndex` is also redundant when `phaseIdToAdvance === resolvedCurrentId` (the normal success path), which could be short-circuited. This is not a meaningful CPU concern in Workers at 4 elements. Not worth fixing.
+
+---
+
+**Issue 4 — `roadmapSection` passes unfiltered `results` to `roadmapSection` from `handleAdvancePhase` but `roadmapSection` re-applies the filter internally (Confidence: 88)**
+
+`/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts`, lines 70-75, and `/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts`, lines 112-115.
+
+In `handleAdvancePhase`, `filteredResults` is computed at line 29-31 for the gate evaluation, but `roadmapSection` is then called at line 70 with the raw `results` (not `filteredResults`). This is correct behavior because `roadmapSection` accepts the full result set and applies its own filter internally using `phaseAdvancedAt`. However, `handleAdvancePhase` calls `roadmapSection` **without passing `phaseAdvancedAt`** (the 5th parameter). After a fresh advancement, `phaseAdvancedAt` is stale — it reflects the previous phase transition, not the one just committed. The new timestamp was set by `datetime('now')` inside D1, so the caller never has it. The practical effect is that `roadmapSection` treats the new current phase as if no `phaseAdvancedAt` filter applies, which is what the comment on line 68-69 documents as intentional. This is not a bug but confirms the filter logic inside `roadmapSection` is being re-executed redundantly for a value (`phaseAdvancedAt`) that wasn't threaded through. The `filter()` call in `roadmapSection` line 113-115 runs unnecessarily on every call from this route since `phaseAdvancedAt` is undefined. No real cost at small data sizes, but the caller computes `filteredResults` that are then thrown away — the work was done twice. No fix required given data size, but worth noting as dead computation on the hot path.
+
+---
+
+**Summary of actionable findings:**
+
+`/Users/ryanr/Code/hevy-planner/src/storage/queries.ts` line 346 — `db.batch()` with a single statement is wasteful; replace with `db.prepare(...).bind(...).run()`. Suggested fix:
+
+```ts
+await db
+  .prepare("UPDATE programs SET current_phase_id = ?, phase_advanced_at = datetime('now') WHERE id = ?")
+  .bind(newPhaseId, programId)
+  .run();
+```
+
+Everything else is clean for the data sizes involved. The double-sort in `phases.ts` is not a concern at 4 elements. The sequential `loadProgram` → `getBenchmarkResults` dependency is structural and cannot be parallelized without a schema-query refactor that isn't worth the complexity here.</result>
+<usage><total_tokens>21259</total_tokens><tool_uses>8</tool_uses><duration_ms>42792</duration_ms></usage>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>a93c2109ac1611f69</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/07d9b27e-22dd-4e38-94da-9809ab4f7a6c/tasks/a93c2109ac1611f69.output</output-file>
+<status>completed</status>
+<summary>Agent "Code reuse review" completed</summary>
+<result>I now have everything I need. Here is the complete findings.
+
+---
+
+Reviewing unstaged changes from the diff range `7f588ae..1be8f4d` for code reuse issues only.
+
+---
+
+## Critical
+
+None.
+
+---
+
+## Important
+
+**1. Duplicate sort pattern — `sortOrder` comparator written three times across the new code alone**
+
+- `/Users/ryanr/Code/hevy-planner/src/domain/phases.ts:16` — `[...phases].sort((a, b) =&gt; (a.sortOrder ?? 0) - (b.sortOrder ?? 0))`
+- `/Users/ryanr/Code/hevy-planner/src/domain/phases.ts:44` — identical comparator, second copy within the same file in `validateAdvancement`
+
+The pattern already exists in two other files predating this diff: `src/fragments/template-grid.ts:20` and `src/fragments/program.ts:113`. That makes four total sites across the codebase. The new code adds a fifth instance (two inside the same file). Both `resolvePhaseStatuses` and `validateAdvancement` sort `phases` independently at their top, duplicating the sort on every call path that touches `validateAdvancement` right after `resolvePhaseStatuses` (which is exactly what `handleAdvancePhase` does — it calls `validateAdvancement` which re-sorts the already-sorted-compatible input). The fix has two parts:
+
+- Extract `sortBySortOrder&lt;T extends { sortOrder?: number }&gt;(items: T[]): T[]` into `src/utils/sort.ts` (or `src/utils/html.ts` if you prefer one utils file) and import it at all four existing sites plus both new sites.
+- Inside `src/domain/phases.ts`, `validateAdvancement` could accept pre-sorted phases from `resolvePhaseStatuses` instead of sorting again, but at minimum the inline comparator should be a shared helper. Confidence: **85** — the pattern is already repeated four times; the new file adds two more within eight lines of each other and is the highest-density duplication site.
+
+**2. `results.filter(r =&gt; r.tested_at &gt;= phaseAdvancedAt)` written identically in two places**
+
+- `/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts:30`
+- `/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts:114`
+
+Both sites do the same temporal filtering to restrict benchmark results to those logged after a phase transition. The logic is not complex, but it is now split across a route handler and a fragment builder, and both sites must be updated together if the comparison semantics ever change (e.g., switching from `&gt;=` string comparison to a proper Date comparison). The fix is to extract `filterResultsSince(results: BenchmarkResultRow[], since: string | null | undefined): BenchmarkResultRow[]` into `src/domain/benchmarks.ts`, which already owns all other result-filtering/evaluation logic, and call it from both sites. Confidence: **80** — two sites, logically cohesive with the benchmark domain module that already exists.
+
+**3. `advancePhase` wraps a single statement in `db.batch()`**
+
+- `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts:346-348`
+
+`db.batch([single_statement])` is functionally identical to `.run()` on that statement and adds unnecessary overhead and visual noise. Every other single-statement mutation in this file (e.g., `updateDailyCompleted`, `updateLastSyncAt`, `clearWebhookState`, `updateQueueItemHevyRoutineId`) uses `.prepare().bind().run()` directly. `db.batch()` is reserved for multi-statement atomicity. Fix: replace with `.prepare(...).bind(newPhaseId, programId).run()`. Confidence: **82** — the inconsistency is clear from reading the file; `batch` is explicitly documented in the codebase as the multi-statement pattern.
+
+---
+
+## Not Issues (checked and clean)
+
+1. **`resolvePhaseStatuses` vs. pre-existing phase resolution logic** — no prior phase resolution logic exists. This is genuinely new and appropriately placed in `src/domain/phases.ts`.
+2. **Error response pattern in `advance-phase.ts`** — the 404 plain-text pattern (`new Response("...", { status: 404 })`) matches `benchmarks.ts` and `skill-assessment.ts`. The 422 SSE error (prepend to `#content`) is novel but appropriate since it is a Datastar-initiated POST; there is no existing convention to conflict with.
+3. **Gate evaluation call path** — `advance-phase.ts` calls `evaluateGateTests` directly (with pre-filtered results) then passes the result to `validateAdvancement`. `roadmapSection` also calls `evaluateGateTests` directly. These are not duplicating each other; they serve different purposes (server-side validation vs. display rendering) and share the domain function correctly.</result>
+<usage><total_tokens>30193</total_tokens><tool_uses>20</tool_uses><duration_ms>70552</duration_ms></usage>
+</task-notification>
+
+---
+
+Is .remember intended to be added to .gitignore or committed?
+
+---
+
+<task-notification>
+<task-id>a0933e58bffa372c2</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/07d9b27e-22dd-4e38-94da-9809ab4f7a6c/tasks/a0933e58bffa372c2.output</output-file>
+<status>completed</status>
+<summary>Agent "Expert: HTTP/REST semantics" completed</summary>
+<result>I have all the information needed. Here is the full HTTP semantics review.
+
+---
+
+Reviewing `src/routes/advance-phase.ts` and `src/index.ts` (lines 247-252) against the diff range `7f588ae..HEAD`.
+
+---
+
+## Critical
+
+**[EXPERT-HTTP] src/routes/advance-phase.ts:52-58 — 422 SSE error response is missing `cache-control: private, no-store` — important**
+
+The success path goes through `sseResponse()`, which correctly sets `cache-control: private, no-store` and `vary: Accept`. The 422 error branch constructs its `Response` manually and omits both headers. A Cloudflare edge node or browser could cache a 422 `text/event-stream` response, which would cause the error to replay on a retry without ever hitting the origin.
+
+Fix: Route the error body through `sseResponse()` with a status override, or inline the same headers:
+
+```ts
+return new Response(
+  patchElements(errorHtml, { selector: "#content", mode: "prepend" }),
+  {
+    status: 422,
+    headers: {
+      "content-type": "text/event-stream",
+      "cache-control": "private, no-store",
+      "vary": "Accept",
+    },
+  }
+);
+```
+
+Confidence: 88. The omission is definite; practical risk depends on whether Cloudflare caches 4xx by default (it does not for Workers responses by default), but the missing `vary: Accept` is unconditional correctness debt once any caching layer is introduced.
+
+---
+
+**[EXPERT-HTTP] src/routes/advance-phase.ts:17-19 — `no roadmap` returns plain-text 404 with no `content-type` header — important**
+
+Both plain-text 404 returns (lines 19 and 23) send `text/plain` body implicitly, but the `handleAdvancePhase` function signature contracts with a Datastar SSE caller (`$$post` fires with `Accept: text/event-stream`). When Datastar receives a 404 with `text/plain`, it cannot process it as an SSE event and will silently fail — the UI will not update and there is no user-visible error. The `not_found` error case at line 41 already correctly falls through and returns a 404, but the "no roadmap" check at line 17 returns a bare text response instead.
+
+Fix: Either convert these 404 paths to SSE error fragments (consistent with the 422 path), or at minimum add an explicit `content-type: text/plain` and document that the caller should watch for non-SSE error responses. Given the client is Datastar, the former is strongly preferred.
+
+Confidence: 85. Datastar's `$$post` expects `text/event-stream` on all responses it processes; a `text/plain` 404 silently stalls the fragment update cycle.
+
+---
+
+## Important
+
+**[EXPERT-HTTP] src/routes/advance-phase.ts:40-41 — `not_found` from `validateAdvancement` returns plain-text 404, inconsistent with the 422 SSE error pattern — important**
+
+`validateAdvancement` can return `error: "not_found"` at line 60 of `phases.ts` when `phaseIndex === -1`. This is a second duplicate check — the phase was already found at line 21-23 of the route. If it somehow fires, line 40-41 returns a bare `new Response("Phase not found", { status: 404 })` rather than an SSE fragment. This is both unreachable dead code and, if somehow reached, breaks the SSE contract. Either remove the redundant guard or unify it with the SSE error response pattern.
+
+Confidence: 82. The inconsistency is real; the dead-code status makes it low-risk in practice but it is misleading and creates a maintenance trap.
+
+---
+
+**[EXPERT-HTTP] src/routes/advance-phase.ts:73 — success response patches `.card` with `mode: outer` — selector is ambiguous and may replace the wrong card — minor**
+
+This is not strictly an HTTP semantics issue, but it directly affects whether the SSE response does anything meaningful. `patchElements(html, { selector: ".card", mode: "outer" })` targets the first `.card` in the DOM that Datastar resolves. The `roadmapSection` fragment presumably contains the roadmap's card element, but if the page has multiple `.card` elements (e.g. a benchmark card above the roadmap), Datastar will patch the wrong target. The 422 error path uses `selector: "#content"` which is ID-targeted and unambiguous. The success path should use an ID or more specific selector.
+
+Confidence: 80. The `.card` class is used broadly in this codebase (`errorHtml` on line 51 also uses `.card`). The ambiguity is structural.
+
+---
+
+## Clean areas
+
+- **POST method**: Correct. Phase advancement is an irreversible state mutation; POST is appropriate. PATCH would also be defensible but POST is fine here, especially given the Datastar `$$post` convention.
+- **URL design**: `/api/advance-phase/:phaseId` is acceptable. A stricter REST purist would prefer `/api/roadmap/phases/:phaseId/advance` (noun-based resource with action verb in the leaf), but the flat structure is consistent with other routes in this codebase (`/api/log-benchmark/:id`, `/api/skill-assessment/:id`) and is not a defect.
+- **Idempotency**: The `already_completed` check (via `validateAdvancement`) returns 422 on re-POST, which is correct — POST is not required to be idempotent, and returning a 422 with an SSE error fragment is a sensible choice for a hypermedia client.
+- **Route registration** (`src/index.ts:248-251`): Pattern is correct, `decodeURIComponent` is applied, `method === "POST"` guard is present. No issues.
+- **`Allow` header**: Not required here. `Allow` is only mandated on 405 responses; since this route does not handle OPTIONS or return 405, its absence is not a violation.
+- **`Location` header**: Not applicable — this endpoint returns a hypermedia fragment, not a redirect or resource creation response.
+
+---
+
+## Summary
+
+Two findings rise to **important** (missing cache headers on 422 path; plain-text 404s that break Datastar's SSE contract), one is a **minor** ambiguous selector on the success path, and one is a redundant dead-code guard. The overall HTTP method, idempotency, and route registration are sound.</result>
+<usage><total_tokens>13233</total_tokens><tool_uses>10</tool_uses><duration_ms>67004</duration_ms></usage>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>a4955f0e1189aeb9b</task-id>
+<tool-use-id>toolu_01CM3aJ9Fmzz3iGxm4vz9mcG</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/07d9b27e-22dd-4e38-94da-9809ab4f7a6c/tasks/a4955f0e1189aeb9b.output</output-file>
+<status>completed</status>
+<summary>Agent "Expert: frontend/SSE patterns" completed</summary>
+<result>Now I have everything needed. Let me compile the findings.
+
+---
+
+## Review: Phase Advancement Feature (7f588ae..HEAD)
+
+Reviewing `/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts` and `/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts` against project guidelines and Datastar SSE correctness.
+
+---
+
+### CRITICAL
+
+**[EXPERT-SSE] `/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts:73` — Wrong selector targets first `.card` on page, not the roadmap card — critical**
+
+The success SSE response uses `selector: ".card"` with `mode: "outer"`. The progress page renders skills cards, then the roadmap `&lt;div class="card"&gt;`, then a benchmarks `&lt;div class="card"&gt;`. The CSS selector `.card` resolves to the first matching element in the DOM — which will be a skill card, not the roadmap card. The entire roadmap fragment (which includes `&lt;div class="section-header"&gt;Roadmap&lt;/div&gt;&lt;div class="card"&gt;...&lt;/div&gt;`) would overwrite the wrong element.
+
+The roadmap section has no unique ID. The fix is to wrap the roadmap section in a uniquely identifiable container and target it:
+
+In `roadmapSection()` (progress.ts line 169), change:
+```
+return `&lt;div class="section-header"&gt;Roadmap&lt;/div&gt;\n&lt;div class="card"&gt;\n${items}\n&lt;/div&gt;`;
+```
+to:
+```
+return `&lt;div id="roadmap-section"&gt;&lt;div class="section-header"&gt;Roadmap&lt;/div&gt;\n&lt;div class="card"&gt;\n${items}\n&lt;/div&gt;&lt;/div&gt;`;
+```
+
+Then in advance-phase.ts line 73:
+```ts
+return sseResponse(patchElements(html, { selector: "#roadmap-section", mode: "outer" }));
+```
+
+**[EXPERT-SSE] `/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts:67-72` — `phaseAdvancedAt` omitted from roadmap re-render after advancement — critical**
+
+After `advancePhase()` writes the new `phase_advanced_at` timestamp to D1, the code calls `roadmapSection(program.roadmap, results, program.benchmarks ?? [], newPhaseId)` — with no fifth argument for `phaseAdvancedAt`. This means the new phase's gate checklist will use `filterResultsSince(results, undefined)`, which returns all results. The next phase's gate tests will immediately evaluate against pre-advancement benchmark results, potentially showing false "gate passed" state or even rendering the "Advance" button immediately.
+
+The fix is to re-read `phaseAdvancedAt` from the DB after the write, or use `new Date().toISOString()` as the cutoff. The simplest correct approach: pass the current timestamp as the new `phaseAdvancedAt`:
+
+```ts
+const now = new Date().toISOString();
+const html = roadmapSection(
+  program.roadmap,
+  results,
+  program.benchmarks ?? [],
+  newPhaseId,
+  now   // ← gates for the new current phase start fresh
+);
+```
+
+---
+
+### IMPORTANT
+
+**[EXPERT-SSE] `/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts:234` — Inconsistent `data-signals` syntax: hyphen instead of colon — important**
+
+Line 234 uses `data-signals-${sig}_open="false"` (hyphen separator), while every other signal declaration in the codebase uses `data-signals:${name}="..."` (colon separator). This will silently fail — the signal won't be registered and `$${sig}_open` will be undefined, breaking the "Log Result" toggle visibility (`data-show`) for all benchmark cards.
+
+```
+data-signals-${sig}_open="false"   // wrong — line 234
+data-signals:${signalName}="..."   // correct — used everywhere else
+```
+
+Fix: `data-signals:${sig}_open="false"`.
+
+Note: this is on the `benchmarkCard` function, not the advance-phase feature specifically, but it was introduced in the same diff range.
+
+**[EXPERT-SSE] `/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts:52-58` — Error path returns SSE with HTTP 422 status — important**
+
+The error branch returns a proper SSE body (`patchElements(...)`) but with `status: 422`. Datastar's `$$post` action uses `fetch` under the hood and processes the SSE stream — but only on successful (2xx) responses. A 422 will cause the SSE stream to be ignored entirely, and the error card prepended to `#content` will never render. The user gets no feedback.
+
+The fix is to return status 200 with the error fragment (Datastar's convention), or use a `patchSignals` to set an error signal and display it via `data-show`. The `sseResponse()` helper always uses 200 — use it here too:
+
+```ts
+return sseResponse(patchElements(errorHtml, { selector: "#content", mode: "prepend" }));
+```
+
+**[EXPERT-SSE] `/Users/ryanr/Code/hevy-planner/src/fragments/progress.ts:147` — `$$post` on the advance form vs `@post` everywhere else — important**
+
+The advance form at line 147 uses `$$post(...)` inside `data-on-submit__prevent`. Every other action in the codebase uses `@post(...)` inside `data-on:click` or `data-on:submit`. Both `$$post` (Datastar v1 action syntax) and `@post` (shorthand) may be valid, but mixing them creates inconsistency and raises the risk that one is for an older/newer Datastar version than what is deployed.
+
+The log-benchmark form on line 237 also uses `$$post` with `data-on-submit__prevent`, which is consistent with the advance form — so the pair is at least internally consistent. But these two forms are the only places using this syntax while the rest of the codebase uses `@post`. This should be verified against the pinned Datastar version and standardized. If `@post` is what works everywhere else, use `data-on-submit__prevent="@post('/api/advance-phase/...')"` to match.
+
+---
+
+### Summary
+
+The two critical issues — wrong `.card` selector scope and missing `phaseAdvancedAt` after advancement — will both cause observable bugs on every successful phase advance: the wrong DOM element gets replaced, and the new current phase immediately evaluates gates against stale results. The 422 error response is guaranteed to silently fail. The `data-signals-` typo breaks all benchmark log toggles. All four warrant fixes before shipping.</result>
+<usage><total_tokens>19134</total_tokens><tool_uses>11</tool_uses><duration_ms>69916</duration_ms></usage>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>a55ece29a25ffaad9</task-id>
+<tool-use-id>toolu_015xZs7ZNyyUNkKMRN5QJiAc</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/07d9b27e-22dd-4e38-94da-9809ab4f7a6c/tasks/a55ece29a25ffaad9.output</output-file>
+<status>completed</status>
+<summary>Agent "Expert: data layer review" completed</summary>
+<result>I now have all the information needed. Here is the complete review.
+
+---
+
+Reviewing the diff range `7f588ae..HEAD` for the phase advancement data layer: `/Users/ryanr/Code/hevy-planner/migrations/0011_phase_advancement.sql`, `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts` (lines 237-350), `/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts`, `/Users/ryanr/Code/hevy-planner/src/domain/phases.ts`, and the `ProgramRow` type in `/Users/ryanr/Code/hevy-planner/src/types.ts`.
+
+---
+
+## Critical Issues
+
+**None found.**
+
+---
+
+## Important Issues
+
+**[EXPERT-DATA] `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts`:347 — `advancePhase` UPDATE has no `user_id` guard — severity: important (confidence: 85)**
+
+The UPDATE statement is:
+```sql
+UPDATE programs SET current_phase_id = ?, phase_advanced_at = datetime('now') WHERE id = ?
+```
+
+`programId` is the sole predicate. Because `programId` is obtained from `loadProgram(db, userId)` in the route handler — which already filters by `user_id` — this is not an exploitable SQL injection path. However, `advancePhase` is a public storage function and its signature accepts any `programId` integer with no ownership assertion. If a future caller passes an unvalidated `programId` (e.g., from a URL parameter directly), it would update any user's program row. A defensive `AND user_id = ?` would make the function self-contained and safe regardless of how it is called. Compare to `deleteProgram` and `setActiveProgram` in the same file, both of which include `AND user_id = ?`.
+
+Fix: add `userId string` parameter and `AND user_id = ?` to the WHERE clause, consistent with every other mutating program query in this file.
+
+**[EXPERT-DATA] `/Users/ryanr/Code/hevy-planner/src/routes/advance-phase.ts`:62-63 — last-phase advancement stores `phaseId` (current) not `nextPhaseId` (null) — severity: important (confidence: 82)**
+
+When `validateAdvancement` returns `{ ok: true, nextPhaseId: null }` (the current phase is the last phase), the route does:
+```ts
+const newPhaseId = validation.nextPhaseId ?? phaseId;
+await advancePhase(env.DB, programId, newPhaseId);
+```
+`validation.nextPhaseId` is `null`, so `newPhaseId` falls back to `phaseId` — the phase that was just "advanced". This means the user can re-trigger "advance" on the final phase repeatedly, writing the same `current_phase_id` back each time and updating `phase_advanced_at` on every call. More critically, after the first call the phase is still marked `current` (not `completed`), so the user sees no visible advancement, yet `phase_advanced_at` is refreshed — which silently invalidates benchmark results that were used to qualify for the gate. Whether this is intended or a gap depends on spec, but there is no guard against repeated calls and no `completed` sentinel value for the final phase.
+
+---
+
+## Minor Issues
+
+**[EXPERT-DATA] `/Users/ryanr/Code/hevy-planner/src/domain/phases.ts`:18 — `filterResultsSince` uses lexicographic string comparison for ISO timestamps — severity: minor (confidence: 80)**
+
+```ts
+results.filter((r) =&gt; r.tested_at &gt;= since)
+```
+
+This works correctly as long as `tested_at` and `phase_advanced_at` are both stored in the same ISO 8601 format (e.g., both `YYYY-MM-DD HH:MM:SS` from `datetime('now')`). `datetime('now')` produces that format. If any code path ever stores a different format (Unix epoch integer, `Z`-suffixed ISO, or local time string), the string comparison silently produces wrong results with no error. This is low risk today but fragile — worth a comment noting the format dependency.
+
+---
+
+## All Checklist Items Addressed
+
+1. **Migration correctness** — `ALTER TABLE programs ADD COLUMN current_phase_id TEXT` and `phase_advanced_at TEXT` are correct SQLite syntax. Both default to `NULL` implicitly, which is correct for existing rows.
+
+2. **SELECT in `getActiveProgram`** — Explicitly names all four columns including the two new ones. Correct; no `SELECT *` drift risk.
+
+3. **`advancePhase` UPDATE** — SQL is syntactically correct and uses a prepared statement with bound parameters. The missing `user_id` guard is the important issue noted above.
+
+4. **SQL injection** — No raw string interpolation anywhere in the modified code. All parameters are bound via `.bind()`. Clean.
+
+5. **`datetime('now')`** — Correct SQLite function, always returns UTC in `YYYY-MM-DD HH:MM:SS` format. Consistent with how `filterResultsSince` compares it.
+
+6. **`loadProgram` return type** — Correctly surfaces `currentPhaseId` and `phaseAdvancedAt` from the row. All callers that need them destructure them; callers that don't need them simply ignore the extra fields. No type errors.
+
+7. **Index on `current_phase_id`** — Not needed. The only query touching this column is `getActiveProgram`, which already filters on `user_id` and `is_active = 1` and returns a single row. Adding an index on `current_phase_id` alone would provide no benefit.
+
+8. **NULL default for `current_phase_id`** — Correct. `resolvePhaseStatuses` and `validateAdvancement` both handle `null` via `currentPhaseId ?? sorted[0]?.id`, treating it as "first phase". Existing programs get the right behavior without a data migration.</result>
+<usage><total_tokens>19526</total_tokens><tool_uses>14</tool_uses><duration_ms>65209</duration_ms></usage>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>a4698a4de289492bb</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/07d9b27e-22dd-4e38-94da-9809ab4f7a6c/tasks/a4698a4de289492bb.output</output-file>
+<status>completed</status>
+<summary>Agent "Expert: domain architecture" completed</summary>
+<result>Now I have enough information to deliver a complete, high-confidence review.
+
+---
+
+Reviewing the phase advancement feature (diff range `7f588ae..HEAD`): `src/domain/phases.ts`, `src/domain/benchmarks.ts` (context), and `src/routes/advance-phase.ts`.
+
+---
+
+## Critical Issues
+
+**[EXPERT-DOMAIN] src/routes/advance-phase.ts:67-72 — Post-advancement fragment rendered without `phaseAdvancedAt`, so stale pre-phase results are included in the new current phase's gate evaluation — severity: critical**
+
+After writing the new `phase_advanced_at` timestamp to D1, the handler calls `roadmapSection` without that timestamp:
+
+```ts
+const html = roadmapSection(
+  program.roadmap,
+  results,
+  program.benchmarks ?? [],
+  newPhaseId           // phaseAdvancedAt argument omitted — defaults to undefined
+);
+```
+
+`roadmapSection` passes `phaseAdvancedAt` (5th argument) to `filterResultsSince`. Since it is omitted here, the filter is skipped entirely. The newly-current phase will immediately display all benchmark results from before the advancement — potentially showing gates as "passed" using old results, when the design intent (expressed in the comment on line 65 and in the `filterResultsSince` implementation) is that only results logged *after* the phase transition count toward gate tests.
+
+The comment on lines 65-66 reasons this is safe because "no results exist after it," but that is only true at first sync. If a user quickly logs a benchmark result and then the page re-renders, the full history is shown. More critically, the progress page route (`src/routes/progress.ts:29`) always passes `phaseAdvancedAt`; the advance-phase route response is the only place it is missing. The fix is straightforward — the `phaseAdvancedAt` that was just written is `datetime('now')` in SQLite, so you need either to re-read it from storage or synthesize the equivalent:
+
+```ts
+const newPhaseAdvancedAt = new Date().toISOString().replace("T", " ").slice(0, 19);
+const html = roadmapSection(
+  program.roadmap, results, program.benchmarks ?? [], newPhaseId, newPhaseAdvancedAt
+);
+```
+
+Confidence: 90. The omission is real and causes a visible inconsistency between the SSE fragment returned on advancement and subsequent full-page loads.
+
+---
+
+**[EXPERT-DOMAIN] src/routes/advance-phase.ts:17-23 + src/domain/phases.ts:60 — Double `not_found` check with unreachable early-return creates misleading dead code — severity: important**
+
+The route handler performs an early existence check at line 21-23 (`program.roadmap.find`) and returns HTTP 404 before calling `validateAdvancement`. Then `validateAdvancement` also returns `{ ok: false, error: "not_found" }` at line 60 if the phase is absent. Because the handler already guaranteed the phase exists, the `not_found` branch in the handler's `if (!validation.ok)` block (lines 39-43) can never be reached. This is not a functional bug by itself, but it means the discriminated union contract is violated at the boundary: the handler silently promises to the reader that it handles all union arms, but `not_found` is dead code.
+
+The cleaner design is to remove the early `phase` check from the route (let `validateAdvancement` be the single authority on phase existence) OR keep the early check but remove the `not_found` arm from the route's error switch. As-is, a future refactor that removes the early check would silently produce a 422 instead of a 404 for a missing phase.
+
+Confidence: 85.
+
+---
+
+## Important Issues
+
+**[EXPERT-DOMAIN] src/domain/phases.ts:18 — `filterResultsSince` uses `&gt;=` string comparison, but `phase_advanced_at` is `datetime('now')` (no `T`, space separator) while `tested_at` is a date-only string (`YYYY-MM-DD`) — severity: important**
+
+`phase_advanced_at` is stored as SQLite `datetime('now')`, which produces `"2026-04-10 14:32:05"` (space, no `T`). The `tested_at` column stores date-only strings like `"2026-04-10"` (from `benchmarks.ts` route, line 34). The string comparison `r.tested_at &gt;= since` compares `"2026-04-10"` against `"2026-04-10 14:32:05"`. In lexicographic order `"2026-04-10"` is less than `"2026-04-10 14:32:05"` (the space character 0x20 is less than any digit), so a benchmark result logged *on the same date* as the phase advancement will be **excluded** by the filter.
+
+This means: if a user advances a phase today, then immediately logs a benchmark result today, `filterResultsSince` will drop that result and the gate will appear not-passed. The correct fix depends on intent: if the semantics are "results logged on or after the day of advancement count," the comparison should be `r.tested_at &gt;= since.slice(0, 10)`. If it should be strict datetime comparison, `tested_at` needs to store full timestamps.
+
+Confidence: 88. The format mismatch is confirmed by reading both storage paths.
+
+---
+
+**[EXPERT-DOMAIN] src/domain/phases.ts:30-31 — `resolvePhaseStatuses` silently treats an unknown `currentPhaseId` as if it were the first phase — severity: important**
+
+When `currentPhaseId` is non-null but does not match any phase (e.g., stale ID after a program JSON update that renames a phase), `findIndex` returns `-1`. With `currentIndex = -1`, every phase satisfies `i &lt; currentIndex` as false (since no index is less than -1), `i === currentIndex` as false, so every phase falls through to `status = "future"`. The first phase is never "current" and none are "completed."
+
+This silently produces a fully-future roadmap rather than surfacing the data integrity issue. `validateAdvancement` has the same latent bug at line 65-66 (same `findIndex` pattern), where `currentIndex = -1` means `phaseIndex &lt; currentIndex` is always false and `phaseIndex &gt; currentIndex` is always true — so every phase would return `not_current`, blocking all advancement.
+
+A guard after line 31 in `resolvePhaseStatuses` would make the invariant visible:
+
+```ts
+if (currentIndex === -1 &amp;&amp; resolvedCurrentId != null) {
+  // currentPhaseId is set but not found — program data may be stale
+  // fall through: treat as if no current phase (first phase is current)
+}
+```
+
+Confidence: 80. This requires a program migration or rename to trigger, but the silent failure mode is worth making explicit given the CLAUDE.md guidance that domain functions should be unambiguous.
+
+---
+
+## No Issues Found
+
+**1. Domain purity**: All functions in `src/domain/phases.ts` are pure. No imports of D1, no side effects, no I/O. `sortPhases`, `filterResultsSince`, `resolvePhaseStatuses`, and `validateAdvancement` all take data and return data.
+
+**2. Handler orchestration boundary**: The route handler cleanly owns the I/O sequence — load, query, then call pure domain functions, then write. Domain functions are not given DB handles. The boundary is correct.
+
+**3. AdvancementResult discriminated union design**: The union covers all meaningful cases (`not_found`, `already_completed`, `not_current`, `gates_not_passed`, and success with `nextPhaseId | null` for last-phase). The `failingGates` field is correctly scoped to the one case that needs it. This is well-designed.
+
+**4. Phase resolution correctness**: The null `currentPhaseId` defaulting to `sorted[0]?.id` is correct and explicitly handles an empty-array edge case via optional chaining (giving `undefined`, which is treated like no current phase). Phases before current index = completed, at = current, after = future is correct.
+
+**5. `validateAdvancement` precondition ordering**: Gate check happens after position checks, which is the right order. A phase that isn't current should be rejected before evaluating its gates.
+
+**6. Last-phase advancement**: `nextPhaseId` correctly returns `null` when `phaseIndex + 1 &gt;= sorted.length`. The route handler handles this at line 62 with `validation.nextPhaseId ?? phaseId`, keeping the current phase ID on the last phase rather than clearing it. This is a reasonable choice, though it means a user on the last phase who hits "Advance" will succeed without error and appear to do nothing visible — acceptable given the UI only shows the button when `allPassed &amp;&amp; isCurrent`.
+
+**7. Empty roadmap**: Guarded at the route handler (line 17, returns 404). `validateAdvancement` would also return `not_found` for an empty roadmap since `findIndex` on `[]` returns -1.
+
+---
+
+**Summary**: Two issues need fixing before this ships. The most impactful is the missing `phaseAdvancedAt` in the post-advancement SSE fragment (`advance-phase.ts:67`), which causes the new phase's gate display to be inconsistent with subsequent page loads. The second is the date format mismatch in `filterResultsSince` that will cause same-day benchmark results to be incorrectly excluded after a phase advancement.</result>
+<usage><total_tokens>21118</total_tokens><tool_uses>21</tool_uses><duration_ms>108116</duration_ms></usage>
+</task-notification>
+
+---
+
+Fix 1-7 and make new issues for follow-up for 8-10. 3 and 4 should use SSE error fragments. With respect to 3 specifically, Your Claude Code recommendation is right to flag this, and the SSE error fragment approach **is** the correct contract. Here's the reasoning:
+
+**Why 422 is wrong for SSE error responses**
+
+SSE is a streaming protocol that rides on top of HTTP. The HTTP layer (status code, headers) is the *connection handshake* — it tells the client whether the stream was successfully established. Once Datastar's `$$post` sees a non-2xx status, it treats the whole request as failed at the transport level and never processes the body. The error fragment never gets a chance to render.
+
+A 422 as the HTTP status code is the right semantic for a REST/JSON API where the response *body* is the error payload. But for SSE, the body *is the stream*, so you need a 200 to open the channel first, then communicate the error *inside* the stream.
+
+**The correct contract**
+
+Use `sseResponse()` (which returns 200) and emit an error fragment as an SSE event:
+
+```
+HTTP 200 OK
+Content-Type: text/event-stream
+
+event: datastar-merge-fragments
+data: fragments <div id="error-container">Your validation error here</div>
+```
+
+or with Datastar's signals approach:
+
+```
+event: datastar-merge-signals  
+data: signals {"errorMessage": "Invalid phase transition", "hasError": true}
+```
+
+**Fix your E2E test**
+
+The test expecting 422 is asserting the wrong thing. It should instead:
+
+1. Expect **200** on the HTTP response
+2. Assert that the error **fragment or signal** appears in the DOM after the SSE stream closes
+
+```typescript
+// Before (wrong)
+expect(response.status).toBe(422);
+
+// After (correct)
+expect(response.status).toBe(200);
+await expect(page.locator('#error-container')).toBeVisible();
+await expect(page.locator('#error-container')).toContainText('Invalid phase transition');
+```
+
+**The nuance worth keeping**
+
+There *is* one valid use of non-2xx with SSE: if the request is so malformed that you can't even begin streaming (e.g., completely unparseable body, auth failure). In those cases, rejecting at the HTTP level before opening the stream is fine. But a domain/validation error like a bad phase transition — where you *can* process the request and want to give the user meaningful feedback — should always come back as an SSE error fragment on a 200.
+
+So the fix probability of 85% is probably underselling it for your case — the 422 expectation in the E2E test is almost certainly wrong.
+
+---
+
+Add test-e2e.sh. Ignore .claude/projects/ in .gitignore. Then commit and push
+
+---
+
+For issue #10 above, compare the datastar version we are using with the docs in context7 mcp or online. Should be easy to resolve that one.
