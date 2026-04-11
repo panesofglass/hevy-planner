@@ -31,8 +31,10 @@ function isSSERequest(request: Request): boolean {
   return accept.includes("text/event-stream");
 }
 
-function getSessionActor(env: Env, userId: string): DurableObjectStub {
-  const id = env.SESSION_ACTOR.idFromName(userId);
+type PageName = "today" | "program";
+
+function getSessionActor(env: Env, userId: string, page: PageName): DurableObjectStub {
+  const id = env.SESSION_ACTOR.idFromName(`${userId}:${page}`);
   return env.SESSION_ACTOR.get(id);
 }
 
@@ -50,8 +52,8 @@ function redirect(location: string, status = 303): Response {
   return new Response(null, { status, headers: { location } });
 }
 
-async function broadcastEvents(env: Env, userId: string, events: import("./actor/session-actor").SseEvent[]): Promise<void> {
-  const actor = getSessionActor(env, userId);
+async function broadcastEvents(env: Env, userId: string, page: PageName, events: import("./actor/session-actor").SseEvent[]): Promise<void> {
+  const actor = getSessionActor(env, userId, page);
   await actor.fetch(new Request("https://actor/broadcast", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -59,8 +61,8 @@ async function broadcastEvents(env: Env, userId: string, events: import("./actor
   }));
 }
 
-async function triggerReproject(env: Env, userId: string, tz?: string): Promise<void> {
-  const actor = getSessionActor(env, userId);
+async function triggerReproject(env: Env, userId: string, page: PageName, tz?: string): Promise<void> {
+  const actor = getSessionActor(env, userId, page);
   const url = new URL("https://actor/reproject");
   url.searchParams.set("userId", userId);
   if (tz) url.searchParams.set("tz", tz);
@@ -121,7 +123,7 @@ export default {
         }
 
         if (isSSERequest(request)) {
-          const actor = getSessionActor(env, auth.userId);
+          const actor = getSessionActor(env, auth.userId, "today");
           const connectUrl = new URL("https://actor/connect");
           connectUrl.searchParams.set("userId", auth.userId);
           if (tz) connectUrl.searchParams.set("tz", tz);
@@ -184,14 +186,14 @@ export default {
       // ── POST /api/validate-program ─────────────────────────────
       if (method === "POST" && path === "/api/validate-program") {
         const result = await handleValidateProgram(request);
-        await broadcastEvents(env, auth.userId, result.events);
+        await broadcastEvents(env, auth.userId, "today", result.events);
         return new Response(null, { status: result.status });
       }
 
       // ── POST /api/validate-import-program ──────────────────────
       if (method === "POST" && path === "/api/validate-import-program") {
         const result = await handleValidateImportProgram(request);
-        await broadcastEvents(env, auth.userId, result.events);
+        await broadcastEvents(env, auth.userId, "program", result.events);
         return new Response(null, { status: result.status });
       }
 
@@ -206,7 +208,7 @@ export default {
         const urlTemplateId = setupMatch ? decodeURIComponent(setupMatch[1]) : undefined;
         const response = await handleSetup(request, env, auth.userId, urlTemplateId, tz);
         if (response.status === 202) {
-          await triggerReproject(env, auth.userId, tz);
+          await triggerReproject(env, auth.userId, "today", tz);
         }
         return response;
       }
@@ -222,7 +224,7 @@ export default {
       if (method === "POST" && path === "/api/pull") {
         const response = await handlePull(env, auth.userId, tz);
         if (response.status === 202) {
-          await triggerReproject(env, auth.userId, tz);
+          await triggerReproject(env, auth.userId, "today", tz);
         }
         return response;
       }
@@ -238,7 +240,7 @@ export default {
         const itemId = parseInt(completeMatch[1], 10);
         const response = await handleManualComplete(env, auth.userId, itemId, tz);
         if (response.status === 202) {
-          await triggerReproject(env, auth.userId, tz);
+          await triggerReproject(env, auth.userId, "today", tz);
         }
         return response;
       }
@@ -247,7 +249,7 @@ export default {
       if (method === "POST" && path === "/api/webhooks/register") {
         const response = await handleWebhookRegister(request, env, auth.userId, tz);
         if (response.ok) {
-          await triggerReproject(env, auth.userId, tz);
+          await triggerReproject(env, auth.userId, "today", tz);
         }
         return response;
       }
@@ -256,7 +258,7 @@ export default {
       if (method === "POST" && path === "/api/webhooks/unregister") {
         const response = await handleWebhookUnregister(env, auth.userId, tz);
         if (response.ok) {
-          await triggerReproject(env, auth.userId, tz);
+          await triggerReproject(env, auth.userId, "today", tz);
         }
         return response;
       }
