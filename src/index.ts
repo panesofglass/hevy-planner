@@ -262,3 +262,4 @@ export default {
 };
 
 export type { Env };
+export { SessionActor } from "./actor/session-actor";
