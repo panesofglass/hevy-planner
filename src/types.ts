@@ -63,6 +63,7 @@ export interface ProgramRow {
   readonly json_data: string;
   readonly is_active: number;
   readonly created_at: string;
+  readonly current_phase_id: string | null;
 }
 
 // ──────────────────────────────────────────────────────────────────

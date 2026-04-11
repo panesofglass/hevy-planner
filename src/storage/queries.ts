@@ -237,15 +237,15 @@ export async function updateDailyCompleted(
 export async function getActiveProgram(
   db: D1Database,
   userId: string
-): Promise<Pick<ProgramRow, "id" | "json_data"> | null> {
+): Promise<Pick<ProgramRow, "id" | "json_data" | "current_phase_id"> | null> {
   return db
     .prepare(
-      `SELECT id, json_data FROM programs
+      `SELECT id, json_data, current_phase_id FROM programs
        WHERE user_id = ? AND is_active = 1
        ORDER BY created_at DESC LIMIT 1`
     )
     .bind(userId)
-    .first<Pick<ProgramRow, "id" | "json_data">>();
+    .first<Pick<ProgramRow, "id" | "json_data" | "current_phase_id">>();
 }
 
 export async function updateWebhookState(
@@ -330,11 +330,22 @@ export async function setActiveProgram(db: D1Database, userId: string, programId
   ]);
 }
 
-/** Load the active program from D1 for a given user. Returns the program and its D1 row ID. */
-export async function loadProgram(db: D1Database, userId: string): Promise<{ program: Program; programId: number }> {
+/** Load the active program from D1 for a given user. Returns the program, its D1 row ID, and current phase ID. */
+export async function loadProgram(db: D1Database, userId: string): Promise<{ program: Program; programId: number; currentPhaseId: string | null }> {
   const row = await getActiveProgram(db, userId);
   if (!row) throw new Error("No active program found");
-  return { program: JSON.parse(row.json_data) as Program, programId: row.id };
+  return { program: JSON.parse(row.json_data) as Program, programId: row.id, currentPhaseId: row.current_phase_id };
+}
+
+/** Atomically advance the current phase for a program. */
+export async function advancePhase(
+  db: D1Database,
+  programId: number,
+  newPhaseId: string
+): Promise<void> {
+  await db.batch([
+    db.prepare("UPDATE programs SET current_phase_id = ? WHERE id = ?").bind(newPhaseId, programId),
+  ]);
 }
 
 /** Delete a program and its associated queue items and mappings. */
