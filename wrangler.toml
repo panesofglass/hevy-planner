@@ -10,6 +10,15 @@ binding = "DB"
 database_name = "hevy-planner"
 database_id = "856703c5-ee18-43c5-b910-4ee8f27742f4"
 
+[durable_objects]
+bindings = [
+  { name = "SESSION_ACTOR", class_name = "SessionActor" }
+]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["SessionActor"]
+
 [vars]
 ENVIRONMENT = "development"
 
@@ -23,5 +32,9 @@ ENVIRONMENT = "development"
 binding = "DB"
 database_name = "hevy-planner"
 database_id = "856703c5-ee18-43c5-b910-4ee8f27742f4"
+[env.production.durable_objects]
+bindings = [
+  { name = "SESSION_ACTOR", class_name = "SessionActor" }
+]
 [env.production.vars]
 ENVIRONMENT = "production"
