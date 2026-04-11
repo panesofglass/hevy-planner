@@ -144,7 +144,7 @@ export function roadmapSection(
         let allPassedBadge = "";
         if (evaluation?.allPassed && isCurrent) {
           allPassedBadge = `<div class="gate-all-passed">All gates passed \u2014 ready to advance</div>
-<form data-on-submit__prevent="$$post('/api/advance-phase/${escapeAttr(phase.id)}')" style="margin-top:8px">
+<form data-on:submit__prevent="@post('/api/advance-phase/${escapeAttr(phase.id)}')" style="margin-top:8px">
   <button type="submit" class="btn btn-sm btn-primary">Advance to Next Phase</button>
 </form>`;
         } else if (evaluation?.allPassed && isCompleted) {
@@ -231,10 +231,10 @@ export function benchmarkCard(
   // Log form — Datastar signals for toggle, $$post for SSE form submission
   const sig = `bench_${b.id.replace(/[^a-zA-Z0-9]/g, "_")}`;
 
-  const formHtml = `<div data-signals-${sig}_open="false">
-  <button class="btn btn-sm" data-on-click="$${sig}_open = !$${sig}_open">Log Result</button>
+  const formHtml = `<div data-signals:${sig}_open="false">
+  <button class="btn btn-sm" data-on:click="$${sig}_open = !$${sig}_open">Log Result</button>
   <form data-show="$${sig}_open"
-        data-on-submit__prevent="$$post('/api/log-benchmark/${escapeAttr(b.id)}')"
+        data-on:submit__prevent="@post('/api/log-benchmark/${escapeAttr(b.id)}')"
         style="margin-top:8px">
     <input type="text" name="value" placeholder="${escapeAttr(b.unit ?? "Value")}" required style="width:100%;margin-bottom:4px">
     ${showSideSelector ? `<select name="side" style="width:100%;margin-bottom:4px">
