@@ -189,6 +189,56 @@ export async function handleDeleteProgram(
   return new Response(null, { status: 202 });
 }
 
+/** Full HTML: Program page — overview, progressions, routines, foundations, resources, BODi */
+export async function renderProgramPage(env: Env, userId: string): Promise<string> {
+  let program: Program;
+  let user: Awaited<ReturnType<typeof getUser>>;
+  let allPrograms: Awaited<ReturnType<typeof getPrograms>>;
+  try {
+    const [loaded, userRow, programRows] = await Promise.all([
+      loadProgram(env.DB, userId),
+      getUser(env.DB, userId),
+      getPrograms(env.DB, userId),
+    ]);
+    program = loaded.program;
+    user = userRow;
+    allPrograms = programRows;
+  } catch {
+    return `<div class="card"><p style="color:var(--text-secondary)">No active program. Upload a program to get started.</p></div>`;
+  }
+  const parts: string[] = [];
+
+  const week = user ? currentWeek(user.start_date) : null;
+
+  if (allPrograms.length > 1) {
+    parts.push(programLibrarySection(allPrograms));
+  }
+
+  parts.push(programOverview(program, user, week));
+
+  if (program.progressions.length > 0) {
+    parts.push(progressionsSection(program.progressions, week));
+  }
+
+  parts.push(routinesSection(program));
+
+  if (program.foundations && program.foundations.length > 0) {
+    parts.push(foundationsSection(program.foundations));
+  }
+
+  if (program.resources && program.resources.length > 0) {
+    parts.push(resourcesSection(program.resources));
+  }
+
+  if (program.bodi && program.bodi.length > 0) {
+    parts.push(bodiSection(program.bodi));
+  }
+
+  parts.push(importProgramSection());
+
+  return parts.join("");
+}
+
 /** SSE: Program page — overview, progressions, routines, foundations, resources, BODi */
 export async function handleProgramSSE(env: Env, userId: string): Promise<Response> {
   let program: Program;

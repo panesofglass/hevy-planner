@@ -9,9 +9,9 @@ import { loadProgram as loadProgramForSubtitle } from "./storage/queries";
 import { htmlShell } from "./fragments/layout";
 import { setupPage } from "./fragments/setup";
 import { handleTodaySSE } from "./routes/today";
-import { handleProgressSSE } from "./routes/progress";
-import { handleProgramSSE, handleValidateProgram, handleValidateImportProgram, handleImportProgram, handleSwitchProgram, handleDeleteProgram } from "./routes/program";
-import { handleRoutineSSE } from "./routes/routine";
+import { renderProgressPage } from "./routes/progress";
+import { renderProgramPage, handleProgramSSE, handleValidateProgram, handleValidateImportProgram, handleImportProgram, handleSwitchProgram, handleDeleteProgram } from "./routes/program";
+import { renderRoutinePage } from "./routes/routine";
 import { handleSetup } from "./routes/setup";
 import { handlePush, handlePull, handleCleanupRoutines, handleManualComplete } from "./routes/sync";
 import { handleWebhookEvent, handleWebhookRegister, handleWebhookUnregister } from "./routes/webhooks";
@@ -133,34 +133,28 @@ export default {
 
       // ── GET /progress ──────────────────────────────────────────
       if (method === "GET" && path === "/progress") {
-        if (isSSERequest(request)) {
-          return await handleProgressSSE(env, auth.userId, tz);
-        }
-
         const subtitle = await loadSubtitle(env.DB, auth.userId);
+        const body = await renderProgressPage(env, auth.userId, tz);
         return htmlResponse(
           htmlShell({
             title: "Progress",
             subtitle,
             activeTab: "progress",
-            ssePath: "/progress",
+            body: `<div id="content">${body}</div>`,
           })
         );
       }
 
       // ── GET /program ──────────────────────────────────────────
       if (method === "GET" && path === "/program") {
-        if (isSSERequest(request)) {
-          return await handleProgramSSE(env, auth.userId);
-        }
-
         const subtitle = await loadSubtitle(env.DB, auth.userId);
+        const body = await renderProgramPage(env, auth.userId);
         return htmlResponse(
           htmlShell({
             title: "Program",
             subtitle,
             activeTab: "program",
-            ssePath: "/program",
+            body: `<div id="content">${body}</div>`,
           })
         );
       }
@@ -169,16 +163,12 @@ export default {
       const routineMatch = path.match(/^\/routine\/([^/]+)$/);
       if (method === "GET" && routineMatch) {
         const routineId = decodeURIComponent(routineMatch[1]);
-
-        if (isSSERequest(request)) {
-          return await handleRoutineSSE(env, auth.userId, routineId);
-        }
-
+        const body = await renderRoutinePage(env, auth.userId, routineId);
         return htmlResponse(
           htmlShell({
             title: "Routine",
             activeTab: "today",
-            ssePath: `/routine/${encodeURIComponent(routineId)}`,
+            body: `<div id="content">${body}</div>`,
           })
         );
       }
