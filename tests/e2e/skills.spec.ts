@@ -76,6 +76,35 @@ test.describe("Skill assessments", () => {
     await expect(page.locator("#content")).toContainText("5 strict pull-ups");
   });
 
+  test("user assessment overrides program default", async ({ page }) => {
+    // Save assessment for muscle-up
+    await page.request.post(
+      `${BASE_URL}/api/skill-assessment/muscle-up`,
+      {
+        headers: { "Content-Type": "application/json" },
+        data: assessmentBody("muscle-up", "Can do 5 strict pull-ups. No muscle-up experience."),
+      }
+    );
+
+    await page.goto("/progress");
+    await page.waitForLoadState("networkidle");
+
+    const content = page.locator("#content");
+    // User assessment should appear
+    await expect(content).toContainText("5 strict pull-ups");
+    // Program default should NOT appear for this skill
+    await expect(content).not.toContainText("previously 7-10 before shoulder");
+  });
+
+  test("skill cards have assessment edit affordance", async ({ page }) => {
+    await page.goto("/progress");
+    await page.waitForLoadState("networkidle");
+
+    // There should be a reference to the skill-assessment endpoint somewhere in the page
+    const html = await page.locator("#content").innerHTML();
+    expect(html).toContain("skill-assessment");
+  });
+
   test("updated assessment replaces old one (UPSERT)", async ({ page }) => {
     // First assessment
     await page.request.post(

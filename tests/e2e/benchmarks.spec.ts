@@ -83,6 +83,59 @@ test.describe("Benchmark logging", () => {
     await expect(page.locator("#content")).toContainText("3.5");
   });
 
+  test("benchmark without results shows 'no result' indicator", async ({ page }) => {
+    // hollow-body-hold-test has no results logged — should show no-result text
+    await page.goto("/progress");
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).toContainText(/no result/i);
+  });
+
+  test("gate test status appears on roadmap", async ({ page }) => {
+    await page.goto("/progress");
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).toContainText(/gate/i);
+  });
+
+  test("retest frequency shows timing info", async ({ page }) => {
+    // Log a benchmark first so timing info appears
+    await page.request.post(
+      `${BASE_URL}/api/log-benchmark/wall-dorsiflexion`,
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        data: "value=3.5&passed=true",
+      }
+    );
+
+    await page.goto("/progress");
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).toContainText(/last tested|retest|due/i);
+  });
+
+  test("wrong-phase benchmarks do not satisfy Phase 1 gates", async ({ page }) => {
+    // Log benchmarks that are NOT Phase 1 gates
+    const wrongGates = [
+      "strict-pullups-12", "parallel-dips-15", "false-grip-20s",
+      "ring-support-30s", "pistol-to-box", "wall-handstand-45s",
+    ];
+    for (const gate of wrongGates) {
+      await page.request.post(
+        `${BASE_URL}/api/log-benchmark/${gate}`,
+        {
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          data: "value=pass&passed=true",
+        }
+      );
+    }
+
+    // Phase 1 should NOT show "all gates passed"
+    await page.goto("/progress");
+    await page.waitForLoadState("networkidle");
+    // This is a negative assertion — wrong benchmarks should not satisfy gates
+    const content = await page.locator("#content").textContent();
+    // If "all gates passed" appears, wrong benchmarks satisfied the gates (bug)
+    expect(content?.toLowerCase()).not.toContain("all gates passed");
+  });
+
   test("bilateral tracking — log both sides, verify both on /progress", async ({ page }) => {
     // Log left side
     await page.request.post(
@@ -138,6 +191,23 @@ test.describe("Phase advancement", () => {
     expect(response.status()).toBe(400);
     const body = await response.text();
     expect(body).toContain("Gates not passed");
+  });
+
+  test("ready-to-advance prompt appears when all gates passed", async ({ page }) => {
+    // Log all Phase 1 gate benchmarks
+    for (const gateId of PHASE1_GATE_IDS) {
+      await page.request.post(
+        `${BASE_URL}/api/log-benchmark/${gateId}`,
+        {
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          data: "value=pass&passed=true",
+        }
+      );
+    }
+
+    await page.goto("/progress");
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).toContainText(/ready to advance/i);
   });
 
   test("after logging all Phase 1 gate benchmarks, advance-phase returns 202", async ({ page }) => {

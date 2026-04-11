@@ -68,6 +68,25 @@ test.describe("Program page", () => {
     await expect(content).toContainText("Monday");
   });
 
+  test("program JSON with BODi data passes schema validation", async ({ page }) => {
+    // POST the bundled program JSON to the validate endpoint
+    // Read the default program JSON from the server
+    const programResponse = await page.request.get(`${BASE_URL}/programs/default.json`);
+    expect(programResponse.ok()).toBe(true);
+    const programJson = await programResponse.text();
+
+    const response = await page.request.post(
+      `${BASE_URL}/api/validate-program`,
+      {
+        headers: { "Content-Type": "application/json" },
+        data: JSON.stringify({ programJson }),
+      }
+    );
+    // 202 means valid (validation events broadcast via DO)
+    // 400 means validation errors found
+    expect(response.status()).toBe(202);
+  });
+
   test("page contains integration rules", async ({ page }) => {
     await page.goto("/program");
     await page.waitForLoadState("networkidle");
