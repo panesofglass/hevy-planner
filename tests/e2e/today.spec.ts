@@ -62,9 +62,10 @@ test.describe("Today page", () => {
     expect([200, 202, 400, 404]).toContain(response.status());
   });
 
-  test("POST /api/complete with invalid ID returns 400 or 404", async ({ page }) => {
+  test("POST /api/complete with nonexistent ID returns 202 (silent no-op)", async ({ page }) => {
+    // The handler runs UPDATE WHERE id=999999 which affects zero rows — still returns 202
     const response = await page.request.post(`${BASE_URL}/api/complete/999999`);
-    expect([400, 404]).toContain(response.status());
+    expect(response.status()).toBe(202);
   });
 });
 

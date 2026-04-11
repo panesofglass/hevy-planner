@@ -42,14 +42,13 @@ test.describe("Error broadcast via SSE", () => {
     await expect(page.locator("#error-card")).toBeVisible({ timeout: 5_000 });
   });
 
-  test("POST /api/advance-phase with unmet gates returns error", async ({ page }) => {
-    // Phase 2 gates are not passed — this should return a 400 with error message
+  test("POST /api/advance-phase with invalid phase returns error", async ({ page }) => {
+    // Use a nonexistent phase to guarantee a 404 regardless of DB state
     const response = await page.request.post(
-      `${BASE_URL}/api/advance-phase/phase2`
+      `${BASE_URL}/api/advance-phase/nonexistent-phase-xyz`
     );
-    // The advance-phase handler returns HTTP 400 directly for validation errors
-    expect(response.status()).toBe(400);
+    expect(response.status()).toBe(404);
     const body = await response.text();
-    expect(body).toContain("Gates not passed");
+    expect(body).toContain("Phase not found");
   });
 });

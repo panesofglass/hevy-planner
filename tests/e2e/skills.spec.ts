@@ -6,6 +6,7 @@ import { BASE_URL, seedDatabase } from "./helpers";
 //
 // Ports test-e2e.sh Issue #3. Skill assessments are saved via JSON POST
 // with Datastar signal key format: assess_skill_{sanitized_id}.
+// Serial execution: tests modify shared state (skill assessments in D1).
 // ---------------------------------------------------------------------------
 
 /** Build the JSON body that Datastar sends for a skill assessment. */
@@ -14,7 +15,7 @@ function assessmentBody(skillId: string, currentState: string): string {
   return JSON.stringify({ [signalKey]: currentState });
 }
 
-test.describe("Skill assessments", () => {
+test.describe.serial("Skill assessments", () => {
   test.beforeAll(async ({ browser }) => {
     const page = await browser.newPage();
     try {
@@ -49,7 +50,6 @@ test.describe("Skill assessments", () => {
   });
 
   test("missing current_state returns 400", async ({ page }) => {
-    // Send empty signal value
     const response = await page.request.post(
       `${BASE_URL}/api/skill-assessment/muscle-up`,
       {
@@ -77,15 +77,6 @@ test.describe("Skill assessments", () => {
   });
 
   test("user assessment overrides program default", async ({ page }) => {
-    // Save assessment for muscle-up
-    await page.request.post(
-      `${BASE_URL}/api/skill-assessment/muscle-up`,
-      {
-        headers: { "Content-Type": "application/json" },
-        data: assessmentBody("muscle-up", "Can do 5 strict pull-ups. No muscle-up experience."),
-      }
-    );
-
     await page.goto("/progress");
     await page.waitForLoadState("networkidle");
 
@@ -96,41 +87,36 @@ test.describe("Skill assessments", () => {
     await expect(content).not.toContainText("previously 7-10 before shoulder");
   });
 
-  test("skill cards have assessment edit affordance", async ({ page }) => {
-    await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
-
-    // There should be a reference to the skill-assessment endpoint somewhere in the page
-    const html = await page.locator("#content").innerHTML();
-    expect(html).toContain("skill-assessment");
-  });
-
   test("updated assessment replaces old one (UPSERT)", async ({ page }) => {
-    // First assessment
-    await page.request.post(
-      `${BASE_URL}/api/skill-assessment/muscle-up`,
-      {
-        headers: { "Content-Type": "application/json" },
-        data: assessmentBody("muscle-up", "Can do 5 strict pull-ups. No muscle-up experience."),
-      }
-    );
-
     // Update with new text
-    await page.request.post(
+    const response = await page.request.post(
       `${BASE_URL}/api/skill-assessment/muscle-up`,
       {
         headers: { "Content-Type": "application/json" },
         data: assessmentBody("muscle-up", "Up to 8 pull-ups now. Started false grip work."),
       }
     );
+    expect(response.status()).toBe(202);
 
     await page.goto("/progress");
     await page.waitForLoadState("networkidle");
 
     const content = page.locator("#content");
-    // New text should be present
+    // New text should be present in the skill card
     await expect(content).toContainText("8 pull-ups");
-    // Old text should NOT be present (proves UPSERT, not append)
-    await expect(content).not.toContainText("5 strict pull-ups");
+    // The old assessment text "Can do 5 strict pull-ups" should not appear
+    // in the skill card's "Where You Are" section (proves UPSERT, not append).
+    // Use the specific skill card locator to avoid matching benchmark targets.
+    const skillCard = page.locator("[data-signals\\:skill_muscle_up]");
+    await expect(skillCard).toContainText("8 pull-ups");
+    await expect(skillCard).not.toContainText("Can do 5 strict");
+  });
+
+  test("skill cards have assessment edit affordance", async ({ page }) => {
+    await page.goto("/progress");
+    await page.waitForLoadState("networkidle");
+
+    const html = await page.locator("#content").innerHTML();
+    expect(html).toContain("skill-assessment");
   });
 });
