@@ -652,3 +652,7 @@ await expect(page.locator('#error-container')).toContainText('Invalid phase tran
 There *is* one valid use of non-2xx with SSE: if the request is so malformed that you can't even begin streaming (e.g., completely unparseable body, auth failure). In those cases, rejecting at the HTTP level before opening the stream is fine. But a domain/validation error like a bad phase transition — where you *can* process the request and want to give the user meaningful feedback — should always come back as an SSE error fragment on a 200.
 
 So the fix probability of 85% is probably underselling it for your case — the 422 expectation in the E2E test is almost certainly wrong.
+
+---
+
+Add test-e2e.sh. Ignore .claude/projects/ in .gitignore. Then commit and push
