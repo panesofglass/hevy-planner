@@ -5,6 +5,7 @@
 import type { Skill, RoadmapPhase, Benchmark, BenchmarkResultRow } from "../types";
 import { escapeHtml, escapeAttr } from "../utils/html";
 import { evaluateGateTests, isRetestDue, formatTrend } from "../domain/benchmarks";
+import { resolvePhaseStatuses } from "../domain/phases";
 
 /**
  * Render a single skill card. Used by skillCards() for the full list,
@@ -99,17 +100,18 @@ export function skillCards(skills: Skill[], assessments?: Map<string, string>): 
 export function roadmapSection(
   phases: RoadmapPhase[],
   results: BenchmarkResultRow[],
-  benchmarks: Benchmark[]
+  benchmarks: Benchmark[],
+  currentPhaseId: string | null
 ): string {
   if (phases.length === 0) return "";
 
-  const sorted = [...phases].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const resolved = resolvePhaseStatuses(phases, currentPhaseId);
 
-  const items = sorted
+  const items = resolved
     .map((phase) => {
       const isCurrent = phase.status === "current";
       const isCompleted = phase.status === "completed";
-      const cls = isCurrent ? " roadmap-current" : "";
+      const cls = isCurrent ? " roadmap-current" : isCompleted ? " completed" : "";
       const dotColor = isCurrent
         ? "var(--blue)"
         : isCompleted
@@ -130,7 +132,12 @@ export function roadmapSection(
           .join("\n");
 
         const allPassedBadge = evaluation.allPassed
-          ? `<div class="gate-all-passed">All gates passed</div>`
+          ? isCurrent
+            ? `<div class="gate-all-passed">All gates passed \u2014 ready to advance</div>
+<form data-on-submit__prevent="$$post('/api/advance-phase/${escapeAttr(phase.id)}')" style="margin-top:8px">
+  <button type="submit" class="btn btn-sm btn-primary">Advance to Next Phase</button>
+</form>`
+            : `<div class="gate-all-passed">All gates passed</div>`
           : "";
 
         gateHtml = `<div class="gate-checklist">
