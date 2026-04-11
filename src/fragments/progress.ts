@@ -5,7 +5,7 @@
 import type { Skill, RoadmapPhase, Benchmark, BenchmarkResultRow } from "../types";
 import { escapeHtml, escapeAttr } from "../utils/html";
 import { evaluateGateTests, isRetestDue, formatTrend } from "../domain/benchmarks";
-import { resolvePhaseStatuses } from "../domain/phases";
+import { resolvePhaseStatuses, filterResultsSince } from "../domain/phases";
 
 /**
  * Render a single skill card. Used by skillCards() for the full list,
@@ -109,10 +109,7 @@ export function roadmapSection(
   if (phases.length === 0) return "";
 
   const resolved = resolvePhaseStatuses(phases, currentPhaseId);
-  // For the current phase, only count results after the phase transition
-  const currentPhaseResults = phaseAdvancedAt
-    ? results.filter((r) => r.tested_at >= phaseAdvancedAt)
-    : results;
+  const currentPhaseResults = filterResultsSince(results, phaseAdvancedAt);
 
   const items = resolved
     .map((phase) => {
@@ -169,10 +166,10 @@ ${allPassedBadge}
     })
     .join("\n");
 
-  return `<div class="section-header">Roadmap</div>
+  return `<div id="roadmap-section"><div class="section-header">Roadmap</div>
 <div class="card">
 ${items}
-</div>`;
+</div></div>`;
 }
 
 /** Render a single benchmark card with results, trend, and log form. */

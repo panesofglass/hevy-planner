@@ -34,6 +34,7 @@ Desktop.ini
 
 # Worktrees
 .worktrees/
+PROMPT.md
 
 # Superpowers
 .superpowers/
@@ -43,6 +44,8 @@ Desktop.ini
 
 # Claude Code local settings
 .claude/settings.local.json
+.claude/projects/
+.remember/
 
 # Logs
 *.log

@@ -1,9 +1,25 @@
-import type { RoadmapPhase } from "../types";
+import type { RoadmapPhase, BenchmarkResultRow } from "../types";
 import type { GateEvaluation } from "./benchmarks";
 
 export type AdvancementResult =
   | { ok: true; nextPhaseId: string | null }
   | { ok: false; error: "not_found" | "already_completed" | "not_current" | "gates_not_passed"; failingGates?: string[] };
+
+/** Sort phases by sortOrder (defensive copy). */
+function sortPhases(phases: RoadmapPhase[]): RoadmapPhase[] {
+  return [...phases].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+}
+
+/** Filter benchmark results to only those logged on or after a phase transition date. */
+export function filterResultsSince(
+  results: BenchmarkResultRow[],
+  since: string | null | undefined
+): BenchmarkResultRow[] {
+  if (!since) return results;
+  // phase_advanced_at is datetime ("2026-04-10 14:32:05"), tested_at is date-only ("2026-04-10")
+  const sinceDate = since.slice(0, 10);
+  return results.filter((r) => r.tested_at >= sinceDate);
+}
 
 /**
  * Resolve phase statuses (current/completed/future) from a sorted roadmap
@@ -13,7 +29,7 @@ export function resolvePhaseStatuses(
   phases: RoadmapPhase[],
   currentPhaseId: string | null
 ): RoadmapPhase[] {
-  const sorted = [...phases].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const sorted = sortPhases(phases);
   const resolvedCurrentId = currentPhaseId ?? sorted[0]?.id;
   const currentIndex = sorted.findIndex((p) => p.id === resolvedCurrentId);
 
@@ -41,7 +57,7 @@ export function validateAdvancement(
   currentPhaseId: string | null,
   gateEvaluation: GateEvaluation
 ): AdvancementResult {
-  const sorted = [...phases].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const sorted = sortPhases(phases);
   const phaseIndex = sorted.findIndex((p) => p.id === phaseIdToAdvance);
 
   if (phaseIndex === -1) {

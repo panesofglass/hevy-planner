@@ -337,15 +337,17 @@ export async function loadProgram(db: D1Database, userId: string): Promise<{ pro
   return { program: JSON.parse(row.json_data) as Program, programId: row.id, currentPhaseId: row.current_phase_id, phaseAdvancedAt: row.phase_advanced_at };
 }
 
-/** Atomically advance the current phase for a program. */
+/** Advance the current phase for a program. */
 export async function advancePhase(
   db: D1Database,
+  userId: string,
   programId: number,
   newPhaseId: string
 ): Promise<void> {
-  await db.batch([
-    db.prepare("UPDATE programs SET current_phase_id = ?, phase_advanced_at = datetime('now') WHERE id = ?").bind(newPhaseId, programId),
-  ]);
+  await db
+    .prepare("UPDATE programs SET current_phase_id = ?, phase_advanced_at = datetime('now') WHERE id = ? AND user_id = ?")
+    .bind(newPhaseId, programId, userId)
+    .run();
 }
 
 /** Delete a program and its associated queue items and mappings. */
