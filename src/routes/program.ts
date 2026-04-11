@@ -103,17 +103,17 @@ export async function handleImportProgram(request: Request, env: Env, userId: st
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return sseErrorCard("Invalid request body.", "#import-validation-result", "inner");
+    return new Response("Invalid request body.", { status: 400 });
   }
 
   const { importProgramJson: programJsonStr, importTemplateId: templateId } = body;
 
   if (!programJsonStr) {
-    return sseErrorCard("No program JSON provided.", "#import-validation-result", "inner");
+    return new Response("No program JSON provided.", { status: 400 });
   }
 
   if (!templateId) {
-    return sseErrorCard("Template ID is required.", "#import-validation-result", "inner");
+    return new Response("Template ID is required.", { status: 400 });
   }
 
   // Parse and validate program
@@ -122,15 +122,15 @@ export async function handleImportProgram(request: Request, env: Env, userId: st
     const parsed = JSON.parse(programJsonStr);
     const result = validateProgram(parsed);
     if (!result.valid) {
-      return sseErrorCard(`Invalid program: ${result.errors.join(", ")}`, "#import-validation-result", "inner");
+      return new Response(`Invalid program: ${result.errors.join(", ")}`, { status: 400 });
     }
     program = result.program;
   } catch {
-    return sseErrorCard("Invalid program JSON.", "#import-validation-result", "inner");
+    return new Response("Invalid program JSON.", { status: 400 });
   }
 
   if (!program.weekTemplates.find((t) => t.id === templateId)) {
-    return sseErrorCard("Invalid template ID.", "#import-validation-result", "inner");
+    return new Response("Invalid template ID.", { status: 400 });
   }
 
   // Update user program fields and get existing (encrypted) API key in one pass, then decrypt
@@ -140,11 +140,10 @@ export async function handleImportProgram(request: Request, env: Env, userId: st
   // Activate: clear old state, sync to Hevy, generate queue
   await activateProgram(env.DB, userId, program, programJsonStr, templateId, apiKey);
 
-  // Re-render the Program page
-  return await handleProgramSSE(env, userId);
+  return new Response(null, { status: 202 });
 }
 
-/** POST /api/switch-program/:id — switch the active program and re-render the Program page */
+/** POST /api/switch-program/:id — switch the active program */
 export async function handleSwitchProgram(
   env: Env,
   userId: string,
@@ -162,9 +161,9 @@ export async function handleSwitchProgram(
         .run();
     }
   } catch (err) {
-    return sseErrorCard(err instanceof Error ? err.message : "Failed to switch program");
+    return new Response(err instanceof Error ? err.message : "Failed to switch program", { status: 500 });
   }
-  return await handleProgramSSE(env, userId);
+  return new Response(null, { status: 202 });
 }
 
 /** POST /api/delete-program/:id — delete an inactive program */
@@ -177,17 +176,17 @@ export async function handleDeleteProgram(
   const programs = await getPrograms(env.DB, userId);
   const target = programs.find((p) => p.id === programId);
   if (!target) {
-    return sseErrorCard("Program not found.");
+    return new Response("Program not found.", { status: 404 });
   }
   if (target.is_active) {
-    return sseErrorCard("Cannot delete the active program. Switch to another program first.");
+    return new Response("Cannot delete the active program. Switch to another program first.", { status: 400 });
   }
   try {
     await deleteProgram(env.DB, userId, programId);
   } catch (err) {
-    return sseErrorCard(err instanceof Error ? err.message : "Failed to delete program");
+    return new Response(err instanceof Error ? err.message : "Failed to delete program", { status: 500 });
   }
-  return await handleProgramSSE(env, userId);
+  return new Response(null, { status: 202 });
 }
 
 /** SSE: Program page — overview, progressions, routines, foundations, resources, BODi */

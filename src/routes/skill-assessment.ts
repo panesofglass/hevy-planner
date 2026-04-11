@@ -1,7 +1,5 @@
 import type { Env } from "../types";
-import { sseResponse, patchElements } from "../sse/helpers";
-import { loadProgram, upsertSkillAssessment, getUserSkillAssessments } from "../storage/queries";
-import { skillCardHtml } from "../fragments/progress";
+import { loadProgram, upsertSkillAssessment } from "../storage/queries";
 
 /** POST /api/skill-assessment/:skillId — save or update a user's skill assessment */
 export async function handleSkillAssessment(
@@ -30,10 +28,5 @@ export async function handleSkillAssessment(
   // Upsert the assessment
   await upsertSkillAssessment(env.DB, userId, programId, skillId, currentState.trim());
 
-  // Return SSE response that patches the skill card.
-  // Selector uses escaped colon to match the Datastar signal attribute.
-  const assessments = await getUserSkillAssessments(env.DB, userId, programId);
-  const cardHtml = skillCardHtml(skill, true, assessments);
-  const selector = `[data-signals\\:skill_${skillId.replace(/[^a-zA-Z0-9]/g, "_")}]`;
-  return sseResponse(patchElements(cardHtml, { selector, mode: "outer" }));
+  return new Response(null, { status: 202 });
 }

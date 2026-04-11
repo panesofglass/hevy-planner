@@ -1,6 +1,4 @@
 import type { Env, Program } from "../types";
-import { sseResponse, executeScript } from "../sse/helpers";
-import { sseErrorCard } from "../utils/sse";
 import { upsertUser } from "../storage/queries";
 import { validateProgram } from "../validation/validate-program";
 import { activateProgram } from "../services/activate-program";
@@ -32,7 +30,7 @@ export async function handleSetup(
   const programJsonStr = body.programJson || JSON.stringify(defaultProgramJson);
 
   if (!templateId) {
-    return sseErrorCard("Template ID is required.");
+    return new Response("Template ID is required.", { status: 400 });
   }
 
   // Parse and validate program
@@ -41,16 +39,16 @@ export async function handleSetup(
     const parsed = JSON.parse(programJsonStr);
     const result = validateProgram(parsed);
     if (!result.valid) {
-      return sseErrorCard(`Invalid program: ${result.errors.join(", ")}`);
+      return new Response(`Invalid program: ${result.errors.join(", ")}`, { status: 400 });
     }
     program = result.program;
   } catch {
-    return sseErrorCard("Invalid program JSON.");
+    return new Response("Invalid program JSON.", { status: 400 });
   }
 
   const template = program.weekTemplates.find((t) => t.id === templateId);
   if (!template) {
-    return sseErrorCard("Invalid template ID.");
+    return new Response("Invalid template ID.", { status: 400 });
   }
 
   // Validate API key against Hevy before proceeding
@@ -59,10 +57,9 @@ export async function handleSetup(
       const client = new HevyClient(apiKey);
       await client.getExerciseTemplates(1, 1);
     } catch {
-      return sseErrorCard(
+      return new Response(
         "Invalid Hevy API key. Check your key in Hevy Settings > Developer and try again.",
-        "#content",
-        "prepend"
+        { status: 400 }
       );
     }
   }
@@ -82,6 +79,5 @@ export async function handleSetup(
   // a-j. Store program, sync Hevy templates/routines, generate queue
   await activateProgram(env.DB, userId, program, programJsonStr, templateId, apiKey);
 
-  // k. Redirect to Today
-  return sseResponse(executeScript("window.location.href = '/'"));
+  return new Response(null, { status: 202 });
 }

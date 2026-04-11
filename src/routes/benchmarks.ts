@@ -1,9 +1,7 @@
 import type { Env } from "../types";
-import { loadProgram, insertBenchmarkResult, getBenchmarkResults } from "../storage/queries";
-import { patchElements, sseResponse } from "../sse/helpers";
-import { benchmarkCard } from "../fragments/progress";
+import { loadProgram, insertBenchmarkResult } from "../storage/queries";
 
-/** POST /api/log-benchmark/:id — record a benchmark result, return updated card via SSE */
+/** POST /api/log-benchmark/:id — record a benchmark result */
 export async function handleLogBenchmark(
   request: Request,
   env: Env,
@@ -44,11 +42,5 @@ export async function handleLogBenchmark(
     testedAt: today,
   });
 
-  const allResults = await getBenchmarkResults(env.DB, userId, programId);
-  const benchResults = allResults.filter((r) => r.benchmark_id === benchmarkId);
-
-  const html = benchmarkCard(benchmark, benchResults, today);
-  return sseResponse(
-    patchElements(html, { selector: `#benchmark-${benchmarkId}`, mode: "outer" })
-  );
+  return new Response(null, { status: 202 });
 }

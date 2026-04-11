@@ -1,6 +1,4 @@
 import type { Env } from "../types";
-import { sseResponse, patchElements, executeScript } from "../sse/helpers";
-import { sseErrorCard } from "../utils/sse";
 import {
   getUser,
   loadProgram,
@@ -14,17 +12,15 @@ import {
 } from "../storage/queries";
 import { autoMatchExercises, buildRoutinePayload } from "../domain/hevy-sync";
 import { performSync } from "../services/sync";
-import { handleTodaySSE } from "./today";
 import { HevyClient } from "../hevy/client";
 import { getDecryptedApiKey } from "../storage/api-key";
-import { escapeHtml } from "../utils/html";
 import { todayString } from "../utils/date";
 
 /** POST /api/push-hevy/:id — open routine in Hevy (uses existing mapping from setup) */
 export async function handlePush(env: Env, userId: string, routineId: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user || !user.hevy_api_key) {
-    return sseErrorCard("Connect your Hevy API key first.", "#content", "inner");
+    return new Response("Connect your Hevy API key first.", { status: 400 });
   }
 
   const { program, programId } = await loadProgram(env.DB, userId);
@@ -34,10 +30,11 @@ export async function handlePush(env: Env, userId: string, routineId: string): P
   const mapping = routineMappings.find((m) => m.program_routine_id === routineId);
 
   if (mapping) {
-    // Routine already exists in Hevy — open it directly
-    return sseResponse(
-      executeScript(`window.open('https://hevy.com/routine/' + ${JSON.stringify(mapping.hevy_routine_id)}, '_blank')`)
-    );
+    // Routine already exists in Hevy — return URL for client to open
+    return new Response(JSON.stringify({ hevyUrl: `https://hevy.com/routine/${mapping.hevy_routine_id}` }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
   }
 
   // Fallback: no mapping exists (edge case — setup didn't create this routine)
@@ -48,7 +45,7 @@ export async function handlePush(env: Env, userId: string, routineId: string): P
 
   const apiKey = await getDecryptedApiKey(env.DB, userId, env.ENCRYPTION_KEY);
   if (!apiKey) {
-    return sseErrorCard("Connect your Hevy API key first.", "#content", "inner");
+    return new Response("Connect your Hevy API key first.", { status: 400 });
   }
   const client = new HevyClient(apiKey);
 
@@ -77,8 +74,9 @@ export async function handlePush(env: Env, userId: string, routineId: string): P
   const payload = buildRoutinePayload(routine, mappings);
 
   if (payload.exercises.length === 0) {
-    return sseErrorCard(
-      `Cannot push: no exercises could be mapped to Hevy templates. ${payload.unmapped.length} unmapped exercise(s).`
+    return new Response(
+      `Cannot push: no exercises could be mapped to Hevy templates. ${payload.unmapped.length} unmapped exercise(s).`,
+      { status: 400 }
     );
   }
 
@@ -107,11 +105,12 @@ export async function handlePush(env: Env, userId: string, routineId: string): P
       await updateQueueItemHevyRoutineId(env.DB, queueItem.id, created.id);
     }
 
-    return sseResponse(
-      executeScript(`window.open('https://hevy.com/routine/' + ${JSON.stringify(created.id)}, '_blank')`)
-    );
+    return new Response(JSON.stringify({ hevyUrl: `https://hevy.com/routine/${created.id}` }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
   } catch (err) {
-    return sseErrorCard(err instanceof Error ? err.message : "Push failed");
+    return new Response(err instanceof Error ? err.message : "Push failed", { status: 500 });
   }
 }
 
@@ -119,18 +118,18 @@ export async function handlePush(env: Env, userId: string, routineId: string): P
 export async function handlePull(env: Env, userId: string, tz?: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user || !user.hevy_api_key) {
-    return sseErrorCard("Connect your Hevy API key first.", "#content", "inner");
+    return new Response("Connect your Hevy API key first.", { status: 400 });
   }
 
   try {
     const apiKey = await getDecryptedApiKey(env.DB, userId, env.ENCRYPTION_KEY);
     if (!apiKey) {
-      return sseErrorCard("Connect your Hevy API key first.", "#content", "inner");
+      return new Response("Connect your Hevy API key first.", { status: 400 });
     }
     await performSync(env.DB, userId, apiKey, tz);
-    return await handleTodaySSE(env, userId, tz);
+    return new Response(null, { status: 202 });
   } catch (err) {
-    return sseErrorCard(err instanceof Error ? err.message : "Pull failed");
+    return new Response(err instanceof Error ? err.message : "Pull failed", { status: 500 });
   }
 }
 
@@ -138,12 +137,12 @@ export async function handlePull(env: Env, userId: string, tz?: string): Promise
 export async function handleCleanupRoutines(env: Env, userId: string): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user || !user.hevy_api_key) {
-    return sseErrorCard("Connect your Hevy API key first.");
+    return new Response("Connect your Hevy API key first.", { status: 400 });
   }
 
   const apiKey = await getDecryptedApiKey(env.DB, userId, env.ENCRYPTION_KEY);
   if (!apiKey) {
-    return sseErrorCard("Connect your Hevy API key first.");
+    return new Response("Connect your Hevy API key first.", { status: 400 });
   }
   const client = new HevyClient(apiKey);
   const allRoutines = await client.getAllRoutines();
@@ -177,19 +176,10 @@ export async function handleCleanupRoutines(env: Env, userId: string): Promise<R
     }
   }
 
-  const msg = toDelete.length === 0
-    ? "No duplicates found."
-    : `Cleaned up ${deleted} duplicate(s)${failed > 0 ? `, ${failed} failed` : ""}.`;
-
-  return sseResponse(
-    patchElements(
-      `<div class="card"><p style="color:var(--green)">${escapeHtml(msg)}</p></div>`,
-      { selector: "#content", mode: "prepend" }
-    )
-  );
+  return new Response(null, { status: 202 });
 }
 
-/** POST /api/complete/:id — manual complete, re-render today */
+/** POST /api/complete/:id — manual complete */
 export async function handleManualComplete(
   env: Env,
   userId: string,
@@ -201,5 +191,5 @@ export async function handleManualComplete(
   }
   const today = todayString(tz);
   await markQueueItemCompletedForUser(env.DB, itemId, userId, today);
-  return await handleTodaySSE(env, userId, tz);
+  return new Response(null, { status: 202 });
 }
