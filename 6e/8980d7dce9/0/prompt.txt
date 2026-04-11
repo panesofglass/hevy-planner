@@ -1,0 +1,113 @@
+Why did we build our own Datastar capability rather than using the typescript sdk?
+
+---
+
+Does our implementation adhere to the guidelines and ADR linked here: https://github.com/starfederation/datastar/blob/main/CONTRIBUTING.md#sdks?
+
+---
+
+What would it take to generate the missing pieces? Might be worth publishing a full SDK for whatever this set of Web targets is called. I think it has a standardized name.
+
+---
+
+Well, you told me previously ours was stream-oriented. That was an early requirement. So it seems like our hand-rolled one is broken, and it explains why I notice weird behavior.
+
+---
+
+a
+
+---
+
+2. That was always the goal. Also as a goal was to separate request from response. I feel like I took my eye off your work b/c it all "mostly" worked.
+
+---
+
+Original design goal was to respond with 202 Accepted for POST, PUT, etc. and use a single SSE to return ongoing updates from the server. It sounds like you broke or disregarded that design.
+
+---
+
+CQRS or Event Sourcing are relevant patterns
+
+---
+
+Your question hits the heart of what I was doing as an experiment with this app, and I thought it was resolved. Let's discuss using the decompose skill.
+
+---
+
+Now you are clearly overthinking it. This isn't a really complex app. I mean literally separating the communication channels. CQRS and Event Sourcing are much heavier, but they illustrate the pattern. Actor model is probably closer, with an observable pipe to state updates via SSE. Does that help?
+
+---
+
+And where did decomposition into four projects come from?!
+
+---
+
+Yes, and not 202 is the success response. Invalid responses or other issues should still return 400, etc. responses where appropriate, though later detection would be better to send over the SSE stream using error formats.
+
+---
+
+A, but not all async work has to happen within the SSE stream but could be done elsewhere and then pushed over. Would need a worker or durable object. This is where the actor model comes into play. Examples in F# over in ~/Code/frank/sample for the Datastar projects. Those use MailboxProcessor as actors.
+
+---
+
+yes, that matches my intent. Would love to know cost implications and trade-offs. Given the free resume of SSE, I expect that termination and resumption would not be too big of an issue. Is that correct?
+
+---
+
+I usually have the tab in my Safari but not always focused or with Safari staying on all that long. Workouts tend to be 20-30 minutes. Any issue, or do I need to explicitly close it?
+
+---
+
+Option 1. That's a disconnect once completed, correct?
+
+---
+
+Option 2 seems reasonable given my pattern, too, doesn't it? And simpler?
+
+---
+
+ready
+
+---
+
+yes. I think when we first designed this, we planned on having a single / with full HTML when requesting text/html and the sse channel for Accept: text/event-stream
+
+---
+
+Are /progress, /program, and /routing/:id all SSE? I thought those were just static pages. Is SSE necessary at all there?
+
+---
+
+I think so. I'm in the middle of adding more functionality, but don't think those need real-time streaming responses even with the enhancements. Check issues if you need
+
+---
+
+yes
+
+---
+
+yes
+
+---
+
+Yes, and we may want to switch to signals for Form posts to align with Datastar samples
+
+---
+
+yes
+
+---
+
+Yes. Also, this all feels eerily familiar. I'm pretty sure we had this same conversation at the beginning. How will you avoid falling into the same failure pattern again?
+
+---
+
+You are lying about 2. Across numerous projects, you regularly fail to adhere to CLAUDE.md. However, a CLAUDE.md rule would be helpful. You are right about my needing to really check your work. I keep trying to do too many things at the same time and skip looking at the details, especially implementation. You are wonderful at co-design, providing options, and more. But you are really terrible at implementing.
+
+---
+
+continue with the testing section. Also, don't we have some browser tests? The last iteration I made added a curl-based sh script. That was weird.
+
+---
+
+yes

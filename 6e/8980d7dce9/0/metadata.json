@@ -1,0 +1,53 @@
+{
+  "cli_version": "0.5.4",
+  "checkpoint_id": "6e8980d7dce9",
+  "session_id": "363a9a83-1edd-4a94-8c5a-1a3131b0d948",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-11T19:22:57.269959Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/superpowers/specs/2026-04-11-sse-architecture-design.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-4-6[1m]",
+  "turn_id": "413e5ebeca44",
+  "token_usage": {
+    "input_tokens": 305,
+    "cache_creation_tokens": 150304,
+    "cache_read_tokens": 9406217,
+    "output_tokens": 25783,
+    "api_call_count": 103
+  },
+  "session_metrics": {
+    "turn_count": 29
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-11T19:22:56.846763Z",
+    "agent_lines": 180,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 180,
+    "total_lines_changed": 180,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 180,
+      "agent_lines_removed": 0
+    }
+  ]
+}
