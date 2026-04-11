@@ -18,6 +18,7 @@ import { handlePush, handlePull, handleCleanupRoutines, handleManualComplete } f
 import { handleWebhookEvent, handleWebhookRegister, handleWebhookUnregister } from "./routes/webhooks";
 import { handleSkillAssessment } from "./routes/skill-assessment";
 import { handleLogBenchmark } from "./routes/benchmarks";
+import { handleAdvancePhase } from "./routes/advance-phase";
 
 import defaultProgramJson from "../programs/mobility-joint-restoration.json";
 
@@ -241,6 +242,13 @@ export default {
       if (method === "POST" && benchmarkMatch) {
         const benchmarkId = decodeURIComponent(benchmarkMatch[1]);
         return await handleLogBenchmark(request, env, auth.userId, benchmarkId, tz);
+      }
+
+      // ── POST /api/advance-phase/:phaseId ──────────────────────────
+      const advanceMatch = path.match(/^\/api\/advance-phase\/([^/]+)$/);
+      if (method === "POST" && advanceMatch) {
+        const phaseId = decodeURIComponent(advanceMatch[1]);
+        return await handleAdvancePhase(env, auth.userId, phaseId);
       }
 
       // ── 404 ────────────────────────────────────────────────────

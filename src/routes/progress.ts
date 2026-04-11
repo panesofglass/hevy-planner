@@ -5,7 +5,7 @@ import { skillCards, roadmapSection, benchmarksSection } from "../fragments/prog
 
 /** SSE: Progress page — skills, roadmap with gate tests, benchmarks with results */
 export async function handleProgressSSE(env: Env, userId: string, tz?: string): Promise<Response> {
-  const { program, programId } = await loadProgram(env.DB, userId);
+  const { program, programId, currentPhaseId } = await loadProgram(env.DB, userId);
   const assessments = await getUserSkillAssessments(env.DB, userId, programId);
   const results = await getBenchmarkResults(env.DB, userId, programId);
   const fragments: string[] = [];
@@ -26,7 +26,7 @@ export async function handleProgressSSE(env: Env, userId: string, tz?: string): 
   }
 
   if (program.roadmap && program.roadmap.length > 0) {
-    addFragment(roadmapSection(program.roadmap, results, program.benchmarks ?? []));
+    addFragment(roadmapSection(program.roadmap, results, program.benchmarks ?? [], currentPhaseId));
   }
 
   if (program.benchmarks && program.benchmarks.length > 0) {
