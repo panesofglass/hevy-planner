@@ -237,15 +237,15 @@ export async function updateDailyCompleted(
 export async function getActiveProgram(
   db: D1Database,
   userId: string
-): Promise<Pick<ProgramRow, "id" | "json_data" | "current_phase_id"> | null> {
+): Promise<Pick<ProgramRow, "id" | "json_data" | "current_phase_id" | "phase_advanced_at"> | null> {
   return db
     .prepare(
-      `SELECT id, json_data, current_phase_id FROM programs
+      `SELECT id, json_data, current_phase_id, phase_advanced_at FROM programs
        WHERE user_id = ? AND is_active = 1
        ORDER BY created_at DESC LIMIT 1`
     )
     .bind(userId)
-    .first<Pick<ProgramRow, "id" | "json_data" | "current_phase_id">>();
+    .first<Pick<ProgramRow, "id" | "json_data" | "current_phase_id" | "phase_advanced_at">>();
 }
 
 export async function updateWebhookState(
@@ -331,10 +331,10 @@ export async function setActiveProgram(db: D1Database, userId: string, programId
 }
 
 /** Load the active program from D1 for a given user. Returns the program, its D1 row ID, and current phase ID. */
-export async function loadProgram(db: D1Database, userId: string): Promise<{ program: Program; programId: number; currentPhaseId: string | null }> {
+export async function loadProgram(db: D1Database, userId: string): Promise<{ program: Program; programId: number; currentPhaseId: string | null; phaseAdvancedAt: string | null }> {
   const row = await getActiveProgram(db, userId);
   if (!row) throw new Error("No active program found");
-  return { program: JSON.parse(row.json_data) as Program, programId: row.id, currentPhaseId: row.current_phase_id };
+  return { program: JSON.parse(row.json_data) as Program, programId: row.id, currentPhaseId: row.current_phase_id, phaseAdvancedAt: row.phase_advanced_at };
 }
 
 /** Atomically advance the current phase for a program. */
@@ -344,7 +344,7 @@ export async function advancePhase(
   newPhaseId: string
 ): Promise<void> {
   await db.batch([
-    db.prepare("UPDATE programs SET current_phase_id = ? WHERE id = ?").bind(newPhaseId, programId),
+    db.prepare("UPDATE programs SET current_phase_id = ?, phase_advanced_at = datetime('now') WHERE id = ?").bind(newPhaseId, programId),
   ]);
 }
 

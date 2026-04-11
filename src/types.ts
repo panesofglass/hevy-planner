@@ -64,6 +64,7 @@ export interface ProgramRow {
   readonly is_active: number;
   readonly created_at: string;
   readonly current_phase_id: string | null;
+  readonly phase_advanced_at: string | null;
 }
 
 // ──────────────────────────────────────────────────────────────────

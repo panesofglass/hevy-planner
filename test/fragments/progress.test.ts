@@ -130,4 +130,22 @@ describe("roadmapSection", () => {
     const html = roadmapSection(testPhases, [], benchmarks, "phase2");
     expect(html).toContain("completed");
   });
+
+  it("does not show 'all gates passed' on future phases", () => {
+    const results: BenchmarkResultRow[] = [
+      makeResult({ benchmark_id: "gate-c", passed: 1 }),
+    ];
+    // phase1 is current, phase2 is future — phase2's gate-c is passed but no badge shown
+    const html = roadmapSection(testPhases, results, benchmarks, null);
+    expect(html).not.toMatch(/all gates passed/i);
+  });
+
+  it("filters results by phaseAdvancedAt for current phase gates", () => {
+    const results: BenchmarkResultRow[] = [
+      makeResult({ benchmark_id: "gate-c", passed: 1, tested_at: "2026-04-01" }),
+    ];
+    // phase2 is current, phaseAdvancedAt is after the result — result doesn't count
+    const html = roadmapSection(testPhases, results, benchmarks, "phase2", "2026-04-05");
+    expect(html).not.toMatch(/all gates passed/i);
+  });
 });
