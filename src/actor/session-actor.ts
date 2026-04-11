@@ -4,18 +4,25 @@
 //
 // This is a message bus with a stream attached. It does NOT contain
 // domain logic or mutate D1 — it just holds SSE connections and
-// forwards broadcasts.
+// forwards broadcasts. The SDK is only used here.
+//
+// Pattern: ~/Code/tic-tac-toe/src/TicTacToe.Web/SseBroadcast.fs
 // ──────────────────────────────────────────────────────────────────
 
 import { ServerSentEventGenerator } from "@starfederation/datastar-sdk/web";
 import type { Env } from "../types";
 
-export interface BroadcastMessage {
-  type: "patch-elements";
-  html: string;
-  selector?: string;
-  mode?: string;
-}
+// ── Domain-oriented SSE events ──────────────────────────────────
+// Handlers send these. The DO decides how to render them via the SDK.
+// Modeled after F# SseEvent discriminated union.
+
+export type SseEvent =
+  | { type: "patch"; html: string }
+  | { type: "append"; target: string; html: string }
+  | { type: "remove"; target: string }
+  | { type: "signals"; json: string; onlyIfMissing?: boolean };
+
+// ── Durable Object ──────────────────────────────────────────────
 
 export class SessionActor implements DurableObject {
   private streams: Set<ServerSentEventGenerator> = new Set();
@@ -41,10 +48,9 @@ export class SessionActor implements DurableObject {
     return new Response("Not found", { status: 404 });
   }
 
+  // ── SSE connection ──────────────────────────────────────────
+
   private handleConnect(_request: Request): Response {
-    // Each connected client gets an SSE stream held open via keepalive.
-    // The stream stays open until the client disconnects, which triggers
-    // the ReadableStream cancel callback -> onAbort -> cleanup.
     let sseRef: ServerSentEventGenerator | null = null;
 
     return ServerSentEventGenerator.stream(
@@ -52,13 +58,10 @@ export class SessionActor implements DurableObject {
         sseRef = sse;
         this.streams.add(sse);
         // TODO Task 4: project initial state from D1 here
-        // With keepalive: true, the stream stays open after onStart returns.
-        // No need for a polling loop — the SDK holds the connection.
       },
       {
         keepalive: true,
         onAbort: () => {
-          // Client disconnected — remove from the active set
           if (sseRef) {
             this.streams.delete(sseRef);
           }
@@ -67,23 +70,57 @@ export class SessionActor implements DurableObject {
     );
   }
 
-  private async handleBroadcast(request: Request): Promise<Response> {
-    const messages: BroadcastMessage[] = await request.json();
+  // ── Broadcast ───────────────────────────────────────────────
 
-    for (const msg of messages) {
-      for (const sse of this.streams) {
+  private async handleBroadcast(request: Request): Promise<Response> {
+    let events: SseEvent[];
+    try {
+      events = await request.json();
+    } catch {
+      return new Response("Bad request", { status: 400 });
+    }
+    if (!Array.isArray(events)) {
+      return new Response("Expected array", { status: 400 });
+    }
+
+    const snapshot = [...this.streams];
+    for (const event of events) {
+      for (const sse of snapshot) {
         try {
-          sse.patchElements(msg.html, {
-            selector: msg.selector,
-            mode: msg.mode as any,
-          });
-        } catch {
-          // Stream closed — remove from active set
-          this.streams.delete(sse);
+          this.writeSseEvent(sse, event);
+        } catch (err) {
+          if (err instanceof TypeError) {
+            // Stream closed — remove from active set
+            this.streams.delete(sse);
+          } else {
+            throw err;
+          }
         }
       }
     }
 
     return new Response(null, { status: 204 });
+  }
+
+  // ── SDK dispatch ────────────────────────────────────────────
+  // All Datastar SDK usage is confined to this method.
+
+  private writeSseEvent(sse: ServerSentEventGenerator, event: SseEvent): void {
+    switch (event.type) {
+      case "patch":
+        sse.patchElements(event.html);
+        break;
+      case "append":
+        sse.patchElements(event.html, { selector: event.target, mode: "append" });
+        break;
+      case "remove":
+        sse.patchElements("", { selector: event.target, mode: "remove" });
+        break;
+      case "signals":
+        sse.patchSignals(event.json, {
+          onlyIfMissing: event.onlyIfMissing,
+        });
+        break;
+    }
   }
 }
