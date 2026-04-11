@@ -67,6 +67,7 @@ hevy-planner/
 ## Style & Conventions
 
 - Domain functions are pure: data in, data out. No side effects.
+- Datastar v1 attributes use colon separators: `data-on:click`, `data-on:submit__prevent`, `data-signals:name` (NOT hyphens: `data-on-click`, `data-signals-name`). Actions use `@` prefix: `@post('/url')`, `@get('/url')` (NOT `$$post`, `$$get`).
 - Datastar fragments return HTML strings. No JSX, no templating engine.
 - D1 queries use prepared statements (no raw string interpolation).
 - Program data lives in D1 — load per-request via `loadProgram(db, userId)`. No static imports for active program state.
@@ -81,6 +82,9 @@ hevy-planner/
 - Do NOT poll Hevy on every page load — cache recent workout data, refresh on user action
 - Do NOT define escapeHtml/escapeAttr/truncate locally in fragments — import from `src/utils/html.ts`
 - Datastar SSE events must end with two newlines (`\n\n`)
+- SSE endpoints must return HTTP 200 for domain errors — Datastar ignores non-2xx responses and the error fragment never renders. Use `sseResponse()` with an error fragment for validation failures (bad phase, gates not passed). Reserve non-2xx for transport failures (auth, unparseable request). E2E tests should assert error content in the SSE stream, not HTTP status codes.
+- `patchElements()` selector must target a unique element — use `#id` selectors, not `.class`. A `.card` selector hits the first card on the page, not the intended one. Wrap sections in ID'd containers (e.g., `#roadmap-section`).
+- `benchmark_results.tested_at` stores date-only (`"2026-04-10"`) but `programs.phase_advanced_at` stores datetime from SQLite `datetime('now')` (`"2026-04-10 14:32:05"`). When comparing across these columns, slice datetime to date-only first — string comparison `"2026-04-10" < "2026-04-10 14:32:05"` silently excludes same-day results.
 - D1 has a 1MB response size limit per query — paginate workout history
 - Hevy API rate limits are undocumented — add backoff/retry logic
 - Do NOT assume Hevy API request/response shapes — verify against the live API (via MCP tools or curl) before writing client methods. Known quirks: POST `/exercise_templates` returns a plain string ID (not JSON), POST `/routines` returns `{ routine: [...] }` (array inside object), `folder_id` is required on routine creation, and field names differ from GET responses (e.g., `muscle_group` not `primary_muscle_group`). GET `/workouts` uses `title` (not `name`) for workout name.
