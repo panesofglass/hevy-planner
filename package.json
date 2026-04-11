@@ -8,7 +8,8 @@
     "test:watch": "vitest",
     "deploy": "wrangler deploy",
     "db:migrate": "wrangler d1 execute hevy-planner --local --file=migrations/0001_initial.sql",
-    "build:schema": "node scripts/compile-schema.mjs"
+    "build:schema": "node scripts/compile-schema.mjs",
+    "test:e2e": "playwright test"
   },
   "keywords": [],
   "author": "",
