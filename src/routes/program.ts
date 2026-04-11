@@ -1,6 +1,5 @@
 import type { Env, WeekTemplate, Program } from "../types";
-import { sseResponse, patchElements } from "../sse/helpers";
-import { sseErrorCard } from "../utils/sse";
+import type { SseEvent } from "../actor/session-actor";
 import {
   getUser,
   loadProgram,
@@ -33,67 +32,61 @@ import defaultProgramJson from "../../programs/mobility-joint-restoration.json";
 
 /**
  * Shared validation logic for both the setup and import program flows.
- * Parses and validates programJsonStr, then returns either an error card
+ * Returns SseEvent[] for the DO to broadcast — either an error card
  * or the rendered template selection fragment.
- *
- * @param programJsonStr  - raw JSON string to validate (may be undefined)
- * @param selector        - CSS selector for the patch target
- * @param renderTemplates - function that renders the template selection UI
- * @param fallback        - JSON string to use when programJsonStr is empty
  */
-export function validateAndRespond(
+export function validateAndBuildEvents(
   programJsonStr: string | undefined,
-  selector: string,
+  targetId: string,
   renderTemplates: (templates: WeekTemplate[]) => string,
   fallback?: string
-): Response {
+): { ok: boolean; events: SseEvent[] } {
   const jsonStr = programJsonStr || fallback;
   if (!jsonStr) {
-    return sseErrorCard("No program JSON provided.", selector, "inner");
+    return { ok: false, events: [{ type: "patch", html: `<div id="${targetId}"><div class="card"><p style="color:var(--orange)">No program JSON provided.</p></div></div>` }] };
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonStr);
   } catch {
-    return sseErrorCard("Invalid JSON file.", selector, "inner");
+    return { ok: false, events: [{ type: "patch", html: `<div id="${targetId}"><div class="card"><p style="color:var(--orange)">Invalid JSON file.</p></div></div>` }] };
   }
 
   const result = validateProgram(parsed);
   if (!result.valid) {
     const errorList = result.errors.map((e) => `<li>${escapeHtml(e)}</li>`).join("");
-    return sseResponse(
-      patchElements(
-        `<div class="card"><p style="color:var(--orange)">Validation errors:</p><ul style="margin:8px 0 0 16px;font-size:13px;color:var(--text-secondary)">${errorList}</ul></div>`,
-        { selector, mode: "inner" }
-      )
-    );
+    return {
+      ok: false,
+      events: [{ type: "patch", html: `<div id="${targetId}"><div class="card"><p style="color:var(--orange)">Validation errors:</p><ul style="margin:8px 0 0 16px;font-size:13px;color:var(--text-secondary)">${errorList}</ul></div></div>` }],
+    };
   }
 
-  return sseResponse(
-    patchElements(renderTemplates(result.program.weekTemplates), { selector, mode: "inner" })
-  );
+  return {
+    ok: true,
+    events: [{ type: "patch", html: `<div id="${targetId}">${renderTemplates(result.program.weekTemplates)}</div>` }],
+  };
 }
 
-/** POST /api/validate-program — validate uploaded JSON, return template cards */
-export async function handleValidateProgram(request: Request): Promise<Response> {
+/** POST /api/validate-program — validate uploaded JSON, broadcast template cards */
+export async function handleValidateProgram(request: Request): Promise<{ events: SseEvent[]; status: number }> {
   const body = (await request.json()) as Record<string, unknown>;
   const programJsonStr = body.programJson as string | undefined;
-  // Fall back to bundled default program if none uploaded
-  return validateAndRespond(
+  const result = validateAndBuildEvents(
     programJsonStr,
-    "#validation-result",
+    "validation-result",
     templateSelectionFragment,
     JSON.stringify(defaultProgramJson)
   );
+  return { events: result.events, status: result.ok ? 202 : 400 };
 }
 
 /** POST /api/validate-import-program — validate uploaded JSON for the import flow */
-export async function handleValidateImportProgram(request: Request): Promise<Response> {
+export async function handleValidateImportProgram(request: Request): Promise<{ events: SseEvent[]; status: number }> {
   const body = (await request.json()) as Record<string, unknown>;
-  // Datastar converts data-signals:import-program-json to importProgramJson
   const programJsonStr = body.importProgramJson as string | undefined;
-  return validateAndRespond(programJsonStr, "#import-validation-result", importTemplateSelectionFragment);
+  const result = validateAndBuildEvents(programJsonStr, "import-validation-result", importTemplateSelectionFragment);
+  return { events: result.events, status: result.ok ? 202 : 400 };
 }
 
 /** POST /api/import-program — replace active program, re-sync Hevy, regenerate queue */

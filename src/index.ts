@@ -50,6 +50,15 @@ function redirect(location: string, status = 303): Response {
   return new Response(null, { status, headers: { location } });
 }
 
+async function broadcastEvents(env: Env, userId: string, events: import("./actor/session-actor").SseEvent[]): Promise<void> {
+  const actor = getSessionActor(env, userId);
+  await actor.fetch(new Request("https://actor/broadcast", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(events),
+  }));
+}
+
 async function triggerReproject(env: Env, userId: string, tz?: string): Promise<void> {
   const actor = getSessionActor(env, userId);
   const url = new URL("https://actor/reproject");
@@ -174,12 +183,16 @@ export default {
 
       // ── POST /api/validate-program ─────────────────────────────
       if (method === "POST" && path === "/api/validate-program") {
-        return await handleValidateProgram(request);
+        const result = await handleValidateProgram(request);
+        await broadcastEvents(env, auth.userId, result.events);
+        return new Response(null, { status: result.status });
       }
 
       // ── POST /api/validate-import-program ──────────────────────
       if (method === "POST" && path === "/api/validate-import-program") {
-        return await handleValidateImportProgram(request);
+        const result = await handleValidateImportProgram(request);
+        await broadcastEvents(env, auth.userId, result.events);
+        return new Response(null, { status: result.status });
       }
 
       // ── POST /api/import-program ────────────────────────────────
