@@ -4,7 +4,6 @@
 
 import type { Env } from "./types";
 import { getAuthenticatedUserOrDev } from "./auth/access";
-import { isSSERequest } from "./sse/helpers";
 import { getUser } from "./storage/queries";
 import { loadProgram as loadProgramForSubtitle } from "./storage/queries";
 import { htmlShell } from "./fragments/layout";
@@ -27,6 +26,16 @@ const APP_NAME = "Hevy Planner";
 // ──────────────────────────────────────────────────────────────────
 // Local helpers (router-only concerns)
 // ──────────────────────────────────────────────────────────────────
+
+function isSSERequest(request: Request): boolean {
+  const accept = request.headers.get("accept") || "";
+  return accept.includes("text/event-stream");
+}
+
+function getSessionActor(env: Env, userId: string): DurableObjectStub {
+  const id = env.SESSION_ACTOR.idFromName(userId);
+  return env.SESSION_ACTOR.get(id);
+}
 
 function htmlResponse(body: string): Response {
   return new Response(body, {
@@ -96,7 +105,11 @@ export default {
         }
 
         if (isSSERequest(request)) {
-          return await handleTodaySSE(env, auth.userId, tz);
+          const actor = getSessionActor(env, auth.userId);
+          const connectUrl = new URL("https://actor/connect");
+          connectUrl.searchParams.set("userId", auth.userId);
+          if (tz) connectUrl.searchParams.set("tz", tz);
+          return actor.fetch(new Request(connectUrl.toString()));
         }
 
         const subtitle = await loadSubtitle(env.DB, auth.userId);
