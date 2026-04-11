@@ -51,6 +51,14 @@ function redirect(location: string, status = 303): Response {
   return new Response(null, { status, headers: { location } });
 }
 
+async function triggerReproject(env: Env, userId: string, tz?: string): Promise<void> {
+  const actor = getSessionActor(env, userId);
+  const url = new URL("https://actor/reproject");
+  url.searchParams.set("userId", userId);
+  if (tz) url.searchParams.set("tz", tz);
+  await actor.fetch(new Request(url.toString()));
+}
+
 /** Load the subtitle from the active program, or undefined on failure. */
 async function loadSubtitle(db: D1Database, userId: string): Promise<string | undefined> {
   try {
@@ -194,7 +202,11 @@ export default {
       const setupMatch = path.match(/^\/api\/setup\/([^/]+)$/);
       if (method === "POST" && (path === "/api/setup" || setupMatch)) {
         const urlTemplateId = setupMatch ? decodeURIComponent(setupMatch[1]) : undefined;
-        return await handleSetup(request, env, auth.userId, urlTemplateId, tz);
+        const response = await handleSetup(request, env, auth.userId, urlTemplateId, tz);
+        if (response.status === 202) {
+          await triggerReproject(env, auth.userId, tz);
+        }
+        return response;
       }
 
       // ── POST /api/push-hevy/:id ────────────────────────────────
@@ -206,7 +218,11 @@ export default {
 
       // ── POST /api/pull ─────────────────────────────────────────
       if (method === "POST" && path === "/api/pull") {
-        return await handlePull(env, auth.userId, tz);
+        const response = await handlePull(env, auth.userId, tz);
+        if (response.status === 202) {
+          await triggerReproject(env, auth.userId, tz);
+        }
+        return response;
       }
 
       // ── POST /api/cleanup-routines ───────────────────────────────
@@ -218,17 +234,29 @@ export default {
       const completeMatch = path.match(/^\/api\/complete\/([^/]+)$/);
       if (method === "POST" && completeMatch) {
         const itemId = parseInt(completeMatch[1], 10);
-        return await handleManualComplete(env, auth.userId, itemId, tz);
+        const response = await handleManualComplete(env, auth.userId, itemId, tz);
+        if (response.status === 202) {
+          await triggerReproject(env, auth.userId, tz);
+        }
+        return response;
       }
 
       // ── POST /api/webhooks/register ────────────────────────────
       if (method === "POST" && path === "/api/webhooks/register") {
-        return await handleWebhookRegister(request, env, auth.userId, tz);
+        const response = await handleWebhookRegister(request, env, auth.userId, tz);
+        if (response.ok) {
+          await triggerReproject(env, auth.userId, tz);
+        }
+        return response;
       }
 
       // ── POST /api/webhooks/unregister ──────────────────────────
       if (method === "POST" && path === "/api/webhooks/unregister") {
-        return await handleWebhookUnregister(env, auth.userId, tz);
+        const response = await handleWebhookUnregister(env, auth.userId, tz);
+        if (response.ok) {
+          await triggerReproject(env, auth.userId, tz);
+        }
+        return response;
       }
 
       // ── POST /api/switch-program/:id ───────────────────────────

@@ -37,6 +37,10 @@ export class SessionActor implements DurableObject {
       return this.handleConnect(request);
     }
 
+    if (url.pathname === "/reproject") {
+      return this.handleReproject(request);
+    }
+
     if (url.pathname === "/broadcast") {
       return this.handleBroadcast(request);
     }
@@ -75,6 +79,39 @@ export class SessionActor implements DurableObject {
         },
       },
     );
+  }
+
+  // ── Reproject ───────────────────────────────────────────────
+  // Re-render the today page state and push to all connected streams.
+
+  private async handleReproject(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+    const userId = url.searchParams.get("userId");
+    const tz = url.searchParams.get("tz") || undefined;
+
+    if (!userId) {
+      return new Response("userId required", { status: 400 });
+    }
+
+    const { buildTodayEvents } = await import("../routes/today");
+    const events = await buildTodayEvents(this.env.DB, userId, tz);
+
+    const snapshot = [...this.streams];
+    for (const sse of snapshot) {
+      for (const event of events) {
+        try {
+          this.writeSseEvent(sse, event);
+        } catch (err) {
+          if (err instanceof TypeError) {
+            this.streams.delete(sse);
+          } else {
+            throw err;
+          }
+        }
+      }
+    }
+
+    return new Response(null, { status: 204 });
   }
 
   // ── Broadcast ───────────────────────────────────────────────
