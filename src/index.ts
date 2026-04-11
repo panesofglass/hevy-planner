@@ -61,6 +61,10 @@ async function broadcastEvents(env: Env, userId: string, page: PageName, events:
   }));
 }
 
+async function broadcastError(env: Env, userId: string, page: PageName, message: string): Promise<void> {
+  await broadcastEvents(env, userId, page, [{ type: "error", message }]);
+}
+
 async function triggerReproject(env: Env, userId: string, page: PageName, tz?: string): Promise<void> {
   const actor = getSessionActor(env, userId, page);
   const url = new URL("https://actor/reproject");
@@ -209,6 +213,9 @@ export default {
         const response = await handleSetup(request, env, auth.userId, urlTemplateId, tz);
         if (response.status === 202) {
           await triggerReproject(env, auth.userId, "today", tz);
+        } else if (!response.ok) {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "today", msg || "Setup failed");
         }
         return response;
       }
@@ -217,7 +224,12 @@ export default {
       const pushMatch = path.match(/^\/api\/push-hevy\/([^/]+)$/);
       if (method === "POST" && pushMatch) {
         const routineId = decodeURIComponent(pushMatch[1]);
-        return await handlePush(env, auth.userId, routineId);
+        const response = await handlePush(env, auth.userId, routineId);
+        if (!response.ok) {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "today", msg || "Push failed");
+        }
+        return response;
       }
 
       // ── POST /api/pull ─────────────────────────────────────────
@@ -225,6 +237,9 @@ export default {
         const response = await handlePull(env, auth.userId, tz);
         if (response.status === 202) {
           await triggerReproject(env, auth.userId, "today", tz);
+        } else if (!response.ok) {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "today", msg || "Sync failed");
         }
         return response;
       }
@@ -241,6 +256,9 @@ export default {
         const response = await handleManualComplete(env, auth.userId, itemId, tz);
         if (response.status === 202) {
           await triggerReproject(env, auth.userId, "today", tz);
+        } else if (!response.ok) {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "today", msg || "Complete failed");
         }
         return response;
       }
@@ -250,6 +268,9 @@ export default {
         const response = await handleWebhookRegister(request, env, auth.userId, tz);
         if (response.ok) {
           await triggerReproject(env, auth.userId, "today", tz);
+        } else {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "today", msg || "Webhook registration failed");
         }
         return response;
       }
@@ -259,6 +280,9 @@ export default {
         const response = await handleWebhookUnregister(env, auth.userId, tz);
         if (response.ok) {
           await triggerReproject(env, auth.userId, "today", tz);
+        } else {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "today", msg || "Webhook removal failed");
         }
         return response;
       }

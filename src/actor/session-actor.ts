@@ -8,6 +8,7 @@
 
 import { ServerSentEventGenerator } from "@starfederation/datastar-sdk/web";
 import type { Env } from "../types";
+import { escapeHtml } from "../utils/html";
 
 // ── SSE events ──────────────────────────────────────────────────
 // Handlers send these. The DO decides how to render them via the SDK.
@@ -16,7 +17,8 @@ export type SseEvent =
   | { type: "patch"; html: string }
   | { type: "append"; target: string; html: string }
   | { type: "remove"; target: string }
-  | { type: "signals"; json: string; onlyIfMissing?: boolean };
+  | { type: "signals"; json: string; onlyIfMissing?: boolean }
+  | { type: "error"; message: string };
 
 // ── Durable Object ──────────────────────────────────────────────
 
@@ -163,6 +165,12 @@ export class SessionActor implements DurableObject {
         sse.patchSignals(event.json, {
           onlyIfMissing: event.onlyIfMissing,
         });
+        break;
+      case "error":
+        sse.patchElements(
+          `<div id="error-card" class="card"><p style="color:var(--orange)">${escapeHtml(event.message)}</p></div>`,
+          { selector: "#content", mode: "prepend" },
+        );
         break;
       default: {
         const _exhaustive: never = event;
