@@ -2,19 +2,15 @@
 // SessionActor — Durable Object that holds SSE connections and
 // broadcasts HTML fragments to all connected clients.
 //
-// This is a message bus with a stream attached. It does NOT contain
-// domain logic or mutate D1 — it just holds SSE connections and
-// forwards broadcasts. The SDK is only used here.
-//
-// Pattern: ~/Code/tic-tac-toe/src/TicTacToe.Web/SseBroadcast.fs
+// Pure message bus: no domain logic, no D1 mutations. The SDK is
+// only used here — route handlers never import it.
 // ──────────────────────────────────────────────────────────────────
 
 import { ServerSentEventGenerator } from "@starfederation/datastar-sdk/web";
 import type { Env } from "../types";
 
-// ── Domain-oriented SSE events ──────────────────────────────────
+// ── SSE events ──────────────────────────────────────────────────
 // Handlers send these. The DO decides how to render them via the SDK.
-// Modeled after F# SseEvent discriminated union.
 
 export type SseEvent =
   | { type: "patch"; html: string }
@@ -57,7 +53,7 @@ export class SessionActor implements DurableObject {
       (sse) => {
         sseRef = sse;
         this.streams.add(sse);
-        // TODO Task 4: project initial state from D1 here
+        // TODO: project initial state from D1 on connect
       },
       {
         keepalive: true,
@@ -90,7 +86,6 @@ export class SessionActor implements DurableObject {
           this.writeSseEvent(sse, event);
         } catch (err) {
           if (err instanceof TypeError) {
-            // Stream closed — remove from active set
             this.streams.delete(sse);
           } else {
             throw err;
