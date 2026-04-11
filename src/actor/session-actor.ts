@@ -114,13 +114,17 @@ export class SessionActor implements DurableObject {
         sse.patchElements(event.html, { selector: event.target, mode: "append" });
         break;
       case "remove":
-        sse.patchElements("", { selector: event.target, mode: "remove" });
+        sse.removeElements(event.target);
         break;
       case "signals":
         sse.patchSignals(event.json, {
           onlyIfMissing: event.onlyIfMissing,
         });
         break;
+      default: {
+        const _exhaustive: never = event;
+        throw new Error(`Unknown SSE event type: ${(_exhaustive as SseEvent).type}`);
+      }
     }
   }
 }
