@@ -46,14 +46,25 @@ export class SessionActor implements DurableObject {
 
   // ── SSE connection ──────────────────────────────────────────
 
-  private handleConnect(_request: Request): Response {
+  private handleConnect(request: Request): Response {
     let sseRef: ServerSentEventGenerator | null = null;
 
     return ServerSentEventGenerator.stream(
-      (sse) => {
+      async (sse) => {
         sseRef = sse;
         this.streams.add(sse);
-        // TODO: project initial state from D1 on connect
+
+        // Project initial today-page state from D1
+        const url = new URL(request.url);
+        const userId = url.searchParams.get("userId");
+        const tz = url.searchParams.get("tz") || undefined;
+        if (userId) {
+          const { buildTodayEvents } = await import("../routes/today");
+          const events = await buildTodayEvents(this.env.DB, userId, tz);
+          for (const event of events) {
+            this.writeSseEvent(sse, event);
+          }
+        }
       },
       {
         keepalive: true,
