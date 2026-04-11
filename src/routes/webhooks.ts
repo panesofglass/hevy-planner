@@ -1,8 +1,6 @@
 import type { Env } from "../types";
-import { sseErrorCard } from "../utils/sse";
 import { getUser, updateWebhookState, clearWebhookState, getUserByWebhookToken } from "../storage/queries";
 import { performSync } from "../services/sync";
-import { handleTodaySSE } from "./today";
 import { getDecryptedApiKey } from "../storage/api-key";
 
 /** POST /api/webhooks/register — generate a webhook URL for the user to paste into Hevy settings */
@@ -10,11 +8,11 @@ export async function handleWebhookRegister(
   request: Request,
   env: Env,
   userId: string,
-  tz?: string
+  _tz?: string
 ): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user || !user.hevy_api_key) {
-    return sseErrorCard("Connect your Hevy API key first.");
+    return new Response("Connect your Hevy API key first.", { status: 400 });
   }
 
   try {
@@ -22,9 +20,9 @@ export async function handleWebhookRegister(
     const origin = new URL(request.url).origin;
     const callbackUrl = `${origin}/api/webhooks/hevy`;
     await updateWebhookState(env.DB, userId, callbackUrl, bearerToken, env.ENCRYPTION_KEY);
-    return await handleTodaySSE(env, userId, tz, { showCredentials: true });
+    return new Response(null, { status: 202 });
   } catch (err) {
-    return sseErrorCard(err instanceof Error ? err.message : "Failed to enable auto-sync");
+    return new Response(err instanceof Error ? err.message : "Failed to enable auto-sync", { status: 500 });
   }
 }
 
@@ -32,18 +30,18 @@ export async function handleWebhookRegister(
 export async function handleWebhookUnregister(
   env: Env,
   userId: string,
-  tz?: string
+  _tz?: string
 ): Promise<Response> {
   const user = await getUser(env.DB, userId);
   if (!user) {
-    return sseErrorCard("User not found.");
+    return new Response("User not found.", { status: 400 });
   }
 
   try {
     await clearWebhookState(env.DB, userId);
-    return await handleTodaySSE(env, userId, tz);
+    return new Response(null, { status: 202 });
   } catch (err) {
-    return sseErrorCard(err instanceof Error ? err.message : "Failed to disable auto-sync");
+    return new Response(err instanceof Error ? err.message : "Failed to disable auto-sync", { status: 500 });
   }
 }
 

@@ -1,5 +1,5 @@
 import type { Env, WeekTemplate, Program } from "../types";
-import { sseResponse, patchElements, mergeFragments } from "../sse/helpers";
+import { sseResponse, patchElements } from "../sse/helpers";
 import { sseErrorCard } from "../utils/sse";
 import {
   getUser,
@@ -239,64 +239,3 @@ export async function renderProgramPage(env: Env, userId: string): Promise<strin
   return parts.join("");
 }
 
-/** SSE: Program page — overview, progressions, routines, foundations, resources, BODi */
-export async function handleProgramSSE(env: Env, userId: string): Promise<Response> {
-  let program: Program;
-  let user: Awaited<ReturnType<typeof getUser>>;
-  let allPrograms: Awaited<ReturnType<typeof getPrograms>>;
-  try {
-    const [loaded, userRow, programRows] = await Promise.all([
-      loadProgram(env.DB, userId),
-      getUser(env.DB, userId),
-      getPrograms(env.DB, userId),
-    ]);
-    program = loaded.program;
-    user = userRow;
-    allPrograms = programRows;
-  } catch {
-    return sseResponse(
-      patchElements(`<div class="card"><p style="color:var(--text-secondary)">No active program. Upload a program to get started.</p></div>`, {
-        selector: "#content", mode: "inner",
-      })
-    );
-  }
-  const fragments: string[] = [];
-  let isFirst = true;
-
-  const addFragment = (html: string) => {
-    fragments.push(patchElements(html, { selector: "#content", mode: isFirst ? "inner" : "append" }));
-    isFirst = false;
-  };
-
-  const week = user ? currentWeek(user.start_date) : null;
-
-  // Program Library section — always shown first (only when > 1 program exists)
-  if (allPrograms.length > 1) {
-    addFragment(programLibrarySection(allPrograms));
-  }
-
-  addFragment(programOverview(program, user, week));
-
-  if (program.progressions.length > 0) {
-    addFragment(progressionsSection(program.progressions, week));
-  }
-
-  addFragment(routinesSection(program));
-
-  if (program.foundations && program.foundations.length > 0) {
-    addFragment(foundationsSection(program.foundations));
-  }
-
-  if (program.resources && program.resources.length > 0) {
-    addFragment(resourcesSection(program.resources));
-  }
-
-  if (program.bodi && program.bodi.length > 0) {
-    addFragment(bodiSection(program.bodi));
-  }
-
-  // Import section — always shown at the bottom of the Program page
-  addFragment(importProgramSection());
-
-  return sseResponse(mergeFragments(fragments));
-}
