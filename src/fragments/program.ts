@@ -33,7 +33,7 @@ export function programOverview(program: Program, user: UserRow | null, week: nu
 
   // Phase badge
   const phaseBadge = phase
-    ? `<div style="display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--green);background:rgba(48,209,88,0.1);padding:4px 10px;border-radius:6px;margin-top:10px">${escapeHtml(phase.phaseName)}${phase.weekRange ? ` \u00B7 ${escapeHtml(phase.weekRange)}` : ""}</div>`
+    ? `<div class="badge-green">${escapeHtml(phase.phaseName)}${phase.weekRange ? ` \u00B7 ${escapeHtml(phase.weekRange)}` : ""}</div>`
     : "";
 
   return `<div class="card">

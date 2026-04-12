@@ -92,7 +92,7 @@ const CSS_THEME = `
   --text: #FFFFFF;
   --text-secondary: #AEAEB2;
   --text-tertiary: #8E8E93;
-  --separator: rgba(255,255,255,0.06);
+  --separator: rgba(255,255,255,0.10);
   --blue: #377DFF;
   --green: #30D158;
   --orange: #FF9F0A;
@@ -146,7 +146,7 @@ body {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
   margin-bottom: 8px;
 }
 
@@ -205,7 +205,7 @@ body {
 .stat-item {
   flex: 1;
   text-align: center;
-  background: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.08);
   border-radius: 10px;
   padding: 10px 4px;
 }
@@ -220,7 +220,7 @@ body {
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   color: var(--text-tertiary);
   margin-top: 2px;
 }
@@ -231,8 +231,19 @@ body {
   font-weight: 600;
   color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   padding: 20px 4px 8px;
+}
+
+/* ── Section spacing ── */
+.section-header + .card,
+.section-header + .skill-card {
+  margin-top: 0;
+}
+
+.card + .section-header,
+.skill-card + .section-header {
+  padding-top: 24px;
 }
 
 /* ── Tab bar ── */
@@ -460,7 +471,7 @@ body {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
   color: var(--orange);
   margin-bottom: 6px;
 }
@@ -552,8 +563,22 @@ body {
   border-radius: 6px;
 }
 
+.badge-green {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--green);
+  background: rgba(48,209,88,0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
 .skill-body {
   padding: 0 16px 16px;
+  transition: opacity 0.15s ease;
 }
 
 .skill-timeline {
@@ -683,7 +708,7 @@ body {
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   margin-bottom: 8px;
 }
 
@@ -832,7 +857,7 @@ body {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   color: var(--text-tertiary);
   margin-bottom: 4px;
 }
