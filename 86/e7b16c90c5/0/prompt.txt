@@ -1,0 +1,121 @@
+1
+
+---
+
+Did you create the GitHub issue(s) based on the plan?
+
+---
+
+#31 is sufficient. Let's start.
+
+---
+
+What issues remain open now? Also, are we ready to push to production?
+
+---
+
+Close #1, #2, #3, and #10. Open browser to dev deployment.
+
+---
+
+latest build failed: https://dash.cloudflare.com/baf5c72ecd033cd93130ab0bc1c6140b/workers/services/view/hevy-planner/production/builds/fd22dad4-6294-44c7-bcc4-53b86608b1df
+
+---
+
+We can clean up the worktree now that it's on main
+
+---
+
+Clean up all other worktrees and branches. Everything should be merged. Report if that is not accurate.
+
+---
+
+[Image #1]
+
+---
+
+It's only targeting main
+
+---
+
+Ah, no I had from non-production branches enabled.
+
+---
+
+New build in progress
+
+---
+
+success
+
+---
+
+Everything is empty with no forms
+
+---
+
+[Image #2]
+
+---
+
+Yes, I had to login to get here
+
+---
+
+See network log @hevy-planner.ryanriley.workers.dev.har
+
+---
+
+Stop. You are spinning. The datastar param looks wrong. Is that from actual datastar or something you cooked up? Here's the rendered markup: [Image #3]
+
+---
+
+May need a separate url for SSE stream after all. Not sure if the Accept header is working.
+
+---
+
+[Image #4] and @hevy-planner.ryanriley.workers.dev.har
+
+---
+
+[Image #6]
+
+---
+
+no, and I don't see any errors in observability logs
+
+---
+
+No logs in the DO and still no content
+
+---
+
+yes, I see worker logs, but no /sse/today logs
+
+---
+
+[Image #7]
+
+---
+
+access configuration
+
+---
+
+no those are deployed. Is it the text/event-stream and not the /sse path?
+
+---
+
+[Image #8]
+
+---
+
+I see nothing
+
+---
+
+[Image #9]
+
+---
+
+[Image #10]
