@@ -4,7 +4,6 @@
 
 import type { Env } from "./types";
 import { getAuthenticatedUserOrDev } from "./auth/access";
-import { getUser } from "./storage/queries";
 import { loadProgram as loadProgramForSubtitle } from "./storage/queries";
 import { htmlShell } from "./fragments/layout";
 import { errorCard } from "./fragments/error";
@@ -16,6 +15,11 @@ import { handleWebhookEvent, handleWebhookRegister, handleWebhookUnregister } fr
 import { handleSkillAssessment } from "./routes/skill-assessment";
 import { handleLogBenchmark } from "./routes/benchmarks";
 import { handleAdvancePhase } from "./routes/advance-phase";
+import { buildTodayEvents } from "./projections/today";
+import { buildProgressEvents } from "./projections/progress";
+import { buildProgramEvents } from "./projections/program";
+import type { SseEvent } from "./actor/session-actor";
+import { setupPage } from "./fragments/setup";
 
 import defaultProgramJson from "../programs/mobility-joint-restoration.json";
 
@@ -28,6 +32,14 @@ const APP_NAME = "Hevy Planner";
 function isSSERequest(request: Request): boolean {
   const accept = request.headers.get("accept") || "";
   return accept.includes("text/event-stream");
+}
+
+/** Extract HTML fragments from SseEvent[] for server-side rendering. */
+function eventsToHtml(events: SseEvent[]): string {
+  return events
+    .filter((e): e is Extract<SseEvent, { html: string }> => "html" in e)
+    .map((e) => e.html)
+    .join("\n");
 }
 
 type PageName = "today" | "progress" | "program";
@@ -142,14 +154,25 @@ export default {
           return actor.fetch(new Request(connectUrl.toString()));
         }
 
-        const user = await getUser(env.DB, auth.userId);
-        const subtitle = user ? await loadSubtitle(env.DB, auth.userId) : "Setup";
+        let content: string;
+        try {
+          const events = await buildTodayEvents(env.DB, auth.userId, tz);
+          content = eventsToHtml(events);
+        } catch {
+          content = setupPage();
+        }
+
+        const subtitle = content.includes("setup-container")
+          ? "Setup"
+          : await loadSubtitle(env.DB, auth.userId);
         return htmlResponse(
           htmlShell({
             title: APP_NAME,
             subtitle,
             activeTab: "today",
             ssePath: "/",
+            body: `<div id="content">${content}</div>
+    <div data-signals:hevy-url="''" data-effect="if ($hevyUrl) { window.open($hevyUrl, '_blank'); $hevyUrl = '' }" style="display:none"></div>`,
           })
         );
       }
@@ -165,6 +188,14 @@ export default {
           return actor.fetch(new Request(connectUrl.toString()));
         }
 
+        let content: string;
+        try {
+          const events = await buildProgressEvents(env.DB, auth.userId, tz);
+          content = eventsToHtml(events);
+        } catch {
+          content = `<div class="card"><p style="color:var(--text-secondary)">Unable to load progress data.</p></div>`;
+        }
+
         const subtitle = await loadSubtitle(env.DB, auth.userId);
         return htmlResponse(
           htmlShell({
@@ -172,6 +203,7 @@ export default {
             subtitle,
             activeTab: "progress",
             ssePath: "/progress",
+            body: `<div id="content">${content}</div>`,
           })
         );
       }
@@ -187,6 +219,14 @@ export default {
           return actor.fetch(new Request(connectUrl.toString()));
         }
 
+        let content: string;
+        try {
+          const events = await buildProgramEvents(env.DB, auth.userId);
+          content = eventsToHtml(events);
+        } catch {
+          content = `<div class="card"><p style="color:var(--text-secondary)">No active program. Upload a program to get started.</p></div>`;
+        }
+
         const subtitle = await loadSubtitle(env.DB, auth.userId);
         return htmlResponse(
           htmlShell({
@@ -194,6 +234,7 @@ export default {
             subtitle,
             activeTab: "program",
             ssePath: "/program",
+            body: `<div id="content">${content}</div>`,
           })
         );
       }
