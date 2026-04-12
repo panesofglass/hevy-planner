@@ -147,3 +147,7 @@ On iOS, should I choose Open as Web App true or false? Default is true.
 ---
 
 works1
+
+---
+
+Okay, any README.md updates? Any other docs needed for anyone else to deploy this for themselves?
