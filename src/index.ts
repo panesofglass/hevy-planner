@@ -34,11 +34,17 @@ function isSSERequest(request: Request): boolean {
   return accept.includes("text/event-stream");
 }
 
-/** Extract HTML fragments from SseEvent[] for server-side rendering. */
+/** Extract HTML fragments from SseEvent[] for server-side rendering.
+ *  Strips the outer `<div id="content">` wrapper from patch events
+ *  since the caller provides its own #content wrapper. */
 function eventsToHtml(events: SseEvent[]): string {
   return events
     .filter((e): e is Extract<SseEvent, { html: string }> => "html" in e)
-    .map((e) => e.html)
+    .map((e) =>
+      e.type === "patch"
+        ? e.html.replace(/^<div id="content">([\s\S]*)<\/div>$/, "$1")
+        : e.html
+    )
     .join("\n");
 }
 
