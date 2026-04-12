@@ -873,4 +873,106 @@ body {
   opacity: 0.5;
   pointer-events: none;
 }
+
+/* ── Sync section ── */
+.sync-section {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.sync-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sync-status-label {
+  font-size: 12px;
+  color: var(--green);
+  font-weight: 500;
+}
+
+.sync-credentials {
+  margin-top: 6px;
+  text-align: left;
+  display: inline-block;
+}
+
+.sync-credentials-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.sync-credential-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-bottom: 2px;
+}
+
+.sync-credential-value {
+  font-size: 11px;
+  word-break: break-all;
+  color: var(--text-secondary);
+  user-select: all;
+}
+
+.sync-last-synced {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.sync-actions {
+  margin-top: 8px;
+}
+
+/* ── Routine list ── */
+.routine-list-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.routine-list-item {
+  padding: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.routine-color-bar {
+  width: 4px;
+  height: 36px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.routine-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.routine-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.routine-meta {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.routine-chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.routine-list-link + .routine-list-link .routine-list-item {
+  border-top: 1px solid var(--separator);
+}
 `;

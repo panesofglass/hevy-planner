@@ -93,26 +93,26 @@ export function routinesSection(program: Program): string {
     }
     const muscles = Array.from(muscleGroups).slice(0, 4).join(", ");
 
-    return `<a href="/routine/${encodeURIComponent(r.id)}" style="text-decoration:none;color:inherit;display:block">
-  <div style="padding:12px 0;display:flex;align-items:center;gap:12px">
-    <div style="width:4px;height:36px;border-radius:2px;background:${escapeAttr(color)};flex-shrink:0"></div>
-    <div style="flex:1;min-width:0">
-      <div style="font-size:15px;font-weight:600">${escapeHtml(r.title)}</div>
-      <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">${exCount} exercise${exCount !== 1 ? "s" : ""}${muscles ? ` \u00B7 ${escapeHtml(muscles)}` : ""}</div>
+    return `<a href="/routine/${encodeURIComponent(r.id)}" class="routine-list-link">
+  <div class="routine-list-item">
+    <div class="routine-color-bar" style="background:${escapeAttr(color)}"></div>
+    <div class="routine-info">
+      <div class="routine-title">${escapeHtml(r.title)}</div>
+      <div class="routine-meta">${exCount} exercise${exCount !== 1 ? "s" : ""}${muscles ? ` \u00B7 ${escapeHtml(muscles)}` : ""}</div>
     </div>
-    <svg style="width:16px;height:16px;color:var(--text-tertiary);flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <svg class="routine-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
   </div>
 </a>`;
   }
 
   const dailyHtml = daily.length > 0
-    ? daily.map((r) => routineCard(r)).join(`<div style="border-top:1px solid var(--separator)"></div>`)
+    ? daily.map((r) => routineCard(r)).join("")
     : "";
 
   const sessionsHtml = sessions
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((r) => routineCard(r))
-    .join(`<div style="border-top:1px solid var(--separator)"></div>`);
+    .join("");
 
   let html = "";
 

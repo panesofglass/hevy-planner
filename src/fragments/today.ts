@@ -194,26 +194,26 @@ export function syncButton(callbackUrl?: string | null, bearerToken?: string | n
 
   if (callbackUrl && bearerToken) {
     // Just registered — show credentials for the user to paste into Hevy
-    return `<div style="text-align:center; margin-top:20px">
-  <div style="display:inline-flex; align-items:center; gap:8px; margin-bottom:8px">
-    <span style="font-size:12px; color:var(--green); font-weight:500">&#9679; Auto-sync enabled</span>
-    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/unregister')" style="font-size:12px; padding:4px 10px" data-indicator:_unregistering data-attr:disabled="$_unregistering">
+    return `<div class="sync-section">
+  <div class="sync-status">
+    <span class="sync-status-label">&#9679; Auto-sync enabled</span>
+    <button class="btn btn-ghost btn-sm" data-on:click="@post('/api/webhooks/unregister')" data-indicator:_unregistering data-attr:disabled="$_unregistering">
       <span data-show="!$_unregistering">Disable</span>
       <span data-show="$_unregistering">Disabling\u2026</span>
     </button>
   </div>
-  <div style="margin-top:6px; text-align:left; display:inline-block">
-    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:4px">Paste these into <a href="https://hevy.com/settings?developer" target="_blank" style="color:var(--blue)">Hevy developer settings</a>:</div>
+  <div class="sync-credentials">
+    <div class="sync-credentials-hint">Paste these into <a href="https://hevy.com/settings?developer" target="_blank" style="color:var(--blue)">Hevy developer settings</a>:</div>
     <div style="margin-bottom:6px">
-      <div style="font-size:10px; color:var(--text-tertiary); margin-bottom:2px">Callback URL</div>
-      <code style="font-size:11px; word-break:break-all; color:var(--text-secondary); user-select:all">${escapeHtml(callbackUrl)}</code>
+      <div class="sync-credential-label">Callback URL</div>
+      <code class="sync-credential-value">${escapeHtml(callbackUrl)}</code>
     </div>
     <div>
-      <div style="font-size:10px; color:var(--text-tertiary); margin-bottom:2px">Bearer token</div>
-      <code style="font-size:11px; word-break:break-all; color:var(--text-secondary); user-select:all">${escapeHtml(bearerToken)}</code>
+      <div class="sync-credential-label">Bearer token</div>
+      <code class="sync-credential-value">${escapeHtml(bearerToken)}</code>
     </div>
   </div>
-  <div style="margin-top:8px">
+  <div class="sync-actions">
     ${manualSync}
   </div>
 </div>`;
@@ -222,27 +222,27 @@ export function syncButton(callbackUrl?: string | null, bearerToken?: string | n
   if (callbackUrl) {
     // Already registered — show status only
     const statusLabel = lastSyncAt
-      ? `<div style="font-size:11px; color:var(--text-tertiary); margin-top:4px">Last synced: ${escapeHtml(new Date(lastSyncAt).toLocaleString("en-US", { timeZone: tz ?? "UTC" }))}</div>`
-      : `<div style="font-size:11px; color:var(--text-tertiary); margin-top:4px">Waiting for first sync from Hevy&hellip;</div>`;
+      ? `<div class="sync-last-synced">Last synced: ${escapeHtml(new Date(lastSyncAt).toLocaleString("en-US", { timeZone: tz ?? "UTC" }))}</div>`
+      : `<div class="sync-last-synced">Waiting for first sync from Hevy&hellip;</div>`;
 
-    return `<div style="text-align:center; margin-top:20px">
-  <div style="display:inline-flex; align-items:center; gap:8px; margin-bottom:8px">
-    <span style="font-size:12px; color:var(--green); font-weight:500">&#9679; Auto-sync enabled</span>
-    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/unregister')" style="font-size:12px; padding:4px 10px" data-indicator:_unregistering data-attr:disabled="$_unregistering">
+    return `<div class="sync-section">
+  <div class="sync-status">
+    <span class="sync-status-label">&#9679; Auto-sync enabled</span>
+    <button class="btn btn-ghost btn-sm" data-on:click="@post('/api/webhooks/unregister')" data-indicator:_unregistering data-attr:disabled="$_unregistering">
       <span data-show="!$_unregistering">Disable</span>
       <span data-show="$_unregistering">Disabling\u2026</span>
     </button>
   </div>
   ${statusLabel}
-  <div style="margin-top:8px">
+  <div class="sync-actions">
     ${manualSync}
   </div>
 </div>`;
   }
 
-  return `<div style="text-align:center; margin-top:20px">
+  return `<div class="sync-section">
   <div style="margin-bottom:8px">
-    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/register')" style="font-size:13px" data-indicator:_registering data-attr:disabled="$_registering">
+    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/register')" data-indicator:_registering data-attr:disabled="$_registering" style="font-size:13px">
       <span data-show="!$_registering">Enable auto-sync</span>
       <span data-show="$_registering">Enabling\u2026</span>
     </button>
