@@ -21,7 +21,7 @@ export function htmlShell(opts: HtmlShellOptions): string {
     : "";
 
   const bodyContent = opts.body
-    ? opts.body
+    ? opts.body.replace('<div id="content">', `<div id="content"${sseAttr}>`)
     : `<div id="content"${sseAttr}></div>
     <div data-signals:hevy-url="''" data-effect="if ($hevyUrl) { window.open($hevyUrl, '_blank'); $hevyUrl = '' }" style="display:none"></div>`;
 
