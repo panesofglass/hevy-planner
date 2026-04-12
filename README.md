@@ -1,8 +1,8 @@
-# Mobility Tracker
+# Hevy Planner
 
 A training companion for [Hevy](https://www.hevyapp.com/) that adds queue-based scheduling, automatic reflow, multi-phase roadmaps, benchmark tracking, and an open program schema.
 
-Built with [Cloudflare Workers](https://workers.cloudflare.com/) and [Datastar](https://data-star.dev/).
+Built with [Cloudflare Workers](https://workers.cloudflare.com/) and [Datastar](https://data-star.dev/). Installable as a PWA on mobile and desktop.
 
 ## Status
 
