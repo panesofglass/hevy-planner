@@ -86,4 +86,3 @@ export async function buildTodayEvents(db: D1Database, userId: string, tz?: stri
 
   return events;
 }
-

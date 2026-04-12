@@ -31,9 +31,9 @@ export async function handlePush(env: Env, userId: string, routineId: string): P
 
   if (mapping) {
     // Routine already exists in Hevy — return URL for client to open
-    return new Response(JSON.stringify({ hevyUrl: `https://hevy.com/routine/${mapping.hevy_routine_id}` }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
+    return new Response(null, {
+      status: 202,
+      headers: { "x-hevy-url": `https://hevy.com/routine/${mapping.hevy_routine_id}` },
     });
   }
 
@@ -103,9 +103,9 @@ export async function handlePush(env: Env, userId: string, routineId: string): P
       await updateQueueItemHevyRoutineId(env.DB, queueItem.id, created.id);
     }
 
-    return new Response(JSON.stringify({ hevyUrl: `https://hevy.com/routine/${created.id}` }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
+    return new Response(null, {
+      status: 202,
+      headers: { "x-hevy-url": `https://hevy.com/routine/${created.id}` },
     });
   } catch (err) {
     return new Response(err instanceof Error ? err.message : "Push failed", { status: 500 });

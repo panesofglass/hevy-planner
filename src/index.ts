@@ -7,6 +7,7 @@ import { getAuthenticatedUserOrDev } from "./auth/access";
 import { getUser } from "./storage/queries";
 import { loadProgram as loadProgramForSubtitle } from "./storage/queries";
 import { htmlShell } from "./fragments/layout";
+import { errorCard } from "./fragments/error";
 import { handleValidateProgram, handleValidateImportProgram, handleImportProgram, handleSwitchProgram, handleDeleteProgram } from "./routes/program";
 import { buildRoutinePage } from "./routes/routine";
 import { handleSetup } from "./routes/setup";
@@ -60,7 +61,7 @@ async function broadcastEvents(env: Env, userId: string, page: PageName, events:
 }
 
 async function broadcastError(env: Env, userId: string, page: PageName, message: string): Promise<void> {
-  await broadcastEvents(env, userId, page, [{ type: "error", message }]);
+  await broadcastEvents(env, userId, page, [{ type: "error", html: errorCard(message) }]);
 }
 
 async function triggerReproject(env: Env, userId: string, page: PageName, tz?: string): Promise<void> {
@@ -241,7 +242,20 @@ export default {
       const pushMatch = path.match(/^\/api\/push-hevy\/([^/]+)$/);
       if (method === "POST" && pushMatch) {
         const routineId = decodeURIComponent(pushMatch[1]);
-        return handleMutation(await handlePush(env, auth.userId, routineId), env, auth.userId, "today", tz, "Push failed");
+        const response = await handlePush(env, auth.userId, routineId);
+        if (response.status === 202) {
+          const hevyUrl = response.headers.get("x-hevy-url");
+          if (hevyUrl) {
+            await broadcastEvents(env, auth.userId, "today", [
+              { type: "signals", json: JSON.stringify({ hevyUrl }) },
+            ]);
+          }
+          await triggerReproject(env, auth.userId, "today", tz);
+        } else if (!response.ok) {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "today", msg || "Push failed");
+        }
+        return response;
       }
 
       // ── POST /api/pull ─────────────────────────────────────────

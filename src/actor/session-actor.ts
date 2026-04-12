@@ -8,10 +8,10 @@
 
 import { ServerSentEventGenerator } from "@starfederation/datastar-sdk/web";
 import type { Env } from "../types";
-import { escapeHtml } from "../utils/html";
-import { buildTodayEvents } from "../routes/today";
-import { buildProgressEvents } from "../routes/progress";
-import { buildProgramEvents } from "../routes/program";
+import { errorCard } from "../fragments/error";
+import { buildTodayEvents } from "../projections/today";
+import { buildProgressEvents } from "../projections/progress";
+import { buildProgramEvents } from "../projections/program";
 
 // ── SSE events ──────────────────────────────────────────────────
 // Handlers send these. The DO decides how to render them via the SDK.
@@ -21,7 +21,7 @@ export type SseEvent =
   | { type: "append"; target: string; html: string }
   | { type: "remove"; target: string }
   | { type: "signals"; json: string; onlyIfMissing?: boolean }
-  | { type: "error"; message: string };
+  | { type: "error"; html: string };
 
 // ── Durable Object ──────────────────────────────────────────────
 
@@ -64,7 +64,7 @@ export class SessionActor implements DurableObject {
       case "program":
         return buildProgramEvents(db, userId);
       default:
-        return [{ type: "error", message: `Unknown page: ${page}` }];
+        return [{ type: "error", html: errorCard(`Unknown page: ${page}`) }];
     }
   }
 
@@ -101,7 +101,7 @@ export class SessionActor implements DurableObject {
         const page = url.searchParams.get("page") || "today";
         const tz = url.searchParams.get("tz") || undefined;
         if (!userId) {
-          this.writeSseEvent(sse, { type: "error", message: "Session expired" });
+          this.writeSseEvent(sse, { type: "error", html: errorCard("Session expired") });
           return;
         }
 
@@ -180,10 +180,7 @@ export class SessionActor implements DurableObject {
         });
         break;
       case "error":
-        sse.patchElements(
-          `<div id="error-card" class="card"><p style="color:var(--orange)">${escapeHtml(event.message)}</p></div>`,
-          { selector: "#content", mode: "prepend" },
-        );
+        sse.patchElements(event.html, { selector: "#content", mode: "prepend" });
         break;
       default: {
         const _exhaustive: never = event;

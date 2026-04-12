@@ -22,7 +22,8 @@ export function htmlShell(opts: HtmlShellOptions): string {
 
   const bodyContent = opts.body
     ? opts.body
-    : `<div id="content"${sseAttr}></div>`;
+    : `<div id="content"${sseAttr}></div>
+    <div data-signals:hevy-url="''" data-effect="if ($hevyUrl) { window.open($hevyUrl, '_blank'); $hevyUrl = '' }" style="display:none"></div>`;
 
   return `<!DOCTYPE html>
 <html lang="en">

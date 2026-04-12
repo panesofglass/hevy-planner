@@ -36,4 +36,3 @@ export async function buildProgressEvents(db: D1Database, userId: string, tz?: s
 
   return events;
 }
-
