@@ -14,15 +14,50 @@ export interface HtmlShellOptions {
   body?: string;
 }
 
+function tabBar(activeTab: string): string {
+  return `<nav class="tab-bar">
+    <a href="/" class="tab-item${activeTab === "today" ? " tab-active" : ""}">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <span class="tab-label">Today</span>
+    </a>
+    <a href="/progress" class="tab-item${activeTab === "progress" ? " tab-active" : ""}">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span class="tab-label">Progress</span>
+    </a>
+    <a href="/program" class="tab-item${activeTab === "program" ? " tab-active" : ""}">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      <span class="tab-label">Program</span>
+    </a>
+  </nav>`;
+}
+
+const CONTENT_MARKER = '<div id="content">';
+
 export function htmlShell(opts: HtmlShellOptions): string {
   const activeTab = opts.activeTab ?? "today";
   const sseAttr = opts.ssePath
     ? ` data-init="@get('${opts.ssePath}', {headers: {'Accept': 'text/event-stream'}})"`
     : "";
 
-  const bodyContent = opts.body
-    ? opts.body.replace('<div id="content">', `<div id="content"${sseAttr}>`)
-    : `<div id="content"${sseAttr}></div>`;
+  let bodyContent: string;
+  if (opts.body) {
+    if (!opts.body.includes(CONTENT_MARKER)) {
+      throw new Error("htmlShell: opts.body must contain " + CONTENT_MARKER);
+    }
+    bodyContent = opts.body.replace(CONTENT_MARKER, `<div id="content"${sseAttr}>`);
+  } else {
+    bodyContent = `<div id="content"${sseAttr}></div>`;
+  }
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -54,30 +89,7 @@ export function htmlShell(opts: HtmlShellOptions): string {
     <div data-signals:hevy-url="''" data-effect="if ($hevyUrl) { window.open($hevyUrl, '_blank'); $hevyUrl = '' }" style="display:none"></div>
   </main>
 
-  <nav class="tab-bar">
-    <a href="/" class="tab-item${activeTab === "today" ? " tab-active" : ""}">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-        <line x1="16" y1="2" x2="16" y2="6"/>
-        <line x1="8" y1="2" x2="8" y2="6"/>
-        <line x1="3" y1="10" x2="21" y2="10"/>
-      </svg>
-      <span class="tab-label">Today</span>
-    </a>
-    <a href="/progress" class="tab-item${activeTab === "progress" ? " tab-active" : ""}">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-      </svg>
-      <span class="tab-label">Progress</span>
-    </a>
-    <a href="/program" class="tab-item${activeTab === "program" ? " tab-active" : ""}">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-      </svg>
-      <span class="tab-label">Program</span>
-    </a>
-  </nav>
+  ${tabBar(activeTab)}
 </body>
 </html>`;
 }
