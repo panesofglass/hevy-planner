@@ -119,3 +119,7 @@ Any README updates recommended?
 ---
 
 There is a README.md.
+
+---
+
+I did Share -> Add to Home Screen on iOS but don't see standalone open. It opens in Safari
