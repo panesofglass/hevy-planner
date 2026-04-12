@@ -52,3 +52,4 @@ PROMPT.md
 npm-debug.log*
 *.har
 test-results/
+screenshots/

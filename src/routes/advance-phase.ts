@@ -1,7 +1,7 @@
 import type { Env } from "../types";
 import { loadProgram, getBenchmarkResults, advancePhase } from "../storage/queries";
 import { evaluateGateTests } from "../domain/benchmarks";
-import { validateAdvancement, filterResultsSince } from "../domain/phases";
+import { validateAdvancement, filterResultsSince, PHASE_COMPLETED } from "../domain/phases";
 
 /** POST /api/advance-phase/:phaseId — advance the current roadmap phase */
 export async function handleAdvancePhase(
@@ -43,12 +43,6 @@ export async function handleAdvancePhase(
     return new Response(message, { status: 400 });
   }
 
-  if ("lastPhase" in validation && validation.lastPhase) {
-    await advancePhase(env.DB, userId, programId, "__completed__");
-    return new Response(null, { status: 202 });
-  }
-
-  await advancePhase(env.DB, userId, programId, validation.nextPhaseId!);
-
+  await advancePhase(env.DB, userId, programId, validation.nextPhaseId ?? PHASE_COMPLETED);
   return new Response(null, { status: 202 });
 }

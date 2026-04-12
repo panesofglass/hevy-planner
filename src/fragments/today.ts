@@ -61,7 +61,7 @@ export function heroRoutineCard(routine: Routine, queueItem: QueueItemRow): stri
   ${desc}
   <div style="display:flex; gap:8px; margin-top:14px">
     ${hevyButton}
-    <a href="/routine/${escapeAttr(routine.id)}" class="btn btn-ghost">Details</a>
+    <a href="/routine/${encodeURIComponent(routine.id)}" class="btn btn-ghost">Details</a>
   </div>
 </div>`;
 }

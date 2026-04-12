@@ -3,8 +3,13 @@ import { loadProgram, getUserSkillAssessments, getBenchmarkResults } from "../st
 import { skillCards, roadmapSection, benchmarksSection } from "../fragments/progress";
 import { todayString } from "../utils/date";
 
+export interface ProgressProjection {
+  events: SseEvent[];
+  subtitle?: string;
+}
+
 /** Build SseEvent[] for the Progress page — used by the SessionActor DO on connect. */
-export async function buildProgressEvents(db: D1Database, userId: string, tz?: string): Promise<SseEvent[]> {
+export async function buildProgressProjection(db: D1Database, userId: string, tz?: string): Promise<ProgressProjection> {
   const { program, programId, currentPhaseId, phaseAdvancedAt } = await loadProgram(db, userId);
   const assessments = await getUserSkillAssessments(db, userId, programId);
   const results = await getBenchmarkResults(db, userId, programId);
@@ -34,5 +39,5 @@ export async function buildProgressEvents(db: D1Database, userId: string, tz?: s
     emit(benchmarksSection(program.benchmarks, results, today));
   }
 
-  return events;
+  return { events, subtitle: program.meta.subtitle };
 }

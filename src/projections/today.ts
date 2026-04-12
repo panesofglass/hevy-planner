@@ -6,11 +6,20 @@ import { setupPage } from "../fragments/setup";
 import { carsCard, heroRoutineCard, completedSection, upcomingSection, syncButton } from "../fragments/today";
 import { todayString } from "../utils/date";
 
+export interface TodayProjection {
+  events: SseEvent[];
+  subtitle?: string;
+  isSetup: boolean;
+}
+
 /** Build SseEvent[] for the Today page — used by the SessionActor DO on connect. */
-export async function buildTodayEvents(db: D1Database, userId: string, tz?: string): Promise<SseEvent[]> {
+export async function buildTodayProjection(db: D1Database, userId: string, tz?: string): Promise<TodayProjection> {
   const user = await getUser(db, userId);
   if (!user) {
-    return [{ type: "patch", html: `<div id="content">${setupPage()}</div>` }];
+    return {
+      events: [{ type: "patch", html: `<div id="content">${setupPage()}</div>` }],
+      isSetup: true,
+    };
   }
 
   const { program, programId } = await loadProgram(db, userId);
@@ -84,5 +93,5 @@ export async function buildTodayEvents(db: D1Database, userId: string, tz?: stri
   // Sync button — never decrypt bearer token for DO connect (no showCredentials)
   emit(syncButton(user.webhook_id, null, user.last_sync_at, tz));
 
-  return events;
+  return { events, subtitle: program.meta.subtitle, isSetup: false };
 }

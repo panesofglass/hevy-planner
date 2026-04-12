@@ -118,6 +118,7 @@ export function roadmapSection(
 
   const resolved = resolvePhaseStatuses(phases, currentPhaseId);
   const currentPhaseResults = filterResultsSince(results, phaseAdvancedAt);
+  const benchmarkById = new Map(benchmarks.map((b) => [b.id, b]));
 
   const items = resolved
     .map((phase) => {
@@ -138,7 +139,7 @@ export function roadmapSection(
         const evaluation = isFuture ? null : evaluateGateTests(phase.gateTests, evalResults);
         const gateItems = phase.gateTests
           .map((gateId) => {
-            const name = benchmarks.find((bm) => bm.id === gateId)?.name ?? gateId;
+            const name = benchmarkById.get(gateId)?.name ?? gateId;
             if (isFuture) {
               return `<div class="gate-item">${escapeHtml(name)}</div>`;
             }
@@ -295,11 +296,15 @@ export function benchmarksSection(
 </div>`;
   }
 
+  const resultsByBenchmark = new Map<string, BenchmarkResultRow[]>();
+  for (const r of results) {
+    const list = resultsByBenchmark.get(r.benchmark_id) ?? [];
+    list.push(r);
+    resultsByBenchmark.set(r.benchmark_id, list);
+  }
+
   const items = benchmarks
-    .map((b) => {
-      const benchResults = results.filter((r) => r.benchmark_id === b.id);
-      return benchmarkCard(b, benchResults, today);
-    })
+    .map((b) => benchmarkCard(b, resultsByBenchmark.get(b.id) ?? [], today))
     .join("\n");
 
   return `<h2 class="section-header">Benchmarks</h2>

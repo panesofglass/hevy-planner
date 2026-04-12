@@ -17,8 +17,13 @@ import {
   programLibrarySection,
 } from "../fragments/program";
 
+export interface ProgramProjection {
+  events: SseEvent[];
+  subtitle?: string;
+}
+
 /** Build SseEvent[] for the Program page — used by the SessionActor DO on connect. */
-export async function buildProgramEvents(db: D1Database, userId: string): Promise<SseEvent[]> {
+export async function buildProgramProjection(db: D1Database, userId: string): Promise<ProgramProjection> {
   let program: Program;
   let user: Awaited<ReturnType<typeof getUser>>;
   let allPrograms: Awaited<ReturnType<typeof getPrograms>>;
@@ -32,7 +37,9 @@ export async function buildProgramEvents(db: D1Database, userId: string): Promis
     user = userRow;
     allPrograms = programRows;
   } catch {
-    return [{ type: "patch", html: `<div id="content"><div class="card"><p style="color:var(--text-secondary)">No active program. Upload a program to get started.</p></div></div>` }];
+    return {
+      events: [{ type: "patch", html: `<div id="content"><div class="card"><p style="color:var(--text-secondary)">No active program. Upload a program to get started.</p></div></div>` }],
+    };
   }
 
   const events: SseEvent[] = [];
@@ -75,5 +82,5 @@ export async function buildProgramEvents(db: D1Database, userId: string): Promis
 
   emit(importProgramSection());
 
-  return events;
+  return { events, subtitle: program.meta.subtitle };
 }

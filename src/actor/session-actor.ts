@@ -8,9 +8,9 @@
 
 import { ServerSentEventGenerator } from "@starfederation/datastar-sdk/web";
 import type { Env } from "../types";
-import { buildTodayEvents } from "../projections/today";
-import { buildProgressEvents } from "../projections/progress";
-import { buildProgramEvents } from "../projections/program";
+import { buildTodayProjection } from "../projections/today";
+import { buildProgressProjection } from "../projections/progress";
+import { buildProgramProjection } from "../projections/program";
 
 // ── SSE events ──────────────────────────────────────────────────
 // Handlers send these. The DO decides how to render them via the SDK.
@@ -58,11 +58,11 @@ export class SessionActor implements DurableObject {
   private async buildEventsForPage(page: string, db: D1Database, userId: string, tz?: string): Promise<SseEvent[]> {
     switch (page) {
       case "today":
-        return buildTodayEvents(db, userId, tz);
+        return (await buildTodayProjection(db, userId, tz)).events;
       case "progress":
-        return buildProgressEvents(db, userId, tz);
+        return (await buildProgressProjection(db, userId, tz)).events;
       case "program":
-        return buildProgramEvents(db, userId);
+        return (await buildProgramProjection(db, userId)).events;
       default:
         throw new Error(`Unknown page: ${page}`);
     }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolvePhaseStatuses, validateAdvancement } from "../../src/domain/phases";
+import { resolvePhaseStatuses, validateAdvancement, PHASE_COMPLETED } from "../../src/domain/phases";
 import type { RoadmapPhase } from "../../src/types";
 import type { GateEvaluation } from "../../src/domain/benchmarks";
 
@@ -139,23 +139,12 @@ describe("validateAdvancement", () => {
     }
   });
 
-  it("returns lastPhase flag for last phase advancement (#28)", () => {
+  it("returns null nextPhaseId for last phase advancement (#28)", () => {
     const evaluation: GateEvaluation = { tests: [], allPassed: true };
     const result = validateAdvancement(phases, "phase4", "phase4", evaluation);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.nextPhaseId).toBeNull();
-      expect("lastPhase" in result && result.lastPhase).toBe(true);
-    }
-  });
-
-  it("does not set lastPhase for non-last phases", () => {
-    const evaluation: GateEvaluation = { tests: [], allPassed: true };
-    const result = validateAdvancement(phases, "phase1", "phase1", evaluation);
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.nextPhaseId).toBe("phase2");
-      expect("lastPhase" in result).toBe(false);
     }
   });
 
@@ -174,8 +163,8 @@ describe("resolvePhaseStatuses — edge cases", () => {
     expect(result[1].status).toBe("future");
   });
 
-  it("marks all phases completed when currentPhaseId is __completed__ (#28)", () => {
-    const result = resolvePhaseStatuses(phases, "__completed__");
+  it("marks all phases completed when currentPhaseId is PHASE_COMPLETED (#28)", () => {
+    const result = resolvePhaseStatuses(phases, PHASE_COMPLETED);
     expect(result.every((p) => p.status === "completed")).toBe(true);
   });
 });

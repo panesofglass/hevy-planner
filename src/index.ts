@@ -4,7 +4,6 @@
 
 import type { Env } from "./types";
 import { getAuthenticatedUserOrDev } from "./auth/access";
-import { loadProgram as loadProgramForSubtitle } from "./storage/queries";
 import { htmlShell } from "./fragments/layout";
 import { errorCard } from "./fragments/error";
 import { handleValidateProgram, handleValidateImportProgram, handleImportProgram, handleSwitchProgram, handleDeleteProgram } from "./routes/program";
@@ -15,11 +14,10 @@ import { handleWebhookEvent, handleWebhookRegister, handleWebhookUnregister } fr
 import { handleSkillAssessment } from "./routes/skill-assessment";
 import { handleLogBenchmark } from "./routes/benchmarks";
 import { handleAdvancePhase } from "./routes/advance-phase";
-import { buildTodayEvents } from "./projections/today";
-import { buildProgressEvents } from "./projections/progress";
-import { buildProgramEvents } from "./projections/program";
+import { buildTodayProjection } from "./projections/today";
+import { buildProgressProjection } from "./projections/progress";
+import { buildProgramProjection } from "./projections/program";
 import type { SseEvent } from "./actor/session-actor";
-import { setupPage } from "./fragments/setup";
 
 import defaultProgramJson from "../programs/mobility-joint-restoration.json";
 
@@ -109,15 +107,6 @@ async function handleMutation(
   return response;
 }
 
-/** Load the subtitle from the active program, or undefined on failure. */
-async function loadSubtitle(db: D1Database, userId: string): Promise<string | undefined> {
-  try {
-    const { program } = await loadProgramForSubtitle(db, userId);
-    return program.meta.subtitle;
-  } catch {
-    return undefined;
-  }
-}
 
 // ──────────────────────────────────────────────────────────────────
 // Router
@@ -161,24 +150,22 @@ export default {
         }
 
         let content: string;
+        let subtitle: string | undefined;
         try {
-          const events = await buildTodayEvents(env.DB, auth.userId, tz);
-          content = eventsToHtml(events);
+          const projection = await buildTodayProjection(env.DB, auth.userId, tz);
+          content = eventsToHtml(projection.events);
+          subtitle = projection.isSetup ? undefined : projection.subtitle;
         } catch {
-          content = setupPage();
+          content = `<div class="card"><p class="empty-state">Unable to load. Try refreshing the page.</p></div>`;
         }
 
-        const subtitle = content.includes("setup-container")
-          ? "Setup"
-          : await loadSubtitle(env.DB, auth.userId);
         return htmlResponse(
           htmlShell({
             title: APP_NAME,
-            subtitle,
+            subtitle: subtitle ?? "Setup",
             activeTab: "today",
             ssePath: "/",
-            body: `<div id="content">${content}</div>
-    <div data-signals:hevy-url="''" data-effect="if ($hevyUrl) { window.open($hevyUrl, '_blank'); $hevyUrl = '' }" style="display:none"></div>`,
+            body: `<div id="content">${content}</div>`,
           })
         );
       }
@@ -195,14 +182,15 @@ export default {
         }
 
         let content: string;
+        let subtitle: string | undefined;
         try {
-          const events = await buildProgressEvents(env.DB, auth.userId, tz);
-          content = eventsToHtml(events);
+          const projection = await buildProgressProjection(env.DB, auth.userId, tz);
+          content = eventsToHtml(projection.events);
+          subtitle = projection.subtitle;
         } catch {
           content = `<div class="card"><p class="empty-state">Unable to load progress. Try refreshing the page.</p></div>`;
         }
 
-        const subtitle = await loadSubtitle(env.DB, auth.userId);
         return htmlResponse(
           htmlShell({
             title: "Progress",
@@ -226,14 +214,15 @@ export default {
         }
 
         let content: string;
+        let subtitle: string | undefined;
         try {
-          const events = await buildProgramEvents(env.DB, auth.userId);
-          content = eventsToHtml(events);
+          const projection = await buildProgramProjection(env.DB, auth.userId);
+          content = eventsToHtml(projection.events);
+          subtitle = projection.subtitle;
         } catch {
           content = `<div class="card" style="text-align:center;padding:24px 16px"><p class="empty-state" style="margin-bottom:12px">No active program</p><p class="empty-state" style="font-size:13px">Upload a program JSON to get started</p></div>`;
         }
 
-        const subtitle = await loadSubtitle(env.DB, auth.userId);
         return htmlResponse(
           htmlShell({
             title: "Program",
