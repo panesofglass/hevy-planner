@@ -17,7 +17,7 @@ export interface HtmlShellOptions {
 export function htmlShell(opts: HtmlShellOptions): string {
   const activeTab = opts.activeTab ?? "today";
   const sseAttr = opts.ssePath
-    ? ` data-init="@get('${opts.ssePath}', {headers: {'Accept': 'text/event-stream'}})"`
+    ? ` data-init="@get('${opts.ssePath}')"`
     : "";
 
   const bodyContent = opts.body
