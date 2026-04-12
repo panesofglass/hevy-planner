@@ -1,5 +1,6 @@
 import type { Env } from "../types";
 import { loadProgram, insertBenchmarkResult } from "../storage/queries";
+import { todayString } from "../utils/date";
 
 /** POST /api/log-benchmark/:id — record a benchmark result */
 export async function handleLogBenchmark(
@@ -26,10 +27,7 @@ export async function handleLogBenchmark(
     return new Response("value is required", { status: 400 });
   }
 
-  const now = new Date();
-  const today = tz
-    ? now.toLocaleDateString("en-CA", { timeZone: tz })
-    : now.toISOString().slice(0, 10);
+  const today = todayString(tz);
 
   await insertBenchmarkResult(env.DB, {
     userId,

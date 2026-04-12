@@ -313,6 +313,11 @@ export async function clearPendingStateForUser(db: D1Database, userId: string, p
   }
 }
 
+/** Update the active_program label on the users row (for subtitle display). */
+export async function updateUserActiveProgramLabel(db: D1Database, userId: string, title: string): Promise<void> {
+  await db.prepare("UPDATE users SET active_program = ? WHERE id = ?").bind(title, userId).run();
+}
+
 /** Return all programs for a user, ordered by creation date descending. */
 export async function getPrograms(db: D1Database, userId: string): Promise<ProgramRow[]> {
   const result = await db

@@ -88,7 +88,6 @@ export async function handlePush(env: Env, userId: string, routineId: string): P
       exercises: payload.exercises,
     });
 
-    // Save the mapping so future pushes use the existing routine
     await upsertRoutineMapping(env.DB, {
       user_id: userId,
       program_routine_id: routineId,
@@ -96,7 +95,6 @@ export async function handlePush(env: Env, userId: string, routineId: string): P
       program_id: programId,
     });
 
-    // Also update the queue item if there is one (scoped to active program)
     const items = await getQueueItems(env.DB, userId, programId);
     const queueItem = items.find(
       (i) => i.routine_id === routineId && i.status === "pending"

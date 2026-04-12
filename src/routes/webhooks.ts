@@ -71,9 +71,20 @@ export async function handleWebhookEvent(
     ctx.waitUntil(
       getDecryptedApiKey(env.DB, user.id, env.ENCRYPTION_KEY).then((apiKey) => {
         if (!apiKey) return;
-        return performSync(env.DB, user.id, apiKey, user.timezone ?? undefined).catch((err) => {
-          console.error("Webhook sync failed:", err instanceof Error ? err.message : err);
-        });
+        return performSync(env.DB, user.id, apiKey, user.timezone ?? undefined)
+          .then(() => {
+            // Notify connected SSE clients of updated state
+            const actorId = env.SESSION_ACTOR.idFromName(`${user.id}:today`);
+            const actor = env.SESSION_ACTOR.get(actorId);
+            const url = new URL("https://actor/reproject");
+            url.searchParams.set("userId", user.id);
+            url.searchParams.set("page", "today");
+            if (user.timezone) url.searchParams.set("tz", user.timezone);
+            return actor.fetch(new Request(url.toString())).then(() => {});
+          })
+          .catch((err) => {
+            console.error("Webhook sync failed:", err instanceof Error ? err.message : err);
+          });
       })
     );
   }

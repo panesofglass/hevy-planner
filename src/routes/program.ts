@@ -8,6 +8,7 @@ import {
   getActiveProgram,
   deleteProgram,
   updateUserProgram,
+  updateUserActiveProgramLabel,
 } from "../storage/queries";
 import { currentWeek } from "../domain/schedule";
 import { validateProgram } from "../validation/validate-program";
@@ -91,6 +92,7 @@ export async function handleValidateImportProgram(request: Request): Promise<{ e
 
 /** POST /api/import-program — replace active program, re-sync Hevy, regenerate queue */
 export async function handleImportProgram(request: Request, env: Env, userId: string, tz?: string): Promise<Response> {
+  if (!userId) return new Response("Unauthorized", { status: 401 });
   // Datastar sends camelCase signal names: importProgramJson, importTemplateId
   let body: { importProgramJson?: string; importTemplateId?: string } = {};
   try {
@@ -149,9 +151,7 @@ export async function handleSwitchProgram(
     const row = await getActiveProgram(env.DB, userId);
     if (row) {
       const prog = JSON.parse(row.json_data) as Program;
-      await env.DB.prepare("UPDATE users SET active_program = ? WHERE id = ?")
-        .bind(prog.meta.title, userId)
-        .run();
+      await updateUserActiveProgramLabel(env.DB, userId, prog.meta.title);
     }
   } catch (err) {
     return new Response(err instanceof Error ? err.message : "Failed to switch program", { status: 500 });

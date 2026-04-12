@@ -39,11 +39,11 @@ export class SessionActor implements DurableObject {
     const url = new URL(request.url);
 
     if (url.pathname === "/connect") {
-      return this.handleConnect(request);
+      return this.handleConnect(url);
     }
 
     if (url.pathname === "/reproject") {
-      return this.handleReproject(request);
+      return this.handleReproject(url);
     }
 
     if (url.pathname === "/broadcast") {
@@ -68,27 +68,50 @@ export class SessionActor implements DurableObject {
     }
   }
 
+  // ── Broadcast helper ────────────────────────────────────────
+
+  private broadcastToAll(events: SseEvent[]): void {
+    const snapshot = [...this.streams];
+    for (const event of events) {
+      for (const sse of snapshot) {
+        try {
+          this.writeSseEvent(sse, event);
+        } catch (err) {
+          if (err instanceof TypeError) {
+            this.streams.delete(sse);
+          } else {
+            throw err;
+          }
+        }
+      }
+    }
+  }
+
   // ── SSE connection ──────────────────────────────────────────
 
-  private handleConnect(request: Request): Response {
+  private handleConnect(url: URL): Response {
     let sseRef: ServerSentEventGenerator | null = null;
 
     return ServerSentEventGenerator.stream(
       async (sse) => {
         sseRef = sse;
-        this.streams.add(sse);
 
         // Project initial page state from D1
-        const url = new URL(request.url);
         const userId = url.searchParams.get("userId");
         const page = url.searchParams.get("page") || "today";
         const tz = url.searchParams.get("tz") || undefined;
-        if (userId) {
-          const events = await this.buildEventsForPage(page, this.env.DB, userId, tz);
-          for (const event of events) {
-            this.writeSseEvent(sse, event);
-          }
+        if (!userId) {
+          this.writeSseEvent(sse, { type: "error", message: "Session expired" });
+          return;
         }
+
+        const events = await this.buildEventsForPage(page, this.env.DB, userId, tz);
+        for (const event of events) {
+          this.writeSseEvent(sse, event);
+        }
+
+        // Add to broadcast set after initial projection completes
+        this.streams.add(sse);
       },
       {
         keepalive: true,
@@ -104,8 +127,7 @@ export class SessionActor implements DurableObject {
   // ── Reproject ───────────────────────────────────────────────
   // Re-render page state from D1 and push to all connected streams.
 
-  private async handleReproject(request: Request): Promise<Response> {
-    const url = new URL(request.url);
+  private async handleReproject(url: URL): Promise<Response> {
     const userId = url.searchParams.get("userId");
     const page = url.searchParams.get("page") || "today";
     const tz = url.searchParams.get("tz") || undefined;
@@ -115,21 +137,7 @@ export class SessionActor implements DurableObject {
     }
 
     const events = await this.buildEventsForPage(page, this.env.DB, userId, tz);
-
-    const snapshot = [...this.streams];
-    for (const sse of snapshot) {
-      for (const event of events) {
-        try {
-          this.writeSseEvent(sse, event);
-        } catch (err) {
-          if (err instanceof TypeError) {
-            this.streams.delete(sse);
-          } else {
-            throw err;
-          }
-        }
-      }
-    }
+    this.broadcastToAll(events);
 
     return new Response(null, { status: 204 });
   }
@@ -147,20 +155,7 @@ export class SessionActor implements DurableObject {
       return new Response("Expected array", { status: 400 });
     }
 
-    const snapshot = [...this.streams];
-    for (const event of events) {
-      for (const sse of snapshot) {
-        try {
-          this.writeSseEvent(sse, event);
-        } catch (err) {
-          if (err instanceof TypeError) {
-            this.streams.delete(sse);
-          } else {
-            throw err;
-          }
-        }
-      }
-    }
+    this.broadcastToAll(events);
 
     return new Response(null, { status: 204 });
   }

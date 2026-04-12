@@ -64,7 +64,6 @@ export async function handleSetup(
     }
   }
 
-  // h. Upsert user (must exist before program insert due to FK constraint)
   // Encrypt the API key before storage; pass undefined when no key provided.
   const encryptedApiKey = apiKey ? await encryptAesGcm(apiKey, env.ENCRYPTION_KEY) : undefined;
   await upsertUser(env.DB, {
@@ -76,7 +75,6 @@ export async function handleSetup(
     timezone: tz,
   });
 
-  // a-j. Store program, sync Hevy templates/routines, generate queue
   await activateProgram(env.DB, userId, program, programJsonStr, templateId, apiKey);
 
   return new Response(null, { status: 202 });

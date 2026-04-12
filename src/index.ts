@@ -8,7 +8,7 @@ import { getUser } from "./storage/queries";
 import { loadProgram as loadProgramForSubtitle } from "./storage/queries";
 import { htmlShell } from "./fragments/layout";
 import { handleValidateProgram, handleValidateImportProgram, handleImportProgram, handleSwitchProgram, handleDeleteProgram } from "./routes/program";
-import { renderRoutinePage } from "./routes/routine";
+import { buildRoutinePage } from "./routes/routine";
 import { handleSetup } from "./routes/setup";
 import { handlePush, handlePull, handleCleanupRoutines, handleManualComplete } from "./routes/sync";
 import { handleWebhookEvent, handleWebhookRegister, handleWebhookUnregister } from "./routes/webhooks";
@@ -70,6 +70,24 @@ async function triggerReproject(env: Env, userId: string, page: PageName, tz?: s
   url.searchParams.set("page", page);
   if (tz) url.searchParams.set("tz", tz);
   await actor.fetch(new Request(url.toString()));
+}
+
+/** Handle the common mutation pattern: reproject on 202, broadcast error on failure. */
+async function handleMutation(
+  response: Response,
+  env: Env,
+  userId: string,
+  page: PageName,
+  tz?: string,
+  fallbackMsg = "Request failed"
+): Promise<Response> {
+  if (response.status === 202) {
+    await triggerReproject(env, userId, page, tz);
+  } else if (!response.ok) {
+    const msg = await response.clone().text();
+    await broadcastError(env, userId, page, msg || fallbackMsg);
+  }
+  return response;
 }
 
 /** Load the subtitle from the active program, or undefined on failure. */
@@ -183,7 +201,7 @@ export default {
       const routineMatch = path.match(/^\/routine\/([^/]+)$/);
       if (method === "GET" && routineMatch) {
         const routineId = decodeURIComponent(routineMatch[1]);
-        const body = await renderRoutinePage(env, auth.userId, routineId);
+        const body = await buildRoutinePage(env, auth.userId, routineId);
         return htmlResponse(
           htmlShell({
             title: "Routine",
@@ -209,52 +227,26 @@ export default {
 
       // ── POST /api/import-program ────────────────────────────────
       if (method === "POST" && path === "/api/import-program") {
-        const response = await handleImportProgram(request, env, auth.userId, tz);
-        if (response.status === 202) {
-          await triggerReproject(env, auth.userId, "program", tz);
-        } else if (!response.ok) {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "program", msg || "Import failed");
-        }
-        return response;
+        return handleMutation(await handleImportProgram(request, env, auth.userId, tz), env, auth.userId, "program", tz, "Import failed");
       }
 
       // ── POST /api/setup/:templateId ─────────────────────────────
       const setupMatch = path.match(/^\/api\/setup\/([^/]+)$/);
       if (method === "POST" && (path === "/api/setup" || setupMatch)) {
         const urlTemplateId = setupMatch ? decodeURIComponent(setupMatch[1]) : undefined;
-        const response = await handleSetup(request, env, auth.userId, urlTemplateId, tz);
-        if (response.status === 202) {
-          await triggerReproject(env, auth.userId, "today", tz);
-        } else if (!response.ok) {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "today", msg || "Setup failed");
-        }
-        return response;
+        return handleMutation(await handleSetup(request, env, auth.userId, urlTemplateId, tz), env, auth.userId, "today", tz, "Setup failed");
       }
 
       // ── POST /api/push-hevy/:id ────────────────────────────────
       const pushMatch = path.match(/^\/api\/push-hevy\/([^/]+)$/);
       if (method === "POST" && pushMatch) {
         const routineId = decodeURIComponent(pushMatch[1]);
-        const response = await handlePush(env, auth.userId, routineId);
-        if (!response.ok) {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "today", msg || "Push failed");
-        }
-        return response;
+        return handleMutation(await handlePush(env, auth.userId, routineId), env, auth.userId, "today", tz, "Push failed");
       }
 
       // ── POST /api/pull ─────────────────────────────────────────
       if (method === "POST" && path === "/api/pull") {
-        const response = await handlePull(env, auth.userId, tz);
-        if (response.status === 202) {
-          await triggerReproject(env, auth.userId, "today", tz);
-        } else if (!response.ok) {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "today", msg || "Sync failed");
-        }
-        return response;
+        return handleMutation(await handlePull(env, auth.userId, tz), env, auth.userId, "today", tz, "Sync failed");
       }
 
       // ── POST /api/cleanup-routines ───────────────────────────────
@@ -266,106 +258,50 @@ export default {
       const completeMatch = path.match(/^\/api\/complete\/([^/]+)$/);
       if (method === "POST" && completeMatch) {
         const itemId = parseInt(completeMatch[1], 10);
-        const response = await handleManualComplete(env, auth.userId, itemId, tz);
-        if (response.status === 202) {
-          await triggerReproject(env, auth.userId, "today", tz);
-        } else if (!response.ok) {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "today", msg || "Complete failed");
-        }
-        return response;
+        return handleMutation(await handleManualComplete(env, auth.userId, itemId, tz), env, auth.userId, "today", tz, "Complete failed");
       }
 
       // ── POST /api/webhooks/register ────────────────────────────
       if (method === "POST" && path === "/api/webhooks/register") {
-        const response = await handleWebhookRegister(request, env, auth.userId, tz);
-        if (response.ok) {
-          await triggerReproject(env, auth.userId, "today", tz);
-        } else {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "today", msg || "Webhook registration failed");
-        }
-        return response;
+        return handleMutation(await handleWebhookRegister(request, env, auth.userId, tz), env, auth.userId, "today", tz, "Webhook registration failed");
       }
 
       // ── POST /api/webhooks/unregister ──────────────────────────
       if (method === "POST" && path === "/api/webhooks/unregister") {
-        const response = await handleWebhookUnregister(env, auth.userId, tz);
-        if (response.ok) {
-          await triggerReproject(env, auth.userId, "today", tz);
-        } else {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "today", msg || "Webhook removal failed");
-        }
-        return response;
+        return handleMutation(await handleWebhookUnregister(env, auth.userId, tz), env, auth.userId, "today", tz, "Webhook removal failed");
       }
 
       // ── POST /api/switch-program/:id ───────────────────────────
       let switchMatch: RegExpMatchArray | null;
       if (method === "POST" && (switchMatch = path.match(/^\/api\/switch-program\/(\d+)$/))) {
-        const response = await handleSwitchProgram(env, auth.userId, parseInt(switchMatch[1], 10), tz);
-        if (response.status === 202) {
-          await triggerReproject(env, auth.userId, "program", tz);
-        } else if (!response.ok) {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "program", msg || "Switch failed");
-        }
-        return response;
+        return handleMutation(await handleSwitchProgram(env, auth.userId, parseInt(switchMatch[1], 10), tz), env, auth.userId, "program", tz, "Switch failed");
       }
 
       // ── POST /api/delete-program/:id ───────────────────────────
       let deleteMatch: RegExpMatchArray | null;
       if (method === "POST" && (deleteMatch = path.match(/^\/api\/delete-program\/(\d+)$/))) {
-        const response = await handleDeleteProgram(env, auth.userId, parseInt(deleteMatch[1], 10));
-        if (response.status === 202) {
-          await triggerReproject(env, auth.userId, "program", tz);
-        } else if (!response.ok) {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "program", msg || "Delete failed");
-        }
-        return response;
+        return handleMutation(await handleDeleteProgram(env, auth.userId, parseInt(deleteMatch[1], 10)), env, auth.userId, "program", tz, "Delete failed");
       }
 
       // ── POST /api/skill-assessment/:id ─────────────────────────
       const assessMatch = path.match(/^\/api\/skill-assessment\/([a-zA-Z0-9_-]+)$/);
       if (method === "POST" && assessMatch) {
         const skillId = decodeURIComponent(assessMatch[1]);
-        const response = await handleSkillAssessment(request, env, auth.userId, skillId);
-        if (response.status === 202) {
-          await triggerReproject(env, auth.userId, "progress", tz);
-        } else if (!response.ok) {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "progress", msg || "Assessment failed");
-        }
-        return response;
+        return handleMutation(await handleSkillAssessment(request, env, auth.userId, skillId), env, auth.userId, "progress", tz, "Assessment failed");
       }
 
       // ── POST /api/log-benchmark/:id ─────────────────────────────
       const benchmarkMatch = path.match(/^\/api\/log-benchmark\/([^/]+)$/);
       if (method === "POST" && benchmarkMatch) {
         const benchmarkId = decodeURIComponent(benchmarkMatch[1]);
-        const response = await handleLogBenchmark(request, env, auth.userId, benchmarkId, tz);
-        if (response.status === 202) {
-          await triggerReproject(env, auth.userId, "progress", tz);
-        } else if (!response.ok) {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "progress", msg || "Log failed");
-        }
-        return response;
+        return handleMutation(await handleLogBenchmark(request, env, auth.userId, benchmarkId, tz), env, auth.userId, "progress", tz, "Log failed");
       }
 
       // ── POST /api/advance-phase/:phaseId ──────────────────────────
       const advanceMatch = path.match(/^\/api\/advance-phase\/([^/]+)$/);
       if (method === "POST" && advanceMatch) {
         const phaseId = decodeURIComponent(advanceMatch[1]);
-        const response = await handleAdvancePhase(env, auth.userId, phaseId);
-        if (response.status === 202) {
-          await triggerReproject(env, auth.userId, "progress", tz);
-        } else if (!response.ok) {
-          const msg = await response.clone().text();
-          await broadcastError(env, auth.userId, "progress", msg || "Phase advance failed");
-        }
-        return response;
+        return handleMutation(await handleAdvancePhase(env, auth.userId, phaseId), env, auth.userId, "progress", tz, "Phase advance failed");
       }
 
       // ── 404 ────────────────────────────────────────────────────

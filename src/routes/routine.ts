@@ -4,7 +4,7 @@ import { currentWeek, findActiveProgression } from "../domain/schedule";
 import { routineDetailPage } from "../fragments/routine-detail";
 
 /** Full HTML: Routine detail — exercise list with coaching context */
-export async function renderRoutinePage(env: Env, userId: string, routineId: string): Promise<string> {
+export async function buildRoutinePage(env: Env, userId: string, routineId: string): Promise<string> {
   const { program } = await loadProgram(env.DB, userId);
   const routine = program.routines.find((r) => r.id === routineId);
   if (!routine) {

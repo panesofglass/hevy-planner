@@ -17,10 +17,11 @@ export async function buildTodayEvents(db: D1Database, userId: string, tz?: stri
   const routineMap = new Map(program.routines.map((r) => [r.id, r]));
   const dailyRoutine = program.routines.find((r) => r.isDaily);
 
-  const items = await getQueueItems(db, userId, programId);
+  const [items, routineMappings] = await Promise.all([
+    getQueueItems(db, userId, programId),
+    getRoutineMappings(db, userId, programId),
+  ]);
   const today = todayString(tz);
-
-  const routineMappings = await getRoutineMappings(db, userId, programId);
   const routineToHevyId = new Map(
     routineMappings.map((m) => [m.program_routine_id, m.hevy_routine_id])
   );
