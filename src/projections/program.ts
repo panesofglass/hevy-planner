@@ -16,6 +16,7 @@ import {
   importProgramSection,
   programLibrarySection,
 } from "../fragments/program";
+import { buildContentEvents } from "./build-events";
 
 export interface ProgramProjection {
   events: SseEvent[];
@@ -38,49 +39,38 @@ export async function buildProgramProjection(db: D1Database, userId: string): Pr
     allPrograms = programRows;
   } catch {
     return {
-      events: [{ type: "patch", html: `<div id="content"><div class="card"><p style="color:var(--text-secondary)">No active program. Upload a program to get started.</p></div></div>` }],
+      events: buildContentEvents([`<div class="card"><p style="color:var(--text-secondary)">No active program. Upload a program to get started.</p></div>`]),
     };
   }
 
-  const events: SseEvent[] = [];
-  let firstEmitted = false;
-
-  function emit(html: string): void {
-    if (!firstEmitted) {
-      events.push({ type: "patch", html: `<div id="content">${html}</div>` });
-      firstEmitted = true;
-    } else {
-      events.push({ type: "append", target: "#content", html });
-    }
-  }
-
+  const fragments: string[] = [];
   const week = user ? currentWeek(user.start_date) : null;
 
   if (allPrograms.length > 1) {
-    emit(programLibrarySection(allPrograms));
+    fragments.push(programLibrarySection(allPrograms));
   }
 
-  emit(programOverview(program, user, week));
+  fragments.push(programOverview(program, user, week));
 
   if (program.progressions.length > 0) {
-    emit(progressionsSection(program.progressions, week));
+    fragments.push(progressionsSection(program.progressions, week));
   }
 
-  emit(routinesSection(program));
+  fragments.push(routinesSection(program));
 
   if (program.foundations && program.foundations.length > 0) {
-    emit(foundationsSection(program.foundations));
+    fragments.push(foundationsSection(program.foundations));
   }
 
   if (program.resources && program.resources.length > 0) {
-    emit(resourcesSection(program.resources));
+    fragments.push(resourcesSection(program.resources));
   }
 
   if (program.bodi && program.bodi.length > 0) {
-    emit(bodiSection(program.bodi));
+    fragments.push(bodiSection(program.bodi));
   }
 
-  emit(importProgramSection());
+  fragments.push(importProgramSection());
 
-  return { events, subtitle: program.meta.subtitle };
+  return { events: buildContentEvents(fragments), subtitle: program.meta.subtitle };
 }

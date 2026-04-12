@@ -35,7 +35,7 @@ function isSSERequest(request: Request): boolean {
 /** Extract HTML fragments from SseEvent[] for server-side rendering.
  *  Strips the outer `<div id="content">` wrapper from patch events
  *  since the caller provides its own #content wrapper. */
-function eventsToHtml(events: SseEvent[]): string {
+function unwrapContentEvents(events: SseEvent[]): string {
   return events
     .filter((e): e is Extract<SseEvent, { html: string }> => "html" in e)
     .map((e) =>
@@ -153,7 +153,7 @@ export default {
         let subtitle: string | undefined;
         try {
           const projection = await buildTodayProjection(env.DB, auth.userId, tz);
-          content = eventsToHtml(projection.events);
+          content = unwrapContentEvents(projection.events);
           subtitle = projection.isSetup ? undefined : projection.subtitle;
         } catch {
           content = `<div class="card"><p class="empty-state">Unable to load. Try refreshing the page.</p></div>`;
@@ -185,7 +185,7 @@ export default {
         let subtitle: string | undefined;
         try {
           const projection = await buildProgressProjection(env.DB, auth.userId, tz);
-          content = eventsToHtml(projection.events);
+          content = unwrapContentEvents(projection.events);
           subtitle = projection.subtitle;
         } catch {
           content = `<div class="card"><p class="empty-state">Unable to load progress. Try refreshing the page.</p></div>`;
@@ -217,7 +217,7 @@ export default {
         let subtitle: string | undefined;
         try {
           const projection = await buildProgramProjection(env.DB, auth.userId);
-          content = eventsToHtml(projection.events);
+          content = unwrapContentEvents(projection.events);
           subtitle = projection.subtitle;
         } catch {
           content = `<div class="card" style="text-align:center;padding:24px 16px"><p class="empty-state" style="margin-bottom:12px">No active program</p><p class="empty-state" style="font-size:13px">Upload a program JSON to get started</p></div>`;

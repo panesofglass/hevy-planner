@@ -186,21 +186,21 @@ ${rows}
  * @param lastSyncAt   - ISO timestamp of the most recent auto-sync, if any
  * @param tz           - IANA timezone for formatting lastSyncAt (defaults to UTC)
  */
-export function syncButton(callbackUrl?: string | null, bearerToken?: string | null, lastSyncAt?: string | null, tz?: string): string {
-  const manualSync = `<button class="btn btn-ghost" data-on:click="@post('/api/pull')" style="font-size:13px" data-indicator:_syncing data-attr:disabled="$_syncing">
+const MANUAL_SYNC_BUTTON = `<button class="btn btn-ghost" data-on:click="@post('/api/pull')" style="font-size:13px" data-indicator:_syncing data-attr:disabled="$_syncing">
     <span data-show="!$_syncing">Sync from Hevy</span>
     <span data-show="$_syncing">Syncing\u2026</span>
   </button>`;
 
-  if (callbackUrl && bearerToken) {
-    // Just registered — show credentials for the user to paste into Hevy
-    return `<div class="sync-section">
-  <div class="sync-status">
-    <span class="sync-status-label">&#9679; Auto-sync enabled</span>
-    <button class="btn btn-ghost btn-sm" data-on:click="@post('/api/webhooks/unregister')" data-indicator:_unregistering data-attr:disabled="$_unregistering">
+const DISABLE_BUTTON = `<button class="btn btn-ghost btn-sm" data-on:click="@post('/api/webhooks/unregister')" data-indicator:_unregistering data-attr:disabled="$_unregistering">
       <span data-show="!$_unregistering">Disable</span>
       <span data-show="$_unregistering">Disabling\u2026</span>
-    </button>
+    </button>`;
+
+function syncJustRegistered(callbackUrl: string, bearerToken: string): string {
+  return `<div class="sync-section">
+  <div class="sync-status">
+    <span class="sync-status-label">&#9679; Auto-sync enabled</span>
+    ${DISABLE_BUTTON}
   </div>
   <div class="sync-credentials">
     <div class="sync-credentials-hint">Paste these into <a href="https://hevy.com/settings?developer" target="_blank" style="color:var(--blue)">Hevy developer settings</a>:</div>
@@ -213,33 +213,26 @@ export function syncButton(callbackUrl?: string | null, bearerToken?: string | n
       <code class="sync-credential-value">${escapeHtml(bearerToken)}</code>
     </div>
   </div>
-  <div class="sync-actions">
-    ${manualSync}
-  </div>
+  <div class="sync-actions">${MANUAL_SYNC_BUTTON}</div>
 </div>`;
-  }
+}
 
-  if (callbackUrl) {
-    // Already registered — show status only
-    const statusLabel = lastSyncAt
-      ? `<div class="sync-last-synced">Last synced: ${escapeHtml(new Date(lastSyncAt).toLocaleString("en-US", { timeZone: tz ?? "UTC" }))}</div>`
-      : `<div class="sync-last-synced">Waiting for first sync from Hevy&hellip;</div>`;
+function syncRegistered(lastSyncAt: string | null | undefined, tz: string | undefined): string {
+  const statusLabel = lastSyncAt
+    ? `<div class="sync-last-synced">Last synced: ${escapeHtml(new Date(lastSyncAt).toLocaleString("en-US", { timeZone: tz ?? "UTC" }))}</div>`
+    : `<div class="sync-last-synced">Waiting for first sync from Hevy&hellip;</div>`;
 
-    return `<div class="sync-section">
+  return `<div class="sync-section">
   <div class="sync-status">
     <span class="sync-status-label">&#9679; Auto-sync enabled</span>
-    <button class="btn btn-ghost btn-sm" data-on:click="@post('/api/webhooks/unregister')" data-indicator:_unregistering data-attr:disabled="$_unregistering">
-      <span data-show="!$_unregistering">Disable</span>
-      <span data-show="$_unregistering">Disabling\u2026</span>
-    </button>
+    ${DISABLE_BUTTON}
   </div>
   ${statusLabel}
-  <div class="sync-actions">
-    ${manualSync}
-  </div>
+  <div class="sync-actions">${MANUAL_SYNC_BUTTON}</div>
 </div>`;
-  }
+}
 
+function syncNotRegistered(): string {
   return `<div class="sync-section">
   <div style="margin-bottom:8px">
     <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/register')" data-indicator:_registering data-attr:disabled="$_registering" style="font-size:13px">
@@ -247,8 +240,14 @@ export function syncButton(callbackUrl?: string | null, bearerToken?: string | n
       <span data-show="$_registering">Enabling\u2026</span>
     </button>
   </div>
-  ${manualSync}
+  ${MANUAL_SYNC_BUTTON}
 </div>`;
+}
+
+export function syncButton(callbackUrl?: string | null, bearerToken?: string | null, lastSyncAt?: string | null, tz?: string): string {
+  if (callbackUrl && bearerToken) return syncJustRegistered(callbackUrl, bearerToken);
+  if (callbackUrl) return syncRegistered(lastSyncAt, tz);
+  return syncNotRegistered();
 }
 
 export function upcomingSection(items: UpcomingItem[]): string {

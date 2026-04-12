@@ -34,6 +34,20 @@ export class SessionActor implements DurableObject {
     this.env = env;
   }
 
+  // ── Stream lifecycle — all mutations to this.streams go through these ──
+
+  private addStream(sse: ServerSentEventGenerator): void {
+    this.streams.add(sse);
+  }
+
+  private removeStream(sse: ServerSentEventGenerator): void {
+    this.streams.delete(sse);
+  }
+
+  private snapshotStreams(): ServerSentEventGenerator[] {
+    return [...this.streams];
+  }
+
   async fetch(request: Request): Promise<Response> {
     console.log(`[SessionActor.fetch] ${request.method} ${request.url}`);
     const url = new URL(request.url);
@@ -71,14 +85,13 @@ export class SessionActor implements DurableObject {
   // ── Broadcast helper ────────────────────────────────────────
 
   private broadcastToAll(events: SseEvent[]): void {
-    const snapshot = [...this.streams];
     for (const event of events) {
-      for (const sse of snapshot) {
+      for (const sse of this.snapshotStreams()) {
         try {
           this.writeSseEvent(sse, event);
         } catch (err) {
           if (err instanceof TypeError) {
-            this.streams.delete(sse);
+            this.removeStream(sse);
           } else {
             throw err;
           }
@@ -118,13 +131,13 @@ export class SessionActor implements DurableObject {
           );
         }
 
-        this.streams.add(sse);
+        this.addStream(sse);
       },
       {
         keepalive: true,
         onAbort: () => {
           if (sseRef) {
-            this.streams.delete(sseRef);
+            this.removeStream(sseRef);
           }
         },
       },

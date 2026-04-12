@@ -4,7 +4,7 @@
 
 import type { Skill, RoadmapPhase, Benchmark, BenchmarkResultRow } from "../types";
 import { escapeHtml, escapeAttr } from "../utils/html";
-import { evaluateGateTests, isRetestDue, formatTrend } from "../domain/benchmarks";
+import { evaluateGateTests, isRetestDue, formatTrend, type GateEvaluation } from "../domain/benchmarks";
 import { resolvePhaseStatuses, filterResultsSince } from "../domain/phases";
 
 /**
@@ -107,6 +107,71 @@ export function skillCards(skills: Skill[], assessments?: Map<string, string>): 
  * Gate evaluation for the current phase uses only results logged after phaseAdvancedAt
  * (if set). For Phase 1 (no advancement), all results are used.
  */
+function renderGateChecklist(
+  gateTests: string[],
+  evaluation: GateEvaluation | null,
+  isFuture: boolean,
+  isCurrent: boolean,
+  isCompleted: boolean,
+  phaseId: string,
+  benchmarkById: Map<string, Benchmark>
+): string {
+  const gateItems = gateTests
+    .map((gateId) => {
+      const name = benchmarkById.get(gateId)?.name ?? gateId;
+      if (isFuture) {
+        return `<div class="gate-item">${escapeHtml(name)}</div>`;
+      }
+      const test = evaluation!.tests.find((t) => t.benchmarkId === gateId);
+      const icon = test?.passed ? "\u2713" : "\u2717";
+      const itemCls = test?.passed ? "gate-passed" : "gate-not-passed";
+      return `<div class="gate-item ${itemCls}">${icon} ${escapeHtml(name)}</div>`;
+    })
+    .join("\n");
+
+  let badge = "";
+  if (evaluation?.allPassed && isCurrent) {
+    badge = `<div class="gate-all-passed">All gates passed \u2014 ready to advance</div>
+<form data-on:submit__prevent="@post('/api/advance-phase/${escapeAttr(phaseId)}')" style="margin-top:8px">
+  <button type="submit" class="btn btn-sm btn-primary" data-indicator:_advancing data-attr:disabled="$_advancing">
+    <span data-show="!$_advancing">Advance to Next Phase</span>
+    <span data-show="$_advancing">Advancing\u2026</span>
+  </button>
+</form>`;
+  } else if (evaluation?.allPassed && isCompleted) {
+    badge = `<div class="gate-all-passed">All gates passed</div>`;
+  }
+
+  return `<div class="gate-checklist">\n${gateItems}\n${badge}\n</div>`;
+}
+
+function renderPhaseItem(
+  phase: RoadmapPhase,
+  currentPhaseResults: BenchmarkResultRow[],
+  allResults: BenchmarkResultRow[],
+  benchmarkById: Map<string, Benchmark>
+): string {
+  const isCurrent = phase.status === "current";
+  const isCompleted = phase.status === "completed";
+  const isFuture = phase.status === "future";
+  const cls = isCurrent ? " roadmap-current" : isCompleted ? " completed" : "";
+  const dotColor = isCurrent ? "var(--blue)" : isCompleted ? "var(--green)" : "var(--text-tertiary)";
+
+  let gateHtml = "";
+  if (phase.gateTests && phase.gateTests.length > 0) {
+    const evalResults = isCurrent ? currentPhaseResults : allResults;
+    const evaluation = isFuture ? null : evaluateGateTests(phase.gateTests, evalResults);
+    gateHtml = renderGateChecklist(phase.gateTests, evaluation, isFuture, isCurrent, isCompleted, phase.id, benchmarkById);
+  }
+
+  return `<div class="roadmap-item${cls}"><div class="roadmap-indicator" style="background:${dotColor}"></div><div><div class="roadmap-name">${escapeHtml(phase.name)}</div>
+    ${phase.weeks ? `<div class="roadmap-weeks">${escapeHtml(phase.weeks)}</div>` : ""}
+    ${phase.summary ? `<div class="roadmap-summary">${escapeHtml(phase.summary)}</div>` : ""}
+    ${gateHtml}
+  </div>
+</div>`;
+}
+
 export function roadmapSection(
   phases: RoadmapPhase[],
   results: BenchmarkResultRow[],
@@ -121,61 +186,7 @@ export function roadmapSection(
   const benchmarkById = new Map(benchmarks.map((b) => [b.id, b]));
 
   const items = resolved
-    .map((phase) => {
-      const isCurrent = phase.status === "current";
-      const isCompleted = phase.status === "completed";
-      const isFuture = phase.status === "future";
-      const cls = isCurrent ? " roadmap-current" : isCompleted ? " completed" : "";
-      const dotColor = isCurrent
-        ? "var(--blue)"
-        : isCompleted
-          ? "var(--green)"
-          : "var(--text-tertiary)";
-
-      let gateHtml = "";
-      if (phase.gateTests && phase.gateTests.length > 0) {
-        // Use filtered results for current phase, all results for completed phases
-        const evalResults = isCurrent ? currentPhaseResults : results;
-        const evaluation = isFuture ? null : evaluateGateTests(phase.gateTests, evalResults);
-        const gateItems = phase.gateTests
-          .map((gateId) => {
-            const name = benchmarkById.get(gateId)?.name ?? gateId;
-            if (isFuture) {
-              return `<div class="gate-item">${escapeHtml(name)}</div>`;
-            }
-            const test = evaluation!.tests.find((t) => t.benchmarkId === gateId);
-            const icon = test?.passed ? "\u2713" : "\u2717";
-            const itemCls = test?.passed ? "gate-passed" : "gate-not-passed";
-            return `<div class="gate-item ${itemCls}">${icon} ${escapeHtml(name)}</div>`;
-          })
-          .join("\n");
-
-        let allPassedBadge = "";
-        if (evaluation?.allPassed && isCurrent) {
-          allPassedBadge = `<div class="gate-all-passed">All gates passed \u2014 ready to advance</div>
-<form data-on:submit__prevent="@post('/api/advance-phase/${escapeAttr(phase.id)}')" style="margin-top:8px">
-  <button type="submit" class="btn btn-sm btn-primary" data-indicator:_advancing data-attr:disabled="$_advancing">
-    <span data-show="!$_advancing">Advance to Next Phase</span>
-    <span data-show="$_advancing">Advancing\u2026</span>
-  </button>
-</form>`;
-        } else if (evaluation?.allPassed && isCompleted) {
-          allPassedBadge = `<div class="gate-all-passed">All gates passed</div>`;
-        }
-
-        gateHtml = `<div class="gate-checklist">
-${gateItems}
-${allPassedBadge}
-</div>`;
-      }
-
-      return `<div class="roadmap-item${cls}"><div class="roadmap-indicator" style="background:${dotColor}"></div><div><div class="roadmap-name">${escapeHtml(phase.name)}</div>
-    ${phase.weeks ? `<div class="roadmap-weeks">${escapeHtml(phase.weeks)}</div>` : ""}
-    ${phase.summary ? `<div class="roadmap-summary">${escapeHtml(phase.summary)}</div>` : ""}
-    ${gateHtml}
-  </div>
-</div>`;
-    })
+    .map((phase) => renderPhaseItem(phase, currentPhaseResults, results, benchmarkById))
     .join("\n");
 
   const allCompleted = resolved.every((p) => p.status === "completed");

@@ -2,6 +2,7 @@ import type { SseEvent } from "../actor/session-actor";
 import { loadProgram, getUserSkillAssessments, getBenchmarkResults } from "../storage/queries";
 import { skillCards, roadmapSection, benchmarksSection } from "../fragments/progress";
 import { todayString } from "../utils/date";
+import { buildContentEvents } from "./build-events";
 
 export interface ProgressProjection {
   events: SseEvent[];
@@ -15,29 +16,19 @@ export async function buildProgressProjection(db: D1Database, userId: string, tz
   const results = await getBenchmarkResults(db, userId, programId);
   const today = todayString(tz);
 
-  const events: SseEvent[] = [];
-  let firstEmitted = false;
-
-  function emit(html: string): void {
-    if (!firstEmitted) {
-      events.push({ type: "patch", html: `<div id="content">${html}</div>` });
-      firstEmitted = true;
-    } else {
-      events.push({ type: "append", target: "#content", html });
-    }
-  }
+  const fragments: string[] = [];
 
   if (program.skills && program.skills.length > 0) {
-    emit(skillCards(program.skills, assessments));
+    fragments.push(skillCards(program.skills, assessments));
   }
 
   if (program.roadmap && program.roadmap.length > 0) {
-    emit(roadmapSection(program.roadmap, results, program.benchmarks ?? [], currentPhaseId, phaseAdvancedAt));
+    fragments.push(roadmapSection(program.roadmap, results, program.benchmarks ?? [], currentPhaseId, phaseAdvancedAt));
   }
 
   if (program.benchmarks && program.benchmarks.length > 0) {
-    emit(benchmarksSection(program.benchmarks, results, today));
+    fragments.push(benchmarksSection(program.benchmarks, results, today));
   }
 
-  return { events, subtitle: program.meta.subtitle };
+  return { events: buildContentEvents(fragments), subtitle: program.meta.subtitle };
 }

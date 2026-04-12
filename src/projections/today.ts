@@ -5,6 +5,7 @@ import { computeUpcoming } from "../domain/reflow";
 import { setupPage } from "../fragments/setup";
 import { carsCard, heroRoutineCard, completedSection, upcomingSection, syncButton } from "../fragments/today";
 import { todayString } from "../utils/date";
+import { buildContentEvents } from "./build-events";
 
 export interface TodayProjection {
   events: SseEvent[];
@@ -17,12 +18,15 @@ export async function buildTodayProjection(db: D1Database, userId: string, tz?: 
   const user = await getUser(db, userId);
   if (!user) {
     return {
-      events: [{ type: "patch", html: `<div id="content">${setupPage()}</div>` }],
+      events: buildContentEvents([setupPage()]),
       isSetup: true,
     };
   }
 
   const { program, programId } = await loadProgram(db, userId);
+  if (!program.routines || !program.weekTemplates) {
+    throw new Error("Program missing required fields: routines, weekTemplates");
+  }
   const routineMap = new Map(program.routines.map((r) => [r.id, r]));
   const dailyRoutine = program.routines.find((r) => r.isDaily);
 
@@ -35,36 +39,21 @@ export async function buildTodayProjection(db: D1Database, userId: string, tz?: 
     routineMappings.map((m) => [m.program_routine_id, m.hevy_routine_id])
   );
 
-  const events: SseEvent[] = [];
-  let firstEmitted = false;
-
   const dailyDoneToday = dailyRoutine && user.daily_completed_date === today;
-
-  // Helper: emit first fragment as patch (outer morph replaces #content),
-  // subsequent fragments as append into #content.
-  function emit(html: string): void {
-    if (!firstEmitted) {
-      events.push({ type: "patch", html: `<div id="content">${html}</div>` });
-      firstEmitted = true;
-    } else {
-      events.push({ type: "append", target: "#content", html });
-    }
-  }
+  const fragments: string[] = [];
 
   if (dailyRoutine && !dailyDoneToday) {
-    emit(carsCard(dailyRoutine, routineToHevyId.get(dailyRoutine.id)));
+    fragments.push(carsCard(dailyRoutine, routineToHevyId.get(dailyRoutine.id)));
   }
 
-  // Hero session card — next pending
   const nextItem = getNextRoutine(items);
   if (nextItem) {
     const routine = routineMap.get(nextItem.routine_id);
     if (routine) {
-      emit(heroRoutineCard(routine, nextItem));
+      fragments.push(heroRoutineCard(routine, nextItem));
     }
   }
 
-  // Completed today
   const completed = getCompletedRoutines(items, today);
   const completedData = completed.map((item) => ({
     title: routineMap.get(item.routine_id)?.title ?? item.routine_id,
@@ -74,10 +63,9 @@ export async function buildTodayProjection(db: D1Database, userId: string, tz?: 
     completedData.unshift({ title: dailyRoutine.title, hevy_workout_data: null });
   }
   if (completedData.length > 0) {
-    emit(completedSection(completedData));
+    fragments.push(completedSection(completedData));
   }
 
-  // Upcoming (next 5 sessions)
   const template = program.weekTemplates.find((t) => t.id === user.template_id);
   if (template) {
     const pendingItems = items.filter((i) => i.status === "pending").sort((a, b) => a.position - b.position);
@@ -86,12 +74,11 @@ export async function buildTodayProjection(db: D1Database, userId: string, tz?: 
     const todayDow = jsDay === 0 ? 6 : jsDay - 1;
     const upcoming = computeUpcoming(upcomingPending, template, program.routines, 5, todayDow);
     if (upcoming.length > 0) {
-      emit(upcomingSection(upcoming));
+      fragments.push(upcomingSection(upcoming));
     }
   }
 
-  // Sync button — never decrypt bearer token for DO connect (no showCredentials)
-  emit(syncButton(user.webhook_id, null, user.last_sync_at, tz));
+  fragments.push(syncButton(user.webhook_id, null, user.last_sync_at, tz));
 
-  return { events, subtitle: program.meta.subtitle, isSetup: false };
+  return { events: buildContentEvents(fragments), subtitle: program.meta.subtitle, isSetup: false };
 }

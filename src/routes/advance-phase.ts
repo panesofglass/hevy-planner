@@ -9,6 +9,10 @@ export async function handleAdvancePhase(
   userId: string,
   phaseId: string
 ): Promise<Response> {
+  if (!phaseId || phaseId.trim() === "") {
+    return new Response("phaseId required", { status: 400 });
+  }
+
   const { program, programId, currentPhaseId, phaseAdvancedAt } = await loadProgram(env.DB, userId);
 
   if (!program.roadmap || program.roadmap.length === 0) {
