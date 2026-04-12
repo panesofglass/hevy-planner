@@ -413,6 +413,41 @@ body {
   border-radius: 6px;
 }
 
+/* ── Error card ── */
+.error-card {
+  background: rgba(255,159,10,0.08);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.error-card-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.error-card-message {
+  font-size: 14px;
+  color: var(--orange);
+  line-height: 1.45;
+  flex: 1;
+}
+
+.error-card-dismiss {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
 /* ── Phase coaching callout ── */
 .coaching-callout {
   background: rgba(255,159,10,0.08);
