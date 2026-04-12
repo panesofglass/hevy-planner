@@ -65,14 +65,20 @@ async function serveCachedWithBanner(cachedResponse) {
   return new Response(patched, { status: cachedResponse.status, headers });
 }
 
-async function networkFirst(request) {
+const FETCH_TIMEOUT = 10_000;
+
+function fetchWithTimeout(request) {
+  return fetch(request, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
+}
+
+async function fetchAndCacheNetworkFirst(request) {
   const cache = await caches.open(CACHE_NAME);
   try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
+    const response = await fetchWithTimeout(request);
+    if (response.ok) {
+      cache.put(request, response.clone());
     }
-    return networkResponse;
+    return response;
   } catch {
     const cached = await cache.match(request);
     if (cached) {
@@ -85,16 +91,16 @@ async function networkFirst(request) {
   }
 }
 
-async function cacheFirst(request) {
+async function fetchAndCacheCacheFirst(request) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request);
   if (cached) return cached;
   try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
+    const response = await fetchWithTimeout(request);
+    if (response.ok) {
+      cache.put(request, response.clone());
     }
-    return networkResponse;
+    return response;
   } catch {
     return new Response("", { status: 504 });
   }
@@ -111,19 +117,19 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(networkFirst(request));
+    event.respondWith(fetchAndCacheNetworkFirst(request));
     return;
   }
 
   const url = new URL(request.url);
 
   if (url.hostname === "cdn.jsdelivr.net") {
-    event.respondWith(cacheFirst(request));
+    event.respondWith(fetchAndCacheCacheFirst(request));
     return;
   }
 
   if (url.pathname === "/style.css") {
-    event.respondWith(networkFirst(request));
+    event.respondWith(fetchAndCacheNetworkFirst(request));
     return;
   }
 });

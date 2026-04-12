@@ -27,30 +27,27 @@ test.describe("PWA & Service Worker", () => {
     // Wait for the page shell to load before checking SW registration
     await page.waitForLoadState("domcontentloaded");
 
-    // Check that the service worker registers and reaches activated state
     const swState = await page.evaluate(async () => {
-      const registration = await navigator.serviceWorker.getRegistration("/");
-      if (!registration) return null;
+      const reg = await navigator.serviceWorker.getRegistration("/");
+      if (!reg) return null;
 
-      const sw =
-        registration.active ||
-        registration.installing ||
-        registration.waiting;
+      const sw = reg.active || reg.installing || reg.waiting;
       if (!sw) return null;
-
       if (sw.state === "activated") return "activated";
 
-      // Wait for the SW to activate with a timeout fallback
-      return new Promise<string>((resolve) => {
-        const timeout = setTimeout(() => resolve(sw.state), 5000);
-        sw.addEventListener("statechange", function handler() {
-          if (sw.state === "activated") {
+      return waitForActivation(sw);
+
+      function waitForActivation(worker: ServiceWorker): Promise<string> {
+        return new Promise((resolve) => {
+          const timeout = setTimeout(() => resolve(worker.state), 5000);
+          worker.addEventListener("statechange", function handler() {
+            if (worker.state !== "activated") return;
             clearTimeout(timeout);
-            sw.removeEventListener("statechange", handler);
+            worker.removeEventListener("statechange", handler);
             resolve("activated");
-          }
+          });
         });
-      });
+      }
     });
 
     expect(swState).toBe("activated");
