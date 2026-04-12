@@ -242,8 +242,8 @@ export function benchmarkCard(
   <form data-show="$${sig}_open"
         data-on:submit__prevent="@post('/api/log-benchmark/${escapeAttr(b.id)}')"
         style="margin-top:8px">
-    <input type="text" name="value" placeholder="${escapeAttr(b.unit ?? "Value")}" required style="width:100%;margin-bottom:4px">
-    ${showSideSelector ? `<select name="side" style="width:100%;margin-bottom:4px">
+    <input type="text" name="value" placeholder="${escapeAttr(b.unit ?? "Value")}" required class="form-input" style="margin-bottom:4px">
+    ${showSideSelector ? `<select name="side" class="form-input" style="margin-bottom:4px">
       <option value="">No side</option>
       <option value="left">Left</option>
       <option value="right">Right</option>
@@ -251,7 +251,7 @@ export function benchmarkCard(
     <label style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
       <input type="checkbox" name="passed" value="true"> Target met
     </label>
-    <input type="text" name="notes" placeholder="Notes (optional)" style="width:100%;margin-bottom:4px">
+    <input type="text" name="notes" placeholder="Notes (optional)" class="form-input" style="margin-bottom:4px">
     <button type="submit" class="btn btn-sm btn-primary" data-indicator:_savingBench data-attr:disabled="$_savingBench">
       <span data-show="!$_savingBench">Save</span>
       <span data-show="$_savingBench">Saving\u2026</span>
