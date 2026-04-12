@@ -8,7 +8,6 @@
 
 import { ServerSentEventGenerator } from "@starfederation/datastar-sdk/web";
 import type { Env } from "../types";
-import { errorCard } from "../fragments/error";
 import { buildTodayEvents } from "../projections/today";
 import { buildProgressEvents } from "../projections/progress";
 import { buildProgramEvents } from "../projections/program";
@@ -64,7 +63,7 @@ export class SessionActor implements DurableObject {
       case "program":
         return buildProgramEvents(db, userId);
       default:
-        return [{ type: "error", html: errorCard(`Unknown page: ${page}`) }];
+        throw new Error(`Unknown page: ${page}`);
     }
   }
 
@@ -101,7 +100,7 @@ export class SessionActor implements DurableObject {
         const page = url.searchParams.get("page") || "today";
         const tz = url.searchParams.get("tz") || undefined;
         if (!userId) {
-          this.writeSseEvent(sse, { type: "error", html: errorCard("Session expired") });
+          throw new Error("handleConnect called without userId");
           return;
         }
 
