@@ -95,21 +95,27 @@ export class SessionActor implements DurableObject {
       async (sse) => {
         sseRef = sse;
 
-        // Project initial page state from D1
         const userId = url.searchParams.get("userId");
         const page = url.searchParams.get("page") || "today";
         const tz = url.searchParams.get("tz") || undefined;
+        console.log(`[SessionActor] connect: userId=${userId}, page=${page}, tz=${tz}`);
+
         if (!userId) {
-          throw new Error("handleConnect called without userId");
+          console.error("[SessionActor] handleConnect called without userId");
           return;
         }
 
-        const events = await this.buildEventsForPage(page, this.env.DB, userId, tz);
-        for (const event of events) {
-          this.writeSseEvent(sse, event);
+        try {
+          const events = await this.buildEventsForPage(page, this.env.DB, userId, tz);
+          console.log(`[SessionActor] projecting ${events.length} events`);
+          for (const event of events) {
+            this.writeSseEvent(sse, event);
+          }
+        } catch (err) {
+          console.error("[SessionActor] projection failed:", err instanceof Error ? err.message : err);
+          return;
         }
 
-        // Add to broadcast set after initial projection completes
         this.streams.add(sse);
       },
       {
