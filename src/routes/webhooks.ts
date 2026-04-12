@@ -51,28 +51,40 @@ export async function handleWebhookEvent(
   env: Env,
   ctx: ExecutionContext
 ): Promise<Response> {
+  console.log("[webhook] received event");
+
   const authHeader = request.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
+    console.warn("[webhook] rejected: missing or malformed Authorization header");
     return new Response("Unauthorized", { status: 401 });
   }
   const token = authHeader.slice(7);
   if (token.length < 36) {
+    console.warn("[webhook] rejected: token too short");
     return new Response("Unauthorized", { status: 401 });
   }
 
   const user = await getUserByWebhookToken(env.DB, token);
   if (!user) {
+    console.warn("[webhook] rejected: no user matched token");
     return new Response("Unauthorized", { status: 401 });
   }
+
+  console.log(`[webhook] matched user=${user.id}, has_api_key=${!!user.hevy_api_key}`);
 
   // Acknowledge immediately — Hevy expects a fast 2xx
   // Run sync in the background via waitUntil so the response is not delayed
   if (user.hevy_api_key) {
     ctx.waitUntil(
       getDecryptedApiKey(env.DB, user.id, env.ENCRYPTION_KEY).then((apiKey) => {
-        if (!apiKey) return;
+        if (!apiKey) {
+          console.error("[webhook] decryption returned no API key");
+          return;
+        }
+        console.log("[webhook] starting sync");
         return performSync(env.DB, user.id, apiKey, user.timezone ?? undefined)
           .then(() => {
+            console.log("[webhook] sync complete, triggering reproject on today DO");
             // Notify connected SSE clients of updated state
             const actorId = env.SESSION_ACTOR.idFromName(`${user.id}:today`);
             const actor = env.SESSION_ACTOR.get(actorId);
@@ -80,10 +92,12 @@ export async function handleWebhookEvent(
             url.searchParams.set("userId", user.id);
             url.searchParams.set("page", "today");
             if (user.timezone) url.searchParams.set("tz", user.timezone);
-            return actor.fetch(new Request(url.toString())).then(() => {});
+            return actor.fetch(new Request(url.toString())).then((res) => {
+              console.log(`[webhook] reproject response: ${res.status}`);
+            });
           })
           .catch((err) => {
-            console.error("Webhook sync failed:", err instanceof Error ? err.message : err);
+            console.error("[webhook] sync/reproject failed:", err instanceof Error ? err.message : err);
           });
       })
     );
