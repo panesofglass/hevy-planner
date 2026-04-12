@@ -1,0 +1,36 @@
+{
+  "cli_version": "0.5.4",
+  "checkpoint_id": "2a8aec97926d",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "CLAUDE.md",
+    "src/actor/session-actor.ts",
+    "src/index.ts",
+    "src/routes/program.ts",
+    "src/routes/progress.ts",
+    "tests/e2e/benchmarks.spec.ts",
+    "tests/e2e/errors.spec.ts",
+    "tests/e2e/helpers.ts",
+    "tests/e2e/isolation.spec.ts",
+    "tests/e2e/program.spec.ts",
+    "tests/e2e/skills.spec.ts",
+    "tests/e2e/today.spec.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/2a/8aec97926d/0/metadata.json",
+      "transcript": "/2a/8aec97926d/0/full.jsonl",
+      "content_hash": "/2a/8aec97926d/0/content_hash.txt",
+      "prompt": "/2a/8aec97926d/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 962,
+    "cache_creation_tokens": 1869740,
+    "cache_read_tokens": 181664915,
+    "output_tokens": 160429,
+    "api_call_count": 595
+  }
+}

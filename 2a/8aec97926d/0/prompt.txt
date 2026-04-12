@@ -1,0 +1,37 @@
+1
+
+---
+
+Did you create the GitHub issue(s) based on the plan?
+
+---
+
+#31 is sufficient. Let's start.
+
+---
+
+What issues remain open now? Also, are we ready to push to production?
+
+---
+
+Close #1, #2, #3, and #10. Open browser to dev deployment.
+
+---
+
+latest build failed: https://dash.cloudflare.com/baf5c72ecd033cd93130ab0bc1c6140b/workers/services/view/hevy-planner/production/builds/fd22dad4-6294-44c7-bcc4-53b86608b1df
+
+---
+
+We can clean up the worktree now that it's on main
+
+---
+
+Clean up all other worktrees and branches. Everything should be merged. Report if that is not accurate.
+
+---
+
+[Image #1]
+
+---
+
+It's only targeting main
