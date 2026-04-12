@@ -15,3 +15,7 @@ Is the hevy-logo.svg not committed?
 ---
 
 no
+
+---
+
+/simplify
