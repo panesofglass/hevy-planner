@@ -33,7 +33,7 @@ Desktop.ini
 *.tsbuildinfo
 
 # Worktrees
-.worktrees/
+.claude/worktrees/
 PROMPT.md
 
 # Superpowers
