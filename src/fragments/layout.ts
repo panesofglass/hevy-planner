@@ -697,4 +697,180 @@ body {
   line-height: 1.4;
   margin-top: 4px;
 }
+
+/* ── Template card selection ── */
+.template-card.selected {
+  border-color: var(--blue);
+  background: rgba(55,125,255,0.08);
+}
+
+/* ── Completed item structure ── */
+.completed-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.workout-details {
+  margin-top: 8px;
+}
+
+.workout-details summary {
+  list-style: none;
+}
+
+.workout-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.workout-summary {
+  font-size: 13px;
+  color: var(--blue);
+  cursor: pointer;
+}
+
+.workout-exercises {
+  padding-top: 8px;
+}
+
+.workout-exercise {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.workout-ex-name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.workout-ex-sets {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+/* ── Gate tests ── */
+.gate-checklist {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.gate-item {
+  padding: 4px 0;
+}
+
+.gate-passed {
+  color: var(--green);
+}
+
+.gate-not-passed {
+  color: var(--orange);
+}
+
+.gate-all-passed {
+  color: var(--green);
+  font-weight: 600;
+  margin-top: 8px;
+  background: rgba(48,209,88,0.08);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+/* ── Skill assessments ── */
+.skill-current-state {
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.current-state-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+
+.current-state-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.skill-edit-row {
+  margin-top: 8px;
+  text-align: right;
+}
+
+.skill-edit-form {
+  margin-top: 8px;
+}
+
+.skill-edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ── Benchmark details ── */
+.benchmark-trend {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.benchmark-last-tested {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.benchmark-retest {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--orange);
+  margin-top: 4px;
+}
+
+.benchmark-retest-info {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+/* ── Button variants ── */
+.btn-sm {
+  font-size: 13px;
+  padding: 6px 14px;
+  min-height: 44px;
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 4px;
+  cursor: pointer;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
 `;
