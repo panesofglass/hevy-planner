@@ -1,0 +1,184 @@
+1
+
+---
+
+Did you create the GitHub issue(s) based on the plan?
+
+---
+
+#31 is sufficient. Let's start.
+
+---
+
+What issues remain open now? Also, are we ready to push to production?
+
+---
+
+Close #1, #2, #3, and #10. Open browser to dev deployment.
+
+---
+
+latest build failed: https://dash.cloudflare.com/baf5c72ecd033cd93130ab0bc1c6140b/workers/services/view/hevy-planner/production/builds/fd22dad4-6294-44c7-bcc4-53b86608b1df
+
+---
+
+We can clean up the worktree now that it's on main
+
+---
+
+Clean up all other worktrees and branches. Everything should be merged. Report if that is not accurate.
+
+---
+
+[Image #1]
+
+---
+
+It's only targeting main
+
+---
+
+Ah, no I had from non-production branches enabled.
+
+---
+
+New build in progress
+
+---
+
+success
+
+---
+
+Everything is empty with no forms
+
+---
+
+[Image #2]
+
+---
+
+Yes, I had to login to get here
+
+---
+
+See network log @hevy-planner.ryanriley.workers.dev.har
+
+---
+
+Stop. You are spinning. The datastar param looks wrong. Is that from actual datastar or something you cooked up? Here's the rendered markup: [Image #3]
+
+---
+
+May need a separate url for SSE stream after all. Not sure if the Accept header is working.
+
+---
+
+[Image #4] and @hevy-planner.ryanriley.workers.dev.har
+
+---
+
+[Image #6]
+
+---
+
+no, and I don't see any errors in observability logs
+
+---
+
+No logs in the DO and still no content
+
+---
+
+yes, I see worker logs, but no /sse/today logs
+
+---
+
+[Image #7]
+
+---
+
+access configuration
+
+---
+
+no those are deployed. Is it the text/event-stream and not the /sse path?
+
+---
+
+[Image #8]
+
+---
+
+I see nothing
+
+---
+
+[Image #9]
+
+---
+
+[Image #10]
+
+---
+
+I don't understand the reason for the /sse/* bypass rule. The other paths worked with no rule.
+
+---
+
+[Image #11] empty event stream
+
+---
+
+[Image #12]
+
+---
+
+[Image #13]
+
+---
+
+[Image #14] hasn't changed this whole time
+
+---
+
+Why didn't I need it before when you were hiding the SSE response behind a response?
+
+---
+
+So is the fetch that I need to allow, not the /sse/* requests? That's where I'm confused.
+
+---
+
+I can't see any content, so I cannot try any other actions
+
+---
+
+Why can't the fetch just use the cookie?
+
+---
+
+yes, and I don't think the request is making it all the way. It just spins
+
+---
+
+says no plan is loaded
+
+---
+
+still blank
+
+---
+
+D1_ERROR: no such column: current_phase_id at offset 22: SQLITE_ERROR
+Error: D1_ERROR: no such column: current_phase_id at offset 22: SQLITE_ERROR
+    at D1DatabaseSessionAlwaysPrimary._sendOrThrow (cloudflare-internal:d1-api:139:19)
+    at async cloudflare-internal:d1-api:323:39
+    at async loadProgram (index.js:529:15)
+    at async buildTodayEvents (index.js:8312:34)
+    at async ServerSentEventGenerator2.stream.keepalive (index.js:8706:26)
+    at async Object.start (index.js:7984:13)
+
+---
+
+Why do we have folders for test/ and tests/? Looks like tests/e2e/ should move to test/e2e
