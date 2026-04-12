@@ -89,17 +89,20 @@ async function cacheFirst(request) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request);
   if (cached) return cached;
-  const networkResponse = await fetch(request);
-  if (networkResponse.ok) {
-    cache.put(request, networkResponse.clone());
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch {
+    return new Response("", { status: 504 });
   }
-  return networkResponse;
 }
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
-  // Passthrough: SSE requests or non-GET methods
   if (
     request.headers.get("accept")?.includes("text/event-stream") ||
     request.method !== "GET"
@@ -107,19 +110,20 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (request.mode === "navigate") {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
   const url = new URL(request.url);
 
-  // Cache-first: CDN assets
   if (url.hostname === "cdn.jsdelivr.net") {
     event.respondWith(cacheFirst(request));
     return;
   }
 
-  // Network-first: navigations and style.css
-  if (request.mode === "navigate" || url.pathname === "/style.css") {
+  if (url.pathname === "/style.css") {
     event.respondWith(networkFirst(request));
     return;
   }
-
-  // Everything else: passthrough
 });
