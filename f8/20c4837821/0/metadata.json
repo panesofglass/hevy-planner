@@ -1,0 +1,50 @@
+{
+  "cli_version": "0.5.4",
+  "checkpoint_id": "f820c4837821",
+  "session_id": "363a9a83-1edd-4a94-8c5a-1a3131b0d948",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-12T05:15:14.005784Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/index.ts",
+    "tests/e2e/today.spec.ts"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-4-6[1m]",
+  "turn_id": "6d404b5ea17e",
+  "token_usage": {
+    "input_tokens": 1021,
+    "cache_creation_tokens": 1888435,
+    "cache_read_tokens": 202318038,
+    "output_tokens": 168216,
+    "api_call_count": 634
+  },
+  "session_metrics": {
+    "turn_count": 112
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-12T05:15:11.49097Z",
+    "agent_lines": 0,
+    "agent_removed": 0,
+    "human_added": 1624,
+    "human_modified": 39,
+    "human_removed": 0,
+    "total_committed": 1624,
+    "total_lines_changed": 1664,
+    "agent_percentage": 0,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 1643,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "hevy-planner.ryanriley.workers.dev.har": 1643
+      }
+    }
+  ]
+}
