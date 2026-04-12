@@ -130,11 +130,13 @@ export default {
       const sseMatch = path.match(/^\/sse\/(today|progress|program)$/);
       if (method === "GET" && sseMatch) {
         const page = sseMatch[1] as PageName;
+        console.log(`[Router] SSE request: page=${page}, userId=${auth.userId}`);
         const actor = getSessionActor(env, auth.userId, page);
         const connectUrl = new URL("https://actor/connect");
         connectUrl.searchParams.set("userId", auth.userId);
         connectUrl.searchParams.set("page", page);
         if (tz) connectUrl.searchParams.set("tz", tz);
+        console.log(`[Router] Proxying to DO: ${connectUrl.toString()}`);
         return actor.fetch(new Request(connectUrl.toString()));
       }
 
