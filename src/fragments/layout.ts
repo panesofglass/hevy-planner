@@ -37,8 +37,8 @@ export function htmlShell(opts: HtmlShellOptions): string {
   <link rel="manifest" href="/manifest.json" />
   <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.8/bundles/datastar.js"></script>
   <script>
-    if('serviceWorker' in navigator && location.hostname !== 'localhost') {
-      navigator.serviceWorker.register('/sw.js');
+    if('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
     } else if('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
     }
