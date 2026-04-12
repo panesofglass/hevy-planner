@@ -252,7 +252,12 @@ export function syncButton(callbackUrl?: string | null, bearerToken?: string | n
 }
 
 export function upcomingSection(items: UpcomingItem[]): string {
-  if (items.length === 0) return "";
+  if (items.length === 0) {
+    return `<div class="section-header">Coming Up</div>
+<div class="card">
+  <p class="empty-state">No upcoming sessions in queue</p>
+</div>`;
+  }
 
   const rows = items
     .map((item) => {

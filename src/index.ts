@@ -199,7 +199,7 @@ export default {
           const events = await buildProgressEvents(env.DB, auth.userId, tz);
           content = eventsToHtml(events);
         } catch {
-          content = `<div class="card"><p style="color:var(--text-secondary)">Unable to load progress data.</p></div>`;
+          content = `<div class="card"><p class="empty-state">Unable to load progress. Try refreshing the page.</p></div>`;
         }
 
         const subtitle = await loadSubtitle(env.DB, auth.userId);
@@ -230,7 +230,7 @@ export default {
           const events = await buildProgramEvents(env.DB, auth.userId);
           content = eventsToHtml(events);
         } catch {
-          content = `<div class="card"><p style="color:var(--text-secondary)">No active program. Upload a program to get started.</p></div>`;
+          content = `<div class="card" style="text-align:center;padding:24px 16px"><p class="empty-state" style="margin-bottom:12px">No active program</p><p class="empty-state" style="font-size:13px">Upload a program JSON to get started</p></div>`;
         }
 
         const subtitle = await loadSubtitle(env.DB, auth.userId);

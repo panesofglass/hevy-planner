@@ -92,7 +92,12 @@ export function skillCardHtml(
  * Uses Datastar signals for expand/collapse toggling.
  */
 export function skillCards(skills: Skill[], assessments?: Map<string, string>): string {
-  if (skills.length === 0) return "";
+  if (skills.length === 0) {
+    return `<div class="section-header">Skills</div>
+<div class="card">
+  <p class="empty-state">No skills defined in this program</p>
+</div>`;
+  }
   const cards = skills.map((skill, index) => skillCardHtml(skill, index === 0, assessments));
   return `<div class="section-header">Skills</div>\n${cards.join("\n")}`;
 }
@@ -277,7 +282,12 @@ export function benchmarksSection(
   results: BenchmarkResultRow[],
   today: string
 ): string {
-  if (benchmarks.length === 0) return "";
+  if (benchmarks.length === 0) {
+    return `<div class="section-header">Benchmarks</div>
+<div class="card">
+  <p class="empty-state">No benchmarks defined in this program</p>
+</div>`;
+  }
 
   const items = benchmarks
     .map((b) => {
