@@ -1,0 +1,5 @@
+Now that we've resolved the deployment issues, can we try reverting to the Accept: text/event-stream instead of the /sse/* paths?
+
+---
+
+yes
