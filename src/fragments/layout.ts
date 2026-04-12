@@ -179,6 +179,7 @@ body {
   border: none;
   border-radius: 10px;
   padding: 10px 20px;
+  min-height: 44px;
   cursor: pointer;
   text-decoration: none;
   transition: opacity 0.15s;
@@ -289,6 +290,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 10px 0;
+  min-height: 44px;
 }
 
 .completed-item + .completed-item {
@@ -313,6 +315,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 10px 0;
+  min-height: 44px;
 }
 
 .upcoming-item + .upcoming-item {
@@ -390,6 +393,8 @@ body {
   color: var(--blue);
   text-decoration: none;
   margin: 6px 0 0 28px;
+  min-height: 44px;
+  padding: 4px 0;
 }
 
 .exercise-tags {
@@ -926,6 +931,14 @@ body {
 
 .sync-actions {
   margin-top: 8px;
+}
+
+/* ── Empty states ── */
+.empty-state {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 12px 0;
 }
 
 /* ── Routine list ── */
