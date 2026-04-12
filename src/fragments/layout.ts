@@ -75,6 +75,18 @@ export function htmlShell(opts: HtmlShellOptions): string {
     if('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js');
     }
+    window.addEventListener('offline', () => {
+      if(!document.getElementById('offline-banner')) {
+        const b = document.createElement('div');
+        b.id = 'offline-banner';
+        b.style.cssText = 'background:#D97706;color:#fff;text-align:center;padding:8px;font-size:14px;';
+        b.textContent = 'Offline — showing last saved view';
+        document.body.prepend(b);
+      }
+    });
+    window.addEventListener('online', () => {
+      document.getElementById('offline-banner')?.remove();
+    });
   </script>
   <link rel="stylesheet" href="/style.css">
 </head>
