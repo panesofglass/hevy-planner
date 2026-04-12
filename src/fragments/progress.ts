@@ -58,7 +58,10 @@ export function skillCardHtml(
 <div class="skill-edit-form" data-show="$${editSignal}">
   <textarea class="form-input" rows="3" data-bind:${textSignal}></textarea>
   <div class="skill-edit-actions">
-    <button class="btn btn-blue btn-sm" data-on:click="@post('/api/skill-assessment/${escapeAttr(skill.id)}')">Save</button>
+    <button class="btn btn-blue btn-sm" data-on:click="@post('/api/skill-assessment/${escapeAttr(skill.id)}')" data-indicator:_savingAssess data-attr:disabled="$_savingAssess">
+      <span data-show="!$_savingAssess">Save</span>
+      <span data-show="$_savingAssess">Saving\u2026</span>
+    </button>
     <button class="btn btn-ghost btn-sm" data-on:click="$${editSignal} = false">Cancel</button>
   </div>
 </div>`
@@ -145,7 +148,10 @@ export function roadmapSection(
         if (evaluation?.allPassed && isCurrent) {
           allPassedBadge = `<div class="gate-all-passed">All gates passed \u2014 ready to advance</div>
 <form data-on:submit__prevent="@post('/api/advance-phase/${escapeAttr(phase.id)}')" style="margin-top:8px">
-  <button type="submit" class="btn btn-sm btn-primary">Advance to Next Phase</button>
+  <button type="submit" class="btn btn-sm btn-primary" data-indicator:_advancing data-attr:disabled="$_advancing">
+    <span data-show="!$_advancing">Advance to Next Phase</span>
+    <span data-show="$_advancing">Advancing\u2026</span>
+  </button>
 </form>`;
         } else if (evaluation?.allPassed && isCompleted) {
           allPassedBadge = `<div class="gate-all-passed">All gates passed</div>`;
@@ -246,7 +252,10 @@ export function benchmarkCard(
       <input type="checkbox" name="passed" value="true"> Target met
     </label>
     <input type="text" name="notes" placeholder="Notes (optional)" style="width:100%;margin-bottom:4px">
-    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+    <button type="submit" class="btn btn-sm btn-primary" data-indicator:_savingBench data-attr:disabled="$_savingBench">
+      <span data-show="!$_savingBench">Save</span>
+      <span data-show="$_savingBench">Saving\u2026</span>
+    </button>
   </form>
 </div>`;
 

@@ -17,7 +17,10 @@ export function carsCard(routine: Routine, hevyRoutineId?: string): string {
 
   const hevyButton = hevyRoutineId
     ? `<a href="https://hevy.com/routine/${escapeAttr(hevyRoutineId)}" target="_blank" class="btn btn-blue">Open in Hevy</a>`
-    : `<button class="btn btn-blue" data-on:click="@post('/api/push-hevy/${escapeAttr(routine.id)}')">Push to Hevy</button>`;
+    : `<button class="btn btn-blue" data-on:click="@post('/api/push-hevy/${escapeAttr(routine.id)}')" data-indicator:_pushingDaily data-attr:disabled="$_pushingDaily">
+  <span data-show="!$_pushingDaily">Push to Hevy</span>
+  <span data-show="$_pushingDaily">Pushing\u2026</span>
+</button>`;
 
   const labelColor = escapeAttr(routine.color ?? "var(--green)");
   const label = escapeHtml(routine.isDaily ? "Daily" : routine.title);
@@ -46,7 +49,10 @@ export function heroRoutineCard(routine: Routine, queueItem: QueueItemRow): stri
 
   const hevyButton = queueItem.hevy_routine_id
     ? `<a href="https://hevy.com/routine/${escapeAttr(queueItem.hevy_routine_id)}" target="_blank" class="btn btn-blue">Open in Hevy</a>`
-    : `<button class="btn btn-blue" data-on:click="@post('/api/push-hevy/${escapeAttr(queueItem.routine_id)}')">Push to Hevy</button>`;
+    : `<button class="btn btn-blue" data-on:click="@post('/api/push-hevy/${escapeAttr(queueItem.routine_id)}')" data-indicator:_pushingHero data-attr:disabled="$_pushingHero">
+  <span data-show="!$_pushingHero">Push to Hevy</span>
+  <span data-show="$_pushingHero">Pushing\u2026</span>
+</button>`;
 
   return `<div class="card">
   <div class="card-label" style="color: var(--blue)">Next Session</div>
@@ -181,8 +187,9 @@ ${rows}
  * @param tz           - IANA timezone for formatting lastSyncAt (defaults to UTC)
  */
 export function syncButton(callbackUrl?: string | null, bearerToken?: string | null, lastSyncAt?: string | null, tz?: string): string {
-  const manualSync = `<button class="btn btn-ghost" data-on:click="@post('/api/pull')" style="font-size:13px">
-    Sync from Hevy
+  const manualSync = `<button class="btn btn-ghost" data-on:click="@post('/api/pull')" style="font-size:13px" data-indicator:_syncing data-attr:disabled="$_syncing">
+    <span data-show="!$_syncing">Sync from Hevy</span>
+    <span data-show="$_syncing">Syncing\u2026</span>
   </button>`;
 
   if (callbackUrl && bearerToken) {
@@ -190,8 +197,9 @@ export function syncButton(callbackUrl?: string | null, bearerToken?: string | n
     return `<div style="text-align:center; margin-top:20px">
   <div style="display:inline-flex; align-items:center; gap:8px; margin-bottom:8px">
     <span style="font-size:12px; color:var(--green); font-weight:500">&#9679; Auto-sync enabled</span>
-    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/unregister')" style="font-size:12px; padding:4px 10px">
-      Disable
+    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/unregister')" style="font-size:12px; padding:4px 10px" data-indicator:_unregistering data-attr:disabled="$_unregistering">
+      <span data-show="!$_unregistering">Disable</span>
+      <span data-show="$_unregistering">Disabling\u2026</span>
     </button>
   </div>
   <div style="margin-top:6px; text-align:left; display:inline-block">
@@ -220,8 +228,9 @@ export function syncButton(callbackUrl?: string | null, bearerToken?: string | n
     return `<div style="text-align:center; margin-top:20px">
   <div style="display:inline-flex; align-items:center; gap:8px; margin-bottom:8px">
     <span style="font-size:12px; color:var(--green); font-weight:500">&#9679; Auto-sync enabled</span>
-    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/unregister')" style="font-size:12px; padding:4px 10px">
-      Disable
+    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/unregister')" style="font-size:12px; padding:4px 10px" data-indicator:_unregistering data-attr:disabled="$_unregistering">
+      <span data-show="!$_unregistering">Disable</span>
+      <span data-show="$_unregistering">Disabling\u2026</span>
     </button>
   </div>
   ${statusLabel}
@@ -233,8 +242,9 @@ export function syncButton(callbackUrl?: string | null, bearerToken?: string | n
 
   return `<div style="text-align:center; margin-top:20px">
   <div style="margin-bottom:8px">
-    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/register')" style="font-size:13px">
-      Enable auto-sync
+    <button class="btn btn-ghost" data-on:click="@post('/api/webhooks/register')" style="font-size:13px" data-indicator:_registering data-attr:disabled="$_registering">
+      <span data-show="!$_registering">Enable auto-sync</span>
+      <span data-show="$_registering">Enabling\u2026</span>
     </button>
   </div>
   ${manualSync}

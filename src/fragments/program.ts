@@ -370,9 +370,17 @@ export function programLibrarySection(programs: ProgramRow[]): string {
       ? ""
       : `<div style="display:flex;gap:8px;margin-top:8px">
   <button class="btn btn-blue" style="font-size:12px;padding:4px 14px;height:auto"
-    data-on:click="@post('/api/switch-program/${p.id}')">Switch To</button>
+    data-on:click="@post('/api/switch-program/${p.id}')"
+    data-indicator:_switching data-attr:disabled="$_switching">
+    <span data-show="!$_switching">Switch To</span>
+    <span data-show="$_switching">Switching\u2026</span>
+  </button>
   <button class="btn" style="font-size:12px;padding:4px 14px;height:auto;color:var(--orange);border-color:var(--orange)"
-    data-on:click="@post('/api/delete-program/${p.id}')">Delete</button>
+    data-on:click="@post('/api/delete-program/${p.id}')"
+    data-indicator:_deleting data-attr:disabled="$_deleting">
+    <span data-show="!$_deleting">Delete</span>
+    <span data-show="$_deleting">Deleting\u2026</span>
+  </button>
 </div>`;
 
     return `<div style="padding:12px 0;${isActive ? "" : "opacity:0.75"}">
@@ -438,8 +446,11 @@ export function importProgramSection(): string {
       <button
         class="btn btn-blue btn-block"
         data-on:click="@post('/api/validate-import-program')"
+        data-indicator:_validating
+        data-attr:disabled="$_validating"
       >
-        Validate &amp; Preview
+        <span data-show="!$_validating">Validate &amp; Preview</span>
+        <span data-show="$_validating">Validating\u2026</span>
       </button>
     </div>
 
@@ -449,8 +460,11 @@ export function importProgramSection(): string {
       <button
         class="btn btn-blue btn-block"
         data-on:click="@post('/api/import-program')"
+        data-indicator:_importing
+        data-attr:disabled="$_importing"
       >
-        Apply Program
+        <span data-show="!$_importing">Apply Program</span>
+        <span data-show="$_importing">Importing\u2026</span>
       </button>
     </div>
   </div>
