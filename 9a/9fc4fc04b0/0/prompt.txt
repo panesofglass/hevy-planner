@@ -1,0 +1,45 @@
+hevy-svgrepo-com is in my iCloud Downloads folder
+
+---
+
+Looks good
+
+---
+
+1
+
+---
+
+Is the hevy-logo.svg not committed?
+
+---
+
+no
+
+---
+
+/simplify
+
+---
+
+/discipline
+
+---
+
+Fix pre-existing issues
+
+---
+
+Is this pushed? I don't see the sw loaded in https://hevy-planner.ryanriley.workers.dev/
+
+---
+
+push to main
+
+---
+
+How can I simulate offline?
+
+---
+
+When I do that, I don't see the error that I'm offline immediately. I have to refresh to test whether I am still online or offline.
