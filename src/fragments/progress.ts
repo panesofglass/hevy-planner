@@ -177,9 +177,15 @@ ${allPassedBadge}
     })
     .join("\n");
 
+  const allCompleted = resolved.every((p) => p.status === "completed");
+  const completeBadge = allCompleted
+    ? `<div class="gate-all-passed" style="margin-top:12px">Program complete</div>`
+    : "";
+
   return `<div id="roadmap-section"><h2 class="section-header">Roadmap</h2>
 <div class="card">
 ${items}
+${completeBadge}
 </div></div>`;
 }
 

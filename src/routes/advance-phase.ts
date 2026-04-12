@@ -43,9 +43,12 @@ export async function handleAdvancePhase(
     return new Response(message, { status: 400 });
   }
 
-  // Advance: set new current phase (or keep current if last phase)
-  const newPhaseId = validation.nextPhaseId ?? phaseId;
-  await advancePhase(env.DB, userId, programId, newPhaseId);
+  if ("lastPhase" in validation && validation.lastPhase) {
+    await advancePhase(env.DB, userId, programId, "__completed__");
+    return new Response(null, { status: 202 });
+  }
+
+  await advancePhase(env.DB, userId, programId, validation.nextPhaseId!);
 
   return new Response(null, { status: 202 });
 }

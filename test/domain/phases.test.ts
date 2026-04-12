@@ -139,12 +139,43 @@ describe("validateAdvancement", () => {
     }
   });
 
-  it("returns nextPhaseId as null for last phase", () => {
+  it("returns lastPhase flag for last phase advancement (#28)", () => {
     const evaluation: GateEvaluation = { tests: [], allPassed: true };
     const result = validateAdvancement(phases, "phase4", "phase4", evaluation);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.nextPhaseId).toBeNull();
+      expect("lastPhase" in result && result.lastPhase).toBe(true);
     }
+  });
+
+  it("does not set lastPhase for non-last phases", () => {
+    const evaluation: GateEvaluation = { tests: [], allPassed: true };
+    const result = validateAdvancement(phases, "phase1", "phase1", evaluation);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.nextPhaseId).toBe("phase2");
+      expect("lastPhase" in result).toBe(false);
+    }
+  });
+
+  it("falls back to first phase when currentPhaseId is unknown (#29)", () => {
+    const evaluation: GateEvaluation = { tests: [], allPassed: true };
+    // "unknown" doesn't match any phase — should treat phase1 as current
+    const result = validateAdvancement(phases, "phase1", "unknown", evaluation);
+    expect(result.ok).toBe(true);
+  });
+});
+
+describe("resolvePhaseStatuses — edge cases", () => {
+  it("falls back to first phase when currentPhaseId is unknown (#29)", () => {
+    const result = resolvePhaseStatuses(phases, "nonexistent");
+    expect(result[0].status).toBe("current");
+    expect(result[1].status).toBe("future");
+  });
+
+  it("marks all phases completed when currentPhaseId is __completed__ (#28)", () => {
+    const result = resolvePhaseStatuses(phases, "__completed__");
+    expect(result.every((p) => p.status === "completed")).toBe(true);
   });
 });
