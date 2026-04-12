@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Full bleed background — no rounded corners, maskable needs edge-to-edge -->
+  <rect width="512" height="512" fill="#0D0D0F"/>
+
+  <!-- Content scaled to 80% and centered (51px inset on each side) -->
+  <g transform="translate(51, 51) scale(0.8)">
+    <!-- Hevy dumbbell -->
+    <g transform="translate(86, 56) scale(7.08)" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m30.4809,29.4472v7.0532c0,1.8395,1.7614,3.167,3.5297,2.6602l6.5242-1.8697c1.5319-.439,2.6119-1.8002,2.6835-3.3921.1205-2.6811.2817-6.8836.2817-10.1869,0-3.1332-.182-6.4889-.3299-8.698-.1004-1.5006-1.0934-2.7908-2.5189-3.2702l-7.4323-2.4993c-1.5709-.5283-3.1969.6404-3.1969,2.2977v4.5241c0,2.6496-1.3709,5.1106-3.6237,6.5052l-4.7966,2.9693c-2.2529,1.3946-3.6237,3.8556-3.6237,6.5052v4.0467c0,1.892-1.8561,3.226-3.6494,2.623l-6.9797-2.3472c-1.4255-.4794-2.4185-1.7696-2.5189-3.2702-.1479-2.2091-.3299-5.5648-.3299-8.698,0-3.3033.1612-7.5058.2817-10.1869.0716-1.5919,1.1516-2.9531,2.6835-3.3921l6.9619-1.9952c1.549-.4439,3.092.719,3.092,2.3304v7.5085"/>
+    </g>
+
+    <!-- Calendar grid -->
+    <g transform="translate(340, 340)">
+      <rect width="140" height="140" rx="16" fill="#1C1C1E" stroke="#333" stroke-width="2"/>
+      <rect x="0" y="0" width="140" height="32" rx="16" fill="#D97706"/>
+      <rect x="0" y="16" width="140" height="16" fill="#D97706"/>
+      <rect x="16" y="44" width="28" height="24" rx="4" fill="#333"/>
+      <rect x="56" y="44" width="28" height="24" rx="4" fill="#333"/>
+      <rect x="96" y="44" width="28" height="24" rx="4" fill="#333"/>
+      <rect x="16" y="78" width="28" height="24" rx="4" fill="#333"/>
+      <rect x="56" y="78" width="28" height="24" rx="4" fill="#FFFFFF"/>
+      <rect x="96" y="78" width="28" height="24" rx="4" fill="#333"/>
+      <rect x="16" y="112" width="28" height="24" rx="4" fill="#333"/>
+      <rect x="56" y="112" width="28" height="24" rx="4" fill="#333"/>
+      <rect x="96" y="112" width="28" height="24" rx="4" fill="#333"/>
+    </g>
+  </g>
+</svg>
