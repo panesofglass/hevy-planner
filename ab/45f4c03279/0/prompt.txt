@@ -1,0 +1,13 @@
+That worked. Now, can we render the content in the page on the first response, as well? Shouldn't need to wait for the first SSE response.
+
+---
+
+establish immediately.
+
+---
+
+That should also provide an error if the connection is unavailable, so it's good to do that early.
+
+---
+
+A sounds right
