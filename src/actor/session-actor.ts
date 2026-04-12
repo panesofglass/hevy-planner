@@ -35,6 +35,7 @@ export class SessionActor implements DurableObject {
   }
 
   async fetch(request: Request): Promise<Response> {
+    console.log(`[SessionActor.fetch] ${request.method} ${request.url}`);
     const url = new URL(request.url);
 
     if (url.pathname === "/connect") {
@@ -107,13 +108,14 @@ export class SessionActor implements DurableObject {
 
         try {
           const events = await this.buildEventsForPage(page, this.env.DB, userId, tz);
-          console.log(`[SessionActor] projecting ${events.length} events`);
           for (const event of events) {
             this.writeSseEvent(sse, event);
           }
         } catch (err) {
-          console.error("[SessionActor] projection failed:", err instanceof Error ? err.message : err);
-          return;
+          const msg = err instanceof Error ? `${err.message}\n${err.stack}` : String(err);
+          sse.patchElements(
+            `<div id="content"><pre style="color:var(--orange);white-space:pre-wrap;padding:16px">${msg}</pre></div>`,
+          );
         }
 
         this.streams.add(sse);
