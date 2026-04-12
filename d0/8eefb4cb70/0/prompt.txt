@@ -1,0 +1,17 @@
+yes
+
+---
+
+also, fix the tests. No tests should be failing.
+
+---
+
+On all pages?
+
+---
+
+Deploy to production
+
+---
+
+Have an expert UX designer review the application and interaction design. What is good? What is bad? What should I improve?
