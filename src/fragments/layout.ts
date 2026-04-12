@@ -34,10 +34,11 @@ export function htmlShell(opts: HtmlShellOptions): string {
   <meta name="theme-color" content="#0D0D0F" />
   <title>${escapeHtml(opts.title)}</title>
   <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.8/bundles/datastar.js"></script>
   <script>
     if('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
+      navigator.serviceWorker.register('/sw.js');
     }
   </script>
   <link rel="stylesheet" href="/style.css">
