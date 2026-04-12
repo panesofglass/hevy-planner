@@ -1,0 +1,1 @@
+Is the webhook set up to push an update through the DO? I completed a workout but didn't see the auto-refresh. I suspect the data is updated but that there is no trigger through the DO.
