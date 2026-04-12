@@ -43,3 +43,7 @@ How can I simulate offline?
 ---
 
 When I do that, I don't see the error that I'm offline immediately. I have to refresh to test whether I am still online or offline.
+
+---
+
+yes
