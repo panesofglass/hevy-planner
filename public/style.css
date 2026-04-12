@@ -431,8 +431,9 @@ body {
 .sticky-footer {
   position: sticky;
   bottom: calc(72px + var(--safe-bottom));
-  padding: 12px 0;
-  background: linear-gradient(transparent, var(--bg) 20%);
+  padding: 24px 0 12px;
+  background: linear-gradient(transparent, var(--bg) 12px);
+  background-color: var(--bg);
 }
 
 /* ── Skill cards ── */
