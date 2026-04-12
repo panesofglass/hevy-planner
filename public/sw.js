@@ -4,6 +4,8 @@ self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
+const SHELL_PAGES = ["/", "/progress", "/program", "/style.css"];
+
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
@@ -12,6 +14,18 @@ self.addEventListener("activate", (event) => {
         Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
       )
       .then(() => self.clients.claim())
+      .then(() => {
+        // Pre-cache all pages so offline navigation works after first visit
+        return caches.open(CACHE_NAME).then((cache) =>
+          Promise.all(
+            SHELL_PAGES.map((url) =>
+              fetch(url).then((res) => {
+                if (res.ok) cache.put(url, res);
+              }).catch(() => {})
+            )
+          )
+        );
+      })
   );
 });
 
