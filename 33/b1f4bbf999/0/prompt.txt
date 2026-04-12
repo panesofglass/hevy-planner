@@ -1,0 +1,89 @@
+yes
+
+---
+
+also, fix the tests. No tests should be failing.
+
+---
+
+On all pages?
+
+---
+
+Deploy to production
+
+---
+
+Have an expert UX designer review the application and interaction design. What is good? What is bad? What should I improve?
+
+---
+
+Create issues first. Include priorities and dependencies.
+
+---
+
+Start on #37 and #38
+
+---
+
+No, I’m in remote control and cannot see. Make a pass, and we can iterate
+
+---
+
+Looks good
+
+---
+
+Start the next set
+
+---
+
+Last round
+
+---
+
+All tests still pass?
+
+---
+
+Push to production
+
+---
+
+Did these changes make moving to PWA harder, or is that still possible with caching the app shell separately?
+
+---
+
+What next?
+
+---
+
+Close issues, then do a visual polish pass
+
+---
+
+Now 28-29
+
+---
+
+/simplify
+
+---
+
+/discipline
+
+---
+
+Yes
+
+---
+
+/techdebt
+
+---
+
+Yes
+
+---
+
+Push
