@@ -55,3 +55,7 @@ My sw.js is not updating
 ---
 
 Why don't push messages from devtools work?
+
+---
+
+No, just wondering. What about fetching all pages on first page navigation? If I'm online, then go offline and then navigate, I get a blank page.
