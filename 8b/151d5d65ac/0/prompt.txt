@@ -159,3 +159,7 @@ Why can't the fetch just use the cookie?
 ---
 
 yes, and I don't think the request is making it all the way. It just spins
+
+---
+
+says no plan is loaded
