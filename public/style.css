@@ -410,7 +410,7 @@ body {
 }
 
 .coaching-details li::before {
-  content: "\\2022";
+  content: "\2022";
   position: absolute;
   left: 0;
   color: var(--orange);
