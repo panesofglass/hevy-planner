@@ -25,6 +25,11 @@ const APP_NAME = "Hevy Planner";
 // Local helpers (router-only concerns)
 // ──────────────────────────────────────────────────────────────────
 
+function isSSERequest(request: Request): boolean {
+  const accept = request.headers.get("accept") || "";
+  return accept.includes("text/event-stream");
+}
+
 type PageName = "today" | "progress" | "program";
 
 function getSessionActor(env: Env, userId: string, page: PageName): DurableObjectStub {
@@ -126,22 +131,17 @@ export default {
         });
       }
 
-      // ── SSE endpoints ───────────────────────────────────────────
-      const sseMatch = path.match(/^\/sse\/(today|progress|program)$/);
-      if (method === "GET" && sseMatch) {
-        const page = sseMatch[1] as PageName;
-        console.log(`[Router] SSE request: page=${page}, userId=${auth.userId}`);
-        const actor = getSessionActor(env, auth.userId, page);
-        const connectUrl = new URL("https://actor/connect");
-        connectUrl.searchParams.set("userId", auth.userId);
-        connectUrl.searchParams.set("page", page);
-        if (tz) connectUrl.searchParams.set("tz", tz);
-        console.log(`[Router] Proxying to DO: ${connectUrl.toString()}`);
-        return actor.fetch(new Request(connectUrl.toString()));
-      }
-
       // ── GET / ──────────────────────────────────────────────────
       if (method === "GET" && path === "/") {
+        if (isSSERequest(request)) {
+          const actor = getSessionActor(env, auth.userId, "today");
+          const connectUrl = new URL("https://actor/connect");
+          connectUrl.searchParams.set("userId", auth.userId);
+          connectUrl.searchParams.set("page", "today");
+          if (tz) connectUrl.searchParams.set("tz", tz);
+          return actor.fetch(new Request(connectUrl.toString()));
+        }
+
         const user = await getUser(env.DB, auth.userId);
         const subtitle = user ? await loadSubtitle(env.DB, auth.userId) : "Setup";
         return htmlResponse(
@@ -149,33 +149,51 @@ export default {
             title: APP_NAME,
             subtitle,
             activeTab: "today",
-            ssePath: "/sse/today",
+            ssePath: "/",
           })
         );
       }
 
       // ── GET /progress ──────────────────────────────────────────
       if (method === "GET" && path === "/progress") {
+        if (isSSERequest(request)) {
+          const actor = getSessionActor(env, auth.userId, "progress");
+          const connectUrl = new URL("https://actor/connect");
+          connectUrl.searchParams.set("userId", auth.userId);
+          connectUrl.searchParams.set("page", "progress");
+          if (tz) connectUrl.searchParams.set("tz", tz);
+          return actor.fetch(new Request(connectUrl.toString()));
+        }
+
         const subtitle = await loadSubtitle(env.DB, auth.userId);
         return htmlResponse(
           htmlShell({
             title: "Progress",
             subtitle,
             activeTab: "progress",
-            ssePath: "/sse/progress",
+            ssePath: "/progress",
           })
         );
       }
 
       // ── GET /program ──────────────────────────────────────────
       if (method === "GET" && path === "/program") {
+        if (isSSERequest(request)) {
+          const actor = getSessionActor(env, auth.userId, "program");
+          const connectUrl = new URL("https://actor/connect");
+          connectUrl.searchParams.set("userId", auth.userId);
+          connectUrl.searchParams.set("page", "program");
+          if (tz) connectUrl.searchParams.set("tz", tz);
+          return actor.fetch(new Request(connectUrl.toString()));
+        }
+
         const subtitle = await loadSubtitle(env.DB, auth.userId);
         return htmlResponse(
           htmlShell({
             title: "Program",
             subtitle,
             activeTab: "program",
-            ssePath: "/sse/program",
+            ssePath: "/program",
           })
         );
       }

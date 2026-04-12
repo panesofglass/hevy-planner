@@ -45,8 +45,8 @@ test.describe("Today page", () => {
     await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     expect(sseRequests.length).toBeGreaterThan(0);
-    // The SSE request should target the SSE endpoint
-    expect(sseRequests.some((url) => new URL(url).pathname === "/sse/today")).toBe(true);
+    // The SSE request should target the root path
+    expect(sseRequests.some((url) => new URL(url).pathname === "/")).toBe(true);
   });
 
   test("POST /api/pull returns 202", async ({ page }) => {
@@ -83,7 +83,7 @@ test.describe("SSE pages render content via SSE", () => {
     await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     const progressSSE = sseRequests.filter(
-      (url) => new URL(url).pathname === "/sse/progress"
+      (url) => new URL(url).pathname === "/progress"
     );
     expect(progressSSE.length).toBeGreaterThan(0);
   });
@@ -101,7 +101,7 @@ test.describe("SSE pages render content via SSE", () => {
     await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     const programSSE = sseRequests.filter(
-      (url) => new URL(url).pathname === "/sse/program"
+      (url) => new URL(url).pathname === "/program"
     );
     expect(programSSE.length).toBeGreaterThan(0);
   });

@@ -136,6 +136,12 @@ hevy-planner/
 - `wrangler d1 execute --file` uses the /import API endpoint which can fail with OAuth token auth (error 10000). Use `--command` for small queries or `d1 migrations apply` for larger SQL.
 - The `migrations/` directory is for schema migrations only — do NOT commit data-only migrations.
 
+## Deployment
+
+- Dev (`hevy-planner.ryanriley.workers.dev`) auto-deploys on push to `main`.
+- Production is a manual `wrangler deploy --env production`.
+- **Always apply D1 migrations to remote after deploying**: `wrangler d1 migrations apply hevy-planner-db --remote` (and `--env production` for prod). Missing migrations cause blank pages with no obvious error.
+
 ## Current Phase
 
 **SSE architecture migration** — Adopting official `@starfederation/datastar-sdk`, separating command/query channels via Durable Object actor. 98 vitest domain tests + 42 Playwright E2E tests. Design spec: `docs/superpowers/specs/2026-04-11-sse-architecture-design.md`.
