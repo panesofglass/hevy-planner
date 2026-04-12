@@ -69,7 +69,7 @@ export function progressionsSection(progressions: Progression[], currentWk: numb
 </div>`;
   }).join("\n");
 
-  return `<div class="section-header">Phases</div>
+  return `<h2 class="section-header">Phases</h2>
 <div class="card">
 ${items}
 </div>`;
@@ -117,12 +117,12 @@ export function routinesSection(program: Program): string {
   let html = "";
 
   if (dailyHtml) {
-    html += `<div class="section-header">Daily</div>
+    html += `<h2 class="section-header">Daily</h2>
 <div class="card">${dailyHtml}</div>`;
   }
 
   if (sessionsHtml) {
-    html += `<div class="section-header">Routines</div>
+    html += `<h2 class="section-header">Routines</h2>
 <div class="card">${sessionsHtml}</div>`;
   }
 
@@ -167,7 +167,7 @@ export function foundationsSection(foundations: Foundation[]): string {
 </div>`;
   });
 
-  return `<div class="section-header">Foundations</div>\n${cards.join("\n")}`;
+  return `<h2 class="section-header">Foundations</h2>\n${cards.join("\n")}`;
 }
 
 // ── Resources ──────────────────────────────────────────────────────
@@ -197,7 +197,7 @@ export function resourcesSection(resources: Resource[]): string {
     return `<div style="font-size:13px;font-weight:600;color:var(--text-tertiary);margin-bottom:4px">${escapeHtml(category)}</div>${itemsHtml}`;
   }).join("");
 
-  return `<div class="section-header">Resources</div>
+  return `<h2 class="section-header">Resources</h2>
 <div class="card">
 ${sections}
 </div>`;
@@ -212,7 +212,7 @@ export function bodiSection(items: BodiIntegration[]): string {
 
   for (const b of items) {
     // Section header + description
-    html += `<div class="section-header">BODi Integration</div>`;
+    html += `<h2 class="section-header">BODi Integration</h2>`;
     if (b.description) {
       html += `<div class="card"><div style="font-size:14px;color:var(--text-secondary);line-height:1.5">${escapeHtml(b.description)}</div></div>`;
     }
@@ -271,7 +271,7 @@ function bodiRecommendedProgramsHtml(programs: BodiRecommendedProgram[]): string
 </div>`;
   }).join("");
 
-  return `<div class="section-header" style="font-size:13px">Recommended Programs</div>
+  return `<h2 class="section-header" style="font-size:13px">Recommended Programs</h2>
 <div class="card">
 ${cards}
 </div>`;
@@ -310,7 +310,7 @@ function bodiHybridSchedulesHtml(schedules: BodiHybridSchedule[]): string {
 </div>`;
   }).join("\n");
 
-  return `<div class="section-header" style="font-size:13px">Hybrid Schedules</div>\n${sections}`;
+  return `<h2 class="section-header" style="font-size:13px">Hybrid Schedules</h2>\n${sections}`;
 }
 
 function bodiIntegrationRulesHtml(rules: BodiIntegrationRule[]): string {
@@ -336,7 +336,7 @@ function bodiIntegrationRulesHtml(rules: BodiIntegrationRule[]): string {
 </div>`;
   }).join("");
 
-  return `<div class="section-header" style="font-size:13px">Integration Rules</div>
+  return `<h2 class="section-header" style="font-size:13px">Integration Rules</h2>
 <div class="card">
 ${items}
 </div>`;
@@ -394,7 +394,7 @@ export function programLibrarySection(programs: ProgramRow[]): string {
 </div>`;
   }).join(`<div style="border-top:1px solid var(--separator)"></div>`);
 
-  return `<div class="section-header">Program Library</div>
+  return `<h2 class="section-header">Program Library</h2>
 <div class="card">
 ${items}
 </div>`;
@@ -414,7 +414,7 @@ ${items}
  */
 export function importProgramSection(): string {
   return `<div data-signals:import-open="false" data-signals:import-program-json="''" data-signals:import-template-id="''">
-  <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
+  <h2 class="section-header" style="display:flex;align-items:center;justify-content:space-between">
     <span>Import Program</span>
     <button
       class="btn btn-blue"
@@ -423,7 +423,7 @@ export function importProgramSection(): string {
     >
       <span data-text="$importOpen ? 'Cancel' : 'Upload JSON'">Upload JSON</span>
     </button>
-  </div>
+  </h2>
 
   <div data-show="$importOpen">
     <div class="card" style="margin-bottom:12px">

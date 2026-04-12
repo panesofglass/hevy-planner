@@ -93,13 +93,13 @@ export function skillCardHtml(
  */
 export function skillCards(skills: Skill[], assessments?: Map<string, string>): string {
   if (skills.length === 0) {
-    return `<div class="section-header">Skills</div>
+    return `<h2 class="section-header">Skills</h2>
 <div class="card">
   <p class="empty-state">No skills defined in this program</p>
 </div>`;
   }
   const cards = skills.map((skill, index) => skillCardHtml(skill, index === 0, assessments));
-  return `<div class="section-header">Skills</div>\n${cards.join("\n")}`;
+  return `<h2 class="section-header">Skills</h2>\n${cards.join("\n")}`;
 }
 
 /**
@@ -177,7 +177,7 @@ ${allPassedBadge}
     })
     .join("\n");
 
-  return `<div id="roadmap-section"><div class="section-header">Roadmap</div>
+  return `<div id="roadmap-section"><h2 class="section-header">Roadmap</h2>
 <div class="card">
 ${items}
 </div></div>`;
@@ -283,7 +283,7 @@ export function benchmarksSection(
   today: string
 ): string {
   if (benchmarks.length === 0) {
-    return `<div class="section-header">Benchmarks</div>
+    return `<h2 class="section-header">Benchmarks</h2>
 <div class="card">
   <p class="empty-state">No benchmarks defined in this program</p>
 </div>`;
@@ -296,7 +296,7 @@ export function benchmarksSection(
     })
     .join("\n");
 
-  return `<div class="section-header">Benchmarks</div>
+  return `<h2 class="section-header">Benchmarks</h2>
 <div class="card">
 ${items}
 </div>`;

@@ -43,7 +43,7 @@ export function routineDetailPage(
   }
 
   // Exercise list
-  parts.push(`<div class="section-header">Exercises (${routine.exercises.length})</div>`);
+  parts.push(`<h2 class="section-header">Exercises (${routine.exercises.length})</h2>`);
 
   routine.exercises.forEach((routineExercise, index) => {
     const template = templateMap.get(routineExercise.exerciseTemplateId);

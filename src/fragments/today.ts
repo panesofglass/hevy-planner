@@ -169,7 +169,7 @@ export function completedSection(items: CompletedItemData[]): string {
     })
     .join("\n");
 
-  return `<div class="section-header">Completed Today</div>
+  return `<h2 class="section-header">Completed Today</h2>
 <div class="card">
 ${rows}
 </div>`;
@@ -253,7 +253,7 @@ export function syncButton(callbackUrl?: string | null, bearerToken?: string | n
 
 export function upcomingSection(items: UpcomingItem[]): string {
   if (items.length === 0) {
-    return `<div class="section-header">Coming Up</div>
+    return `<h2 class="section-header">Coming Up</h2>
 <div class="card">
   <p class="empty-state">No upcoming sessions in queue</p>
 </div>`;
@@ -281,7 +281,7 @@ export function upcomingSection(items: UpcomingItem[]): string {
     })
     .join("\n");
 
-  return `<div class="section-header">Coming Up</div>
+  return `<h2 class="section-header">Coming Up</h2>
 <div class="card">
 ${rows}
 </div>`;
