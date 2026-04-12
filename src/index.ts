@@ -7,9 +7,7 @@ import { getAuthenticatedUserOrDev } from "./auth/access";
 import { getUser } from "./storage/queries";
 import { loadProgram as loadProgramForSubtitle } from "./storage/queries";
 import { htmlShell } from "./fragments/layout";
-import { setupPage } from "./fragments/setup";
-import { renderProgressPage } from "./routes/progress";
-import { renderProgramPage, handleValidateProgram, handleValidateImportProgram, handleImportProgram, handleSwitchProgram, handleDeleteProgram } from "./routes/program";
+import { handleValidateProgram, handleValidateImportProgram, handleImportProgram, handleSwitchProgram, handleDeleteProgram } from "./routes/program";
 import { renderRoutinePage } from "./routes/routine";
 import { handleSetup } from "./routes/setup";
 import { handlePush, handlePull, handleCleanupRoutines, handleManualComplete } from "./routes/sync";
@@ -31,7 +29,7 @@ function isSSERequest(request: Request): boolean {
   return accept.includes("text/event-stream");
 }
 
-type PageName = "today" | "program";
+type PageName = "today" | "progress" | "program";
 
 function getSessionActor(env: Env, userId: string, page: PageName): DurableObjectStub {
   const id = env.SESSION_ACTOR.idFromName(`${userId}:${page}`);
@@ -69,6 +67,7 @@ async function triggerReproject(env: Env, userId: string, page: PageName, tz?: s
   const actor = getSessionActor(env, userId, page);
   const url = new URL("https://actor/reproject");
   url.searchParams.set("userId", userId);
+  url.searchParams.set("page", page);
   if (tz) url.searchParams.set("tz", tz);
   await actor.fetch(new Request(url.toString()));
 }
@@ -115,26 +114,17 @@ export default {
 
       // ── GET / ──────────────────────────────────────────────────
       if (method === "GET" && path === "/") {
-        const user = await getUser(env.DB, auth.userId);
-        if (!user) {
-          return htmlResponse(
-            htmlShell({
-              title: APP_NAME,
-              subtitle: "Setup",
-              body: `<div id="content">${setupPage()}</div>`,
-            })
-          );
-        }
-
         if (isSSERequest(request)) {
           const actor = getSessionActor(env, auth.userId, "today");
           const connectUrl = new URL("https://actor/connect");
           connectUrl.searchParams.set("userId", auth.userId);
+          connectUrl.searchParams.set("page", "today");
           if (tz) connectUrl.searchParams.set("tz", tz);
           return actor.fetch(new Request(connectUrl.toString()));
         }
 
-        const subtitle = await loadSubtitle(env.DB, auth.userId);
+        const user = await getUser(env.DB, auth.userId);
+        const subtitle = user ? await loadSubtitle(env.DB, auth.userId) : "Setup";
         return htmlResponse(
           htmlShell({
             title: APP_NAME,
@@ -147,28 +137,44 @@ export default {
 
       // ── GET /progress ──────────────────────────────────────────
       if (method === "GET" && path === "/progress") {
+        if (isSSERequest(request)) {
+          const actor = getSessionActor(env, auth.userId, "progress");
+          const connectUrl = new URL("https://actor/connect");
+          connectUrl.searchParams.set("userId", auth.userId);
+          connectUrl.searchParams.set("page", "progress");
+          if (tz) connectUrl.searchParams.set("tz", tz);
+          return actor.fetch(new Request(connectUrl.toString()));
+        }
+
         const subtitle = await loadSubtitle(env.DB, auth.userId);
-        const body = await renderProgressPage(env, auth.userId, tz);
         return htmlResponse(
           htmlShell({
             title: "Progress",
             subtitle,
             activeTab: "progress",
-            body: `<div id="content">${body}</div>`,
+            ssePath: "/progress",
           })
         );
       }
 
       // ── GET /program ──────────────────────────────────────────
       if (method === "GET" && path === "/program") {
+        if (isSSERequest(request)) {
+          const actor = getSessionActor(env, auth.userId, "program");
+          const connectUrl = new URL("https://actor/connect");
+          connectUrl.searchParams.set("userId", auth.userId);
+          connectUrl.searchParams.set("page", "program");
+          if (tz) connectUrl.searchParams.set("tz", tz);
+          return actor.fetch(new Request(connectUrl.toString()));
+        }
+
         const subtitle = await loadSubtitle(env.DB, auth.userId);
-        const body = await renderProgramPage(env, auth.userId);
         return htmlResponse(
           htmlShell({
             title: "Program",
             subtitle,
             activeTab: "program",
-            body: `<div id="content">${body}</div>`,
+            ssePath: "/program",
           })
         );
       }
@@ -203,7 +209,14 @@ export default {
 
       // ── POST /api/import-program ────────────────────────────────
       if (method === "POST" && path === "/api/import-program") {
-        return await handleImportProgram(request, env, auth.userId, tz);
+        const response = await handleImportProgram(request, env, auth.userId, tz);
+        if (response.status === 202) {
+          await triggerReproject(env, auth.userId, "program", tz);
+        } else if (!response.ok) {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "program", msg || "Import failed");
+        }
+        return response;
       }
 
       // ── POST /api/setup/:templateId ─────────────────────────────
@@ -290,34 +303,69 @@ export default {
       // ── POST /api/switch-program/:id ───────────────────────────
       let switchMatch: RegExpMatchArray | null;
       if (method === "POST" && (switchMatch = path.match(/^\/api\/switch-program\/(\d+)$/))) {
-        return await handleSwitchProgram(env, auth.userId, parseInt(switchMatch[1], 10), tz);
+        const response = await handleSwitchProgram(env, auth.userId, parseInt(switchMatch[1], 10), tz);
+        if (response.status === 202) {
+          await triggerReproject(env, auth.userId, "program", tz);
+        } else if (!response.ok) {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "program", msg || "Switch failed");
+        }
+        return response;
       }
 
       // ── POST /api/delete-program/:id ───────────────────────────
       let deleteMatch: RegExpMatchArray | null;
       if (method === "POST" && (deleteMatch = path.match(/^\/api\/delete-program\/(\d+)$/))) {
-        return await handleDeleteProgram(env, auth.userId, parseInt(deleteMatch[1], 10));
+        const response = await handleDeleteProgram(env, auth.userId, parseInt(deleteMatch[1], 10));
+        if (response.status === 202) {
+          await triggerReproject(env, auth.userId, "program", tz);
+        } else if (!response.ok) {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "program", msg || "Delete failed");
+        }
+        return response;
       }
 
       // ── POST /api/skill-assessment/:id ─────────────────────────
       const assessMatch = path.match(/^\/api\/skill-assessment\/([a-zA-Z0-9_-]+)$/);
       if (method === "POST" && assessMatch) {
         const skillId = decodeURIComponent(assessMatch[1]);
-        return await handleSkillAssessment(request, env, auth.userId, skillId);
+        const response = await handleSkillAssessment(request, env, auth.userId, skillId);
+        if (response.status === 202) {
+          await triggerReproject(env, auth.userId, "progress", tz);
+        } else if (!response.ok) {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "progress", msg || "Assessment failed");
+        }
+        return response;
       }
 
       // ── POST /api/log-benchmark/:id ─────────────────────────────
       const benchmarkMatch = path.match(/^\/api\/log-benchmark\/([^/]+)$/);
       if (method === "POST" && benchmarkMatch) {
         const benchmarkId = decodeURIComponent(benchmarkMatch[1]);
-        return await handleLogBenchmark(request, env, auth.userId, benchmarkId, tz);
+        const response = await handleLogBenchmark(request, env, auth.userId, benchmarkId, tz);
+        if (response.status === 202) {
+          await triggerReproject(env, auth.userId, "progress", tz);
+        } else if (!response.ok) {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "progress", msg || "Log failed");
+        }
+        return response;
       }
 
       // ── POST /api/advance-phase/:phaseId ──────────────────────────
       const advanceMatch = path.match(/^\/api\/advance-phase\/([^/]+)$/);
       if (method === "POST" && advanceMatch) {
         const phaseId = decodeURIComponent(advanceMatch[1]);
-        return await handleAdvancePhase(env, auth.userId, phaseId);
+        const response = await handleAdvancePhase(env, auth.userId, phaseId);
+        if (response.status === 202) {
+          await triggerReproject(env, auth.userId, "progress", tz);
+        } else if (!response.ok) {
+          const msg = await response.clone().text();
+          await broadcastError(env, auth.userId, "progress", msg || "Phase advance failed");
+        }
+        return response;
       }
 
       // ── 404 ────────────────────────────────────────────────────

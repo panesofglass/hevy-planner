@@ -9,6 +9,9 @@
 import { ServerSentEventGenerator } from "@starfederation/datastar-sdk/web";
 import type { Env } from "../types";
 import { escapeHtml } from "../utils/html";
+import { buildTodayEvents } from "../routes/today";
+import { buildProgressEvents } from "../routes/progress";
+import { buildProgramEvents } from "../routes/program";
 
 // ── SSE events ──────────────────────────────────────────────────
 // Handlers send these. The DO decides how to render them via the SDK.
@@ -50,6 +53,21 @@ export class SessionActor implements DurableObject {
     return new Response("Not found", { status: 404 });
   }
 
+  // ── Page dispatch ────────────────────────────────────────────
+
+  private async buildEventsForPage(page: string, db: D1Database, userId: string, tz?: string): Promise<SseEvent[]> {
+    switch (page) {
+      case "today":
+        return buildTodayEvents(db, userId, tz);
+      case "progress":
+        return buildProgressEvents(db, userId, tz);
+      case "program":
+        return buildProgramEvents(db, userId);
+      default:
+        return [{ type: "error", message: `Unknown page: ${page}` }];
+    }
+  }
+
   // ── SSE connection ──────────────────────────────────────────
 
   private handleConnect(request: Request): Response {
@@ -60,13 +78,13 @@ export class SessionActor implements DurableObject {
         sseRef = sse;
         this.streams.add(sse);
 
-        // Project initial today-page state from D1
+        // Project initial page state from D1
         const url = new URL(request.url);
         const userId = url.searchParams.get("userId");
+        const page = url.searchParams.get("page") || "today";
         const tz = url.searchParams.get("tz") || undefined;
         if (userId) {
-          const { buildTodayEvents } = await import("../routes/today");
-          const events = await buildTodayEvents(this.env.DB, userId, tz);
+          const events = await this.buildEventsForPage(page, this.env.DB, userId, tz);
           for (const event of events) {
             this.writeSseEvent(sse, event);
           }
@@ -84,19 +102,19 @@ export class SessionActor implements DurableObject {
   }
 
   // ── Reproject ───────────────────────────────────────────────
-  // Re-render the today page state and push to all connected streams.
+  // Re-render page state from D1 and push to all connected streams.
 
   private async handleReproject(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const userId = url.searchParams.get("userId");
+    const page = url.searchParams.get("page") || "today";
     const tz = url.searchParams.get("tz") || undefined;
 
     if (!userId) {
       return new Response("userId required", { status: 400 });
     }
 
-    const { buildTodayEvents } = await import("../routes/today");
-    const events = await buildTodayEvents(this.env.DB, userId, tz);
+    const events = await this.buildEventsForPage(page, this.env.DB, userId, tz);
 
     const snapshot = [...this.streams];
     for (const sse of snapshot) {

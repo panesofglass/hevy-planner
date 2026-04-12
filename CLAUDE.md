@@ -41,9 +41,9 @@ POST /api/sync  ────────────►  validate, mutate D1
                                                            ──► push to browser
 ```
 
-**DO keying**: one DO per page per user — `userId:today`, `userId:program`. Prevents cross-page content leaks. Each DO instance is independent.
+**DO keying**: one DO per page per user — `userId:today`, `userId:progress`, `userId:program`. Prevents cross-page content leaks. Each DO instance is independent.
 
-**Static pages**: `/progress`, `/program`, `/routine/:id` serve full HTML directly from the Worker. No SSE, no DO.
+**Static pages**: `/routine/:id` serves full HTML directly from the Worker. No SSE, no DO.
 
 **Error reporting**: POST failures broadcast an error event (`{ type: "error", message }`) to the DO. The DO renders it as an orange card prepended to `#content`.
 
@@ -104,7 +104,7 @@ hevy-planner/
 ## Style & Conventions
 
 - **POST/PUT/DELETE handlers return 202 on success, 4xx on validation/auth failure.** They never produce SSE. The Datastar SDK (`@starfederation/datastar-sdk/web`) is only imported in `src/actor/session-actor.ts`. Route handlers never import it.
-- **Only `GET /` with `Accept: text/event-stream` produces an SSE stream**, served by the SessionActor DO. Static pages (`/progress`, `/program`, `/routine/:id`) serve full HTML — no SSE, no DO.
+- **`GET /`, `GET /progress`, and `GET /program` with `Accept: text/event-stream` produce SSE streams**, each served by a per-page SessionActor DO. `/routine/:id` serves full HTML — no SSE, no DO.
 - **SseEvent types are domain-oriented**: `patch`, `append`, `remove`, `signals`, `error`. The DO decides how to call the SDK based on event type. Route handlers send events; they don't know about SDK methods.
 - Domain functions are pure: data in, data out. No side effects.
 - Datastar v1 attributes use colon separators: `data-on:click`, `data-on:submit__prevent`, `data-signals:name` (NOT hyphens). Actions use `@` prefix: `@post('/url')`, `@get('/url')` (NOT `$$post`, `$$get`).

@@ -25,7 +25,7 @@ test.describe("SSE page isolation", () => {
     // Open /program in one tab and capture its initial content
     const programPage = await browser.newPage();
     await programPage.goto("/program");
-    await programPage.waitForLoadState("networkidle");
+    await expect(programPage.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
     const programContentBefore = await programPage.locator("#content").innerHTML();
 
     // Open / in another tab (opens SSE to today DO)
@@ -51,7 +51,7 @@ test.describe("SSE page isolation", () => {
     // Open /progress
     const progressPage = await browser.newPage();
     await progressPage.goto("/progress");
-    await progressPage.waitForLoadState("networkidle");
+    await expect(progressPage.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     // Trigger a today-page error (pull with no API key)
     const todayPage = await browser.newPage();
@@ -62,7 +62,7 @@ test.describe("SSE page isolation", () => {
     // Wait for any hypothetical leak
     await progressPage.waitForTimeout(2_000);
 
-    // Error card should NOT appear on /progress (it's a static page, no SSE)
+    // Error card should NOT appear on /progress (different DO than today)
     await expect(progressPage.locator("#error-card")).toHaveCount(0);
 
     await todayPage.close();

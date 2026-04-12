@@ -69,10 +69,9 @@ test.describe("Today page", () => {
   });
 });
 
-test.describe("Static pages do not use SSE", () => {
-  test("/progress serves full HTML without SSE", async ({ page }) => {
+test.describe("SSE pages render content via SSE", () => {
+  test("/progress renders content via SSE", async ({ page }) => {
     const sseRequests: string[] = [];
-
     page.on("request", (req) => {
       const accept = req.headers()["accept"] || "";
       if (accept.includes("text/event-stream")) {
@@ -81,19 +80,16 @@ test.describe("Static pages do not use SSE", () => {
     });
 
     await page.goto("/progress");
-    // Wait for the page to fully load and settle
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
-    // Progress is a static page — content is inline HTML, not SSE-driven
     const progressSSE = sseRequests.filter(
       (url) => new URL(url).pathname === "/progress"
     );
-    expect(progressSSE.length).toBe(0);
+    expect(progressSSE.length).toBeGreaterThan(0);
   });
 
-  test("/program serves full HTML without SSE", async ({ page }) => {
+  test("/program renders content via SSE", async ({ page }) => {
     const sseRequests: string[] = [];
-
     page.on("request", (req) => {
       const accept = req.headers()["accept"] || "";
       if (accept.includes("text/event-stream")) {
@@ -102,12 +98,30 @@ test.describe("Static pages do not use SSE", () => {
     });
 
     await page.goto("/program");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     const programSSE = sseRequests.filter(
       (url) => new URL(url).pathname === "/program"
     );
-    expect(programSSE.length).toBe(0);
+    expect(programSSE.length).toBeGreaterThan(0);
+  });
+
+  test("/routine/:id serves full HTML without SSE (read-only)", async ({ page }) => {
+    const sseRequests: string[] = [];
+    page.on("request", (req) => {
+      const accept = req.headers()["accept"] || "";
+      if (accept.includes("text/event-stream")) {
+        sseRequests.push(req.url());
+      }
+    });
+
+    await page.goto("/routine/daily");
+    await page.waitForLoadState("networkidle");
+
+    const routineSSE = sseRequests.filter(
+      (url) => new URL(url).pathname.startsWith("/routine/")
+    );
+    expect(routineSSE.length).toBe(0);
   });
 });
 

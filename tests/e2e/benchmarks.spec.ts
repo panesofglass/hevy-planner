@@ -76,7 +76,7 @@ test.describe("Benchmark logging", () => {
     );
 
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     // The benchmark card shows "Last tested: X days ago" after a result is logged
     const benchmarkCard = page.locator("#benchmark-wall-dorsiflexion");
@@ -85,13 +85,13 @@ test.describe("Benchmark logging", () => {
 
   test("benchmark without results shows 'no result' indicator", async ({ page }) => {
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
     await expect(page.locator("#content")).toContainText(/no result/i);
   });
 
   test("gate test status appears on roadmap", async ({ page }) => {
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
     await expect(page.locator("#content")).toContainText(/gate/i);
   });
 
@@ -106,13 +106,13 @@ test.describe("Benchmark logging", () => {
     );
 
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
     await expect(page.locator("#content")).toContainText(/last tested|retest|due/i);
   });
 
   test("roadmap shows distinct gate checklists per phase", async ({ page }) => {
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     // Each roadmap phase has its own gate checklist.
     // Phase 1 gates (Pain-Free Planks, etc.) and Phase 2 gates (Phase 2 Gate suffix)
@@ -140,7 +140,7 @@ test.describe("Benchmark logging", () => {
     );
 
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     const content = page.locator("#content");
     await expect(content).toContainText(/left/i);
@@ -220,7 +220,7 @@ test.describe.serial("Phase advancement", () => {
     await page.request.post(`${BASE_URL}/api/advance-phase/phase1`);
 
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     // After Phase 1 is advanced, the roadmap should show a completed indicator.
     // Check for the CSS class or checkmark that indicates completion.
@@ -233,7 +233,7 @@ test.describe.serial("Phase advancement", () => {
     // This tests the CURRENT phase (phase2 after phase1 was advanced).
     // Log phase2 gates if available, or just check that the roadmap shows gate info.
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     // After phase1 is advanced, the current phase should show gate test requirements
     const content = page.locator("#content");

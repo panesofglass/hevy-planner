@@ -71,14 +71,14 @@ test.describe.serial("Skill assessments", () => {
     );
 
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     await expect(page.locator("#content")).toContainText("5 strict pull-ups");
   });
 
   test("user assessment overrides program default", async ({ page }) => {
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     const content = page.locator("#content");
     // User assessment should appear
@@ -99,7 +99,7 @@ test.describe.serial("Skill assessments", () => {
     expect(response.status()).toBe(202);
 
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     const content = page.locator("#content");
     // New text should be present in the skill card
@@ -114,7 +114,7 @@ test.describe.serial("Skill assessments", () => {
 
   test("skill cards have assessment edit affordance", async ({ page }) => {
     await page.goto("/progress");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     const html = await page.locator("#content").innerHTML();
     expect(html).toContain("skill-assessment");

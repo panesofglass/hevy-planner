@@ -21,36 +21,21 @@ test.describe("Program page", () => {
     }
   });
 
-  test("/program page renders without SSE", async ({ page }) => {
-    const sseRequests: string[] = [];
-
-    page.on("request", (req) => {
-      const accept = req.headers()["accept"] || "";
-      if (accept.includes("text/event-stream")) {
-        sseRequests.push(req.url());
-      }
-    });
-
+  test("/program page renders content via SSE", async ({ page }) => {
     await page.goto("/program");
-    await page.waitForLoadState("networkidle");
-
-    // No SSE requests should target the /program path
-    const programSSE = sseRequests.filter(
-      (url) => new URL(url).pathname === "/program"
-    );
-    expect(programSSE.length).toBe(0);
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
   });
 
   test("page contains BODi section", async ({ page }) => {
     await page.goto("/program");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     await expect(page.locator("#content")).toContainText("BODi Integration");
   });
 
   test("page contains trainer info", async ({ page }) => {
     await page.goto("/program");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     const content = page.locator("#content");
     // Program JSON has trainers: Amoila Cesar, Joel Freeman, Sagi Kalev
@@ -59,7 +44,7 @@ test.describe("Program page", () => {
 
   test("page contains hybrid schedule section", async ({ page }) => {
     await page.goto("/program");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     const content = page.locator("#content");
     // Hybrid schedule names from program JSON
@@ -89,7 +74,7 @@ test.describe("Program page", () => {
 
   test("page contains integration rules", async ({ page }) => {
     await page.goto("/program");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#content")).not.toBeEmpty({ timeout: 10_000 });
 
     const content = page.locator("#content");
     // Integration rules section header
