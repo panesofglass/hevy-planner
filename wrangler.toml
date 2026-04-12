@@ -17,7 +17,7 @@ bindings = [
 
 [[migrations]]
 tag = "v1"
-new_classes = ["SessionActor"]
+new_sqlite_classes = ["SessionActor"]
 
 [vars]
 ENVIRONMENT = "development"
