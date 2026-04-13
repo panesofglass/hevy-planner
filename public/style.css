@@ -33,7 +33,7 @@ body {
 }
 
 .page-title {
-  font-size: 28px;
+  font-size: clamp(1.375rem, 1rem + 1.5vw, 1.75rem);
   font-weight: 700;
   letter-spacing: -0.3px;
 }
@@ -46,6 +46,7 @@ body {
 
 .page-main {
   padding: 8px 16px 24px;
+  container-type: inline-size;
 }
 
 /* ── Cards ── */
@@ -125,7 +126,7 @@ body {
 }
 
 .stat-value {
-  font-size: 20px;
+  font-size: clamp(1.125rem, 0.9rem + 1vw, 1.25rem);
   font-weight: 700;
   color: var(--blue);
 }
@@ -957,4 +958,12 @@ body {
 
 .routine-list-link + .routine-list-link .routine-list-item {
   border-top: 1px solid var(--separator);
+}
+
+/* ── Accessibility ── */
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
