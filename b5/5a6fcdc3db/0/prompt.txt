@@ -1,0 +1,17 @@
+Do a comparison of hevy-planner with ~/Code/eg-grid. What's similar? What's different? Anything I can learn and apply to hevy-planner?
+
+---
+
+From comparison: 1, eg-grid would be sufficient. Is it possible to adopt that? 2 is fine for now. 3 I prefer our approach. 4 no action. 5 does eg-grid use a better pattern? The description seems more "correct" but not sure if it is right for hevy-planner. From concrete considerations: 1 agree container queries are better. 2 with using writer.closed for cleanup. 3 clamp is a welcom addition. 4 agree. 5 agree, and it looks like this is a both-and, not an either-or. Is the SQLite in DO useful for hevy-planner?
+
+---
+
+Yes, but also help me understand whether writer.closed is even available to me. Is it an addition, or a replacement?
+
+---
+
+yes, create the issues, then begin implementation
+
+---
+
+proceed
