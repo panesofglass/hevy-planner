@@ -1,0 +1,1 @@
+dd the separate tsconfig for e2e tests. Why are you not doing the right thing and doing a stupid thing?
