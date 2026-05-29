@@ -6,11 +6,16 @@
     "description": "12-week sequential program (weeks 9–20). One session per skill goal in a rotating queue — muscle-up, pistol squat, one-arm push-up, handstand, and tuck planche. Evidence-based compound exercise selection for maximum muscle coverage per session, 20–30 min each.",
     "author": "AI Coach",
     "durationWeeks": 12,
-    "tags": ["strength", "calisthenics", "skills", "hypertrophy", "movesmethod", "phase2"]
+    "tags": [
+      "strength",
+      "calisthenics",
+      "skills",
+      "hypertrophy",
+      "movesmethod",
+      "phase2"
+    ]
   },
-
   "exerciseTemplates": [
-
     {
       "id": "neck-cars",
       "title": "Neck CARs",
@@ -18,7 +23,11 @@
       "equipmentCategory": "none",
       "primaryMuscleGroup": "neck",
       "notes": "Controlled Articular Rotation. Slow full circle each direction. Keep shoulders still. Week 4+: add 3–5s PAILs contraction at end range.",
-      "tags": ["cars", "daily", "movesmethod"]
+      "tags": [
+        "cars",
+        "daily",
+        "movesmethod"
+      ]
     },
     {
       "id": "shoulder-cars",
@@ -27,7 +36,11 @@
       "equipmentCategory": "none",
       "primaryMuscleGroup": "shoulders",
       "notes": "Full circumduction each arm. Maximize range without compensation. Week 3–4: add PAILs hold at top/bottom. Week 5+: full PAILs/RAILs. Weeks 9–12: add wrist PAILs/RAILs at end for handstand prep.",
-      "tags": ["cars", "daily", "movesmethod"]
+      "tags": [
+        "cars",
+        "daily",
+        "movesmethod"
+      ]
     },
     {
       "id": "hip-cars",
@@ -36,7 +49,11 @@
       "equipmentCategory": "none",
       "primaryMuscleGroup": "hip_flexors",
       "notes": "Full hip circumduction each leg, standing. Lock the stance leg. Week 3–4: add PAILs at end range. Week 5+: full PAILs/RAILs.",
-      "tags": ["cars", "daily", "movesmethod"]
+      "tags": [
+        "cars",
+        "daily",
+        "movesmethod"
+      ]
     },
     {
       "id": "ankle-cars",
@@ -45,7 +62,12 @@
       "equipmentCategory": "none",
       "primaryMuscleGroup": "calves",
       "notes": "Full ankle circumduction each foot. Focus on right side — repaired Achilles. Week 5+: add PAILs/RAILs at dorsiflexion end range.",
-      "tags": ["cars", "daily", "movesmethod", "achilles"]
+      "tags": [
+        "cars",
+        "daily",
+        "movesmethod",
+        "achilles"
+      ]
     },
     {
       "id": "spine-cars",
@@ -54,7 +76,11 @@
       "equipmentCategory": "none",
       "primaryMuscleGroup": "other",
       "notes": "Slow segmental movement from cervical through lumbar. Move one vertebra at a time. Full effort with irradiation.",
-      "tags": ["cars", "daily", "movesmethod"]
+      "tags": [
+        "cars",
+        "daily",
+        "movesmethod"
+      ]
     },
     {
       "id": "wrist-cars",
@@ -63,7 +89,11 @@
       "equipmentCategory": "none",
       "primaryMuscleGroup": "forearms",
       "notes": "Full wrist circumduction each wrist. Weeks 9–12: add PAILs/RAILs at extension end range for handstand loading.",
-      "tags": ["cars", "daily", "movesmethod"]
+      "tags": [
+        "cars",
+        "daily",
+        "movesmethod"
+      ]
     },
     {
       "id": "tspine-rotation",
@@ -72,19 +102,29 @@
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "upper_back",
       "notes": "Thread hand behind head, rotate to ceiling. Keep hips square. Full effort irradiation at end range.",
-      "tags": ["cars", "daily", "thoracic"]
+      "tags": [
+        "cars",
+        "daily",
+        "thoracic"
+      ]
     },
-
     {
       "id": "pull-up",
       "title": "Pull-Up",
       "type": "bodyweight_reps",
       "equipmentCategory": "pull_up_bar",
       "primaryMuscleGroup": "lats",
-      "secondaryMuscleGroups": ["biceps", "upper_back", "traps"],
+      "secondaryMuscleGroups": [
+        "biceps",
+        "upper_back",
+        "traps"
+      ],
       "notes": "Alternate grip each session: pronated (pull-up) builds lat width, supinated (chin-up) increases bicep activation for the muscle-up transition. Do 2–3 scapular pull-ups (depress shoulders, no elbow bend) as warm-up before working sets. Use band assistance if needed.",
       "searchTerms": "pull up chin up scapular pull up",
-      "tags": ["muscle-up", "vertical-pull"],
+      "tags": [
+        "muscle-up",
+        "vertical-pull"
+      ],
       "progressionByPhase": {
         "Foundation": {
           "sets": "3×max (band-assisted; aim for 5+ unassisted by end of phase)",
@@ -106,14 +146,27 @@
       "type": "weight_reps",
       "equipmentCategory": "dumbbell",
       "primaryMuscleGroup": "upper_back",
-      "secondaryMuscleGroups": ["lats", "biceps", "traps"],
+      "secondaryMuscleGroups": [
+        "lats",
+        "biceps",
+        "traps"
+      ],
       "notes": "Horizontal pull to complement vertical pull-up. Brace on bench, full ROM. Squeeze shoulder blade at top.",
       "searchTerms": "dumbbell row one arm row",
-      "tags": ["muscle-up", "horizontal-pull"],
+      "tags": [
+        "muscle-up",
+        "horizontal-pull"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×10-12 (moderate weight — focus on form)" },
-        "Build": { "sets": "3×10-12 (increase weight progressively)" },
-        "Integration": { "sets": "3×8-10 (heavier weight, control the eccentric)" }
+        "Foundation": {
+          "sets": "3×10-12 (moderate weight — focus on form)"
+        },
+        "Build": {
+          "sets": "3×10-12 (increase weight progressively)"
+        },
+        "Integration": {
+          "sets": "3×8-10 (heavier weight, control the eccentric)"
+        }
       }
     },
     {
@@ -122,14 +175,29 @@
       "type": "duration",
       "equipmentCategory": "pull_up_bar",
       "primaryMuscleGroup": "forearms",
-      "secondaryMuscleGroups": ["lats", "shoulders"],
+      "secondaryMuscleGroups": [
+        "lats",
+        "shoulders"
+      ],
       "notes": "Loop a towel over the bar and grip it so the bar presses into the heel of your palm (false grip position). This is the wrist position required at the muscle-up transition. Foundation: passive hang. Build: add active shoulder depression while hanging. Integration: commit to true false grip on the bar without towel.",
       "searchTerms": "false grip hang muscle up rings",
-      "tags": ["muscle-up", "grip"],
+      "tags": [
+        "muscle-up",
+        "grip"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "2×10-15s (towel, passive grip)", "notes": "Just hold. Build tissue tolerance." },
-        "Build": { "sets": "2×15-20s (active depression)", "notes": "Depress shoulders while hanging — don't just dangle." },
-        "Integration": { "sets": "2×20-30s (bar false grip)", "notes": "Attempt on bar directly, no towel." }
+        "Foundation": {
+          "sets": "2×10-15s (towel, passive grip)",
+          "notes": "Just hold. Build tissue tolerance."
+        },
+        "Build": {
+          "sets": "2×15-20s (active depression)",
+          "notes": "Depress shoulders while hanging — don't just dangle."
+        },
+        "Integration": {
+          "sets": "2×20-30s (bar false grip)",
+          "notes": "Attempt on bar directly, no towel."
+        }
       }
     },
     {
@@ -138,27 +206,46 @@
       "type": "weight_reps",
       "equipmentCategory": "dumbbell",
       "primaryMuscleGroup": "biceps",
-      "secondaryMuscleGroups": ["forearms"],
+      "secondaryMuscleGroups": [
+        "forearms"
+      ],
       "notes": "Hypertrophy range 10–12 reps. Full supination at top. Bicep peak contraction is critical for the muscle-up transition — this is direct skill-relevant hypertrophy, not vanity work.",
       "searchTerms": "dumbbell curl bicep curl",
-      "tags": ["muscle-up", "hypertrophy", "arms"],
+      "tags": [
+        "muscle-up",
+        "hypertrophy",
+        "arms"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×12 (moderate weight, strict form)" },
-        "Build": { "sets": "3×10-12 (increase weight when 12 feels easy)" },
-        "Integration": { "sets": "3×8-10 (heavier, controlled eccentric)" }
+        "Foundation": {
+          "sets": "3×12 (moderate weight, strict form)"
+        },
+        "Build": {
+          "sets": "3×10-12 (increase weight when 12 feels easy)"
+        },
+        "Integration": {
+          "sets": "3×8-10 (heavier, controlled eccentric)"
+        }
       }
     },
-
     {
       "id": "atg-split-squat",
       "title": "ATG Split Squat",
       "type": "bodyweight_reps",
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "quadriceps",
-      "secondaryMuscleGroups": ["glutes", "hip_flexors", "calves"],
+      "secondaryMuscleGroups": [
+        "glutes",
+        "hip_flexors",
+        "calves"
+      ],
       "notes": "ATG (Ass-to-Grass) split squat. EMG-confirmed to cover quads, glutes, hip flexors, and ankle dorsiflexion simultaneously — the most efficient path to pistol squat. Drive front knee over toes aggressively. Use bench support if needed in Foundation phase.",
       "searchTerms": "ATG split squat Ben Patrick knees over toes split squat",
-      "tags": ["pistol-squat", "knee-health", "ankle-mobility"],
+      "tags": [
+        "pistol-squat",
+        "knee-health",
+        "ankle-mobility"
+      ],
       "progressionByPhase": {
         "Foundation": {
           "sets": "3×6 each leg (bodyweight, partial depth acceptable)",
@@ -180,14 +267,26 @@
       "type": "weight_reps",
       "equipmentCategory": "dumbbell",
       "primaryMuscleGroup": "hamstrings",
-      "secondaryMuscleGroups": ["glutes", "lower_back"],
+      "secondaryMuscleGroups": [
+        "glutes",
+        "lower_back"
+      ],
       "notes": "Posterior chain: hamstrings, glutes, lower back in one movement. Push hips back, maintain neutral spine, feel the hamstring stretch. Pairs with ATG split squat to cover the entire lower body in two exercises.",
       "searchTerms": "romanian deadlift RDL dumbbell hinge",
-      "tags": ["pistol-squat", "posterior-chain"],
+      "tags": [
+        "pistol-squat",
+        "posterior-chain"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×8-10 (25–35 lb each, focus on hip hinge pattern)" },
-        "Build": { "sets": "3×8-10 (35–50 lb each, 1–2s pause at bottom stretch)" },
-        "Integration": { "sets": "3×8 (50–65 lb each; introduce single-leg RDL variation)" }
+        "Foundation": {
+          "sets": "3×8-10 (25–35 lb each, focus on hip hinge pattern)"
+        },
+        "Build": {
+          "sets": "3×8-10 (35–50 lb each, 1–2s pause at bottom stretch)"
+        },
+        "Integration": {
+          "sets": "3×8 (50–65 lb each; introduce single-leg RDL variation)"
+        }
       }
     },
     {
@@ -198,11 +297,23 @@
       "primaryMuscleGroup": "calves",
       "notes": "Alfredson protocol — maintained from Phase 1 for repaired Achilles. Rise on two feet, lower on one (slow 3–5s eccentric). Do both straight-leg and bent-knee sets to target gastrocnemius and soleus.",
       "searchTerms": "eccentric calf raise Alfredson protocol Achilles tendon",
-      "tags": ["achilles", "ankle-health"],
+      "tags": [
+        "achilles",
+        "ankle-health"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "2×15 each leg", "notes": "Both straight and bent-knee sets." },
-        "Build": { "sets": "2×15 each leg", "notes": "Slow 5s eccentric. Use a step edge for full range." },
-        "Integration": { "sets": "2×15 each leg", "notes": "Add light weight (hold dumbbell) if no pain." }
+        "Foundation": {
+          "sets": "2×15 each leg",
+          "notes": "Both straight and bent-knee sets."
+        },
+        "Build": {
+          "sets": "2×15 each leg",
+          "notes": "Slow 5s eccentric. Use a step edge for full range."
+        },
+        "Integration": {
+          "sets": "2×15 each leg",
+          "notes": "Add light weight (hold dumbbell) if no pain."
+        }
       }
     },
     {
@@ -211,31 +322,61 @@
       "type": "duration",
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "calves",
-      "secondaryMuscleGroups": ["abdominals"],
+      "secondaryMuscleGroups": [
+        "abdominals"
+      ],
       "notes": "Eyes closed. Directly targets the Phase 1 gate test gap. Start on a firm surface. Progress to folded towel/pillow for increased proprioceptive challenge. Right side will be harder post-Achilles repair — accept asymmetry and work both sides.",
       "searchTerms": "single leg balance proprioception eyes closed",
-      "tags": ["pistol-squat", "proprioception", "gate-test"],
+      "tags": [
+        "pistol-squat",
+        "proprioception",
+        "gate-test"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "2×20-30s each leg (firm surface)", "notes": "Touch wall lightly if about to fall — don't use it as support." },
-        "Build": { "sets": "2×30s each leg (folded towel)", "notes": "Unstable surface adds proprioceptive challenge." },
-        "Integration": { "sets": "2×30-45s each leg (pillow or balance pad)", "notes": "Gate test target: 30s each side." }
+        "Foundation": {
+          "sets": "2×20-30s each leg (firm surface)",
+          "notes": "Touch wall lightly if about to fall — don't use it as support."
+        },
+        "Build": {
+          "sets": "2×30s each leg (folded towel)",
+          "notes": "Unstable surface adds proprioceptive challenge."
+        },
+        "Integration": {
+          "sets": "2×30-45s each leg (pillow or balance pad)",
+          "notes": "Gate test target: 30s each side."
+        }
       }
     },
-
     {
       "id": "dip",
       "title": "Dip",
       "type": "bodyweight_reps",
       "equipmentCategory": "pull_up_bar",
       "primaryMuscleGroup": "chest",
-      "secondaryMuscleGroups": ["triceps", "shoulders"],
+      "secondaryMuscleGroups": [
+        "triceps",
+        "shoulders"
+      ],
       "notes": "Research confirms dips as the most comprehensive push exercise: chest, triceps, anterior delts, and serratus anterior simultaneously. Lean forward for chest emphasis (one-arm push-up path). Stay upright for tricep emphasis (muscle-up push-over). Full ROM — shoulders below elbows at bottom.",
       "searchTerms": "dip parallel bar dip chest dip tricep dip",
-      "tags": ["one-arm-push-up", "muscle-up", "hypertrophy", "chest"],
+      "tags": [
+        "one-arm-push-up",
+        "muscle-up",
+        "hypertrophy",
+        "chest"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "4×max (band-assisted if needed)", "notes": "Full ROM. Chest-forward lean." },
-        "Build": { "sets": "4×max (reduce or eliminate band; 2–3s pause at bottom)" },
-        "Integration": { "sets": "4×max + attempt +10–25 lb weighted", "notes": "Use dip belt. Aim for 15+ bodyweight reps." }
+        "Foundation": {
+          "sets": "4×max (band-assisted if needed)",
+          "notes": "Full ROM. Chest-forward lean."
+        },
+        "Build": {
+          "sets": "4×max (reduce or eliminate band; 2–3s pause at bottom)"
+        },
+        "Integration": {
+          "sets": "4×max + attempt +10–25 lb weighted",
+          "notes": "Use dip belt. Aim for 15+ bodyweight reps."
+        }
       }
     },
     {
@@ -244,14 +385,27 @@
       "type": "weight_reps",
       "equipmentCategory": "dumbbell",
       "primaryMuscleGroup": "chest",
-      "secondaryMuscleGroups": ["shoulders", "triceps"],
+      "secondaryMuscleGroups": [
+        "shoulders",
+        "triceps"
+      ],
       "notes": "Upper chest angle — the most undertrained chest region. 30–45° incline. Hypertrophy range 10–12 reps with progressive overload. This directly addresses the chest mass loss concern.",
       "searchTerms": "incline dumbbell press upper chest incline press",
-      "tags": ["one-arm-push-up", "hypertrophy", "chest"],
+      "tags": [
+        "one-arm-push-up",
+        "hypertrophy",
+        "chest"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×10-12 (25–35 lb each)" },
-        "Build": { "sets": "3×10-12 (increase 5 lb when top of range is easy)" },
-        "Integration": { "sets": "3×8-10 (progressive overload to comfortable max)" }
+        "Foundation": {
+          "sets": "3×10-12 (25–35 lb each)"
+        },
+        "Build": {
+          "sets": "3×10-12 (increase 5 lb when top of range is easy)"
+        },
+        "Integration": {
+          "sets": "3×8-10 (progressive overload to comfortable max)"
+        }
       }
     },
     {
@@ -260,14 +414,29 @@
       "type": "bodyweight_reps",
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "chest",
-      "secondaryMuscleGroups": ["triceps", "shoulders"],
+      "secondaryMuscleGroups": [
+        "triceps",
+        "shoulders"
+      ],
       "notes": "Direct path to one-arm push-up. Wide stance, push to one side while extending the other arm. Mid-chest emphasis with high stability demand. Reduce support arm as strength builds. The asymmetric loading also serves as planche preparation.",
       "searchTerms": "archer push up one arm push up progression",
-      "tags": ["one-arm-push-up", "chest"],
+      "tags": [
+        "one-arm-push-up",
+        "chest"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×5 each side", "notes": "Support hand on fist for elevation if needed." },
-        "Build": { "sets": "3×5 each side", "notes": "Support arm nearly straight. Increase lean toward working arm." },
-        "Integration": { "sets": "3×5 each side", "notes": "Minimal support. Approach one-arm negative (lower slowly on one arm)." }
+        "Foundation": {
+          "sets": "3×5 each side",
+          "notes": "Support hand on fist for elevation if needed."
+        },
+        "Build": {
+          "sets": "3×5 each side",
+          "notes": "Support arm nearly straight. Increase lean toward working arm."
+        },
+        "Integration": {
+          "sets": "3×5 each side",
+          "notes": "Minimal support. Approach one-arm negative (lower slowly on one arm)."
+        }
       }
     },
     {
@@ -276,31 +445,58 @@
       "type": "weight_reps",
       "equipmentCategory": "dumbbell",
       "primaryMuscleGroup": "chest",
-      "secondaryMuscleGroups": ["triceps", "shoulders"],
+      "secondaryMuscleGroups": [
+        "triceps",
+        "shoulders"
+      ],
       "notes": "Flat chest angle + triceps. Floor press limits ROM at the bottom (protects shoulder in the stretched position) while fully loading the mid-range and top contraction. Covers the flat chest angle not addressed by incline or dip. Better than bench press at Phase 2 given the shoulder history.",
       "searchTerms": "dumbbell floor press flat press chest",
-      "tags": ["one-arm-push-up", "hypertrophy", "chest"],
+      "tags": [
+        "one-arm-push-up",
+        "hypertrophy",
+        "chest"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×10-12 (20–30 lb each)" },
-        "Build": { "sets": "3×10-12 (progressive overload)" },
-        "Integration": { "sets": "3×8-10 (heavier; squeeze chest hard at top)" }
+        "Foundation": {
+          "sets": "3×10-12 (20–30 lb each)"
+        },
+        "Build": {
+          "sets": "3×10-12 (progressive overload)"
+        },
+        "Integration": {
+          "sets": "3×8-10 (heavier; squeeze chest hard at top)"
+        }
       }
     },
-
     {
       "id": "wall-handstand-hold",
       "title": "Wall Handstand Hold",
       "type": "duration",
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "shoulders",
-      "secondaryMuscleGroups": ["abdominals", "triceps", "forearms"],
+      "secondaryMuscleGroups": [
+        "abdominals",
+        "triceps",
+        "forearms"
+      ],
       "notes": "Face-to-wall kick-up. All 3 shoulder heads loaded simultaneously. Wrists, core, and balance all trained in one hold. Foundation: face to wall. Build: experiment with chest-to-wall (harder balance). Integration: begin controlled kick-up practice for freestanding prep.",
       "searchTerms": "wall handstand hold handstand wall practice kick up",
-      "tags": ["handstand"],
+      "tags": [
+        "handstand"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×10-20s (face to wall)", "notes": "Kick up gently. Find shoulder alignment (ears between arms)." },
-        "Build": { "sets": "3×30-45s (face or chest to wall)", "notes": "Controlled hold. Try chest-to-wall for balance skill." },
-        "Integration": { "sets": "3×45-60s + kick-up practice", "notes": "Gate test target: 45s. Begin practicing controlled kick-up and hold." }
+        "Foundation": {
+          "sets": "3×10-20s (face to wall)",
+          "notes": "Kick up gently. Find shoulder alignment (ears between arms)."
+        },
+        "Build": {
+          "sets": "3×30-45s (face or chest to wall)",
+          "notes": "Controlled hold. Try chest-to-wall for balance skill."
+        },
+        "Integration": {
+          "sets": "3×45-60s + kick-up practice",
+          "notes": "Gate test target: 45s. Begin practicing controlled kick-up and hold."
+        }
       }
     },
     {
@@ -309,14 +505,27 @@
       "type": "bodyweight_reps",
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "shoulders",
-      "secondaryMuscleGroups": ["triceps", "upper_back"],
+      "secondaryMuscleGroups": [
+        "triceps",
+        "upper_back"
+      ],
       "notes": "Overhead push pattern — direct handstand push-up prereq. Hips high (inverted V), lower head toward floor. Front and side delts loaded heavily. Build: elevate feet on bench for greater shoulder angle. Integration: lower head to floor (full handstand push-up negative).",
       "searchTerms": "pike push up handstand push up overhead press",
-      "tags": ["handstand"],
+      "tags": [
+        "handstand"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×8 (feet on floor)" },
-        "Build": { "sets": "3×8 (feet elevated on bench)", "notes": "More shoulder loading at higher hip angle." },
-        "Integration": { "sets": "3×8 (feet elevated, lower to head)", "notes": "Full handstand push-up negative. Slow descent." }
+        "Foundation": {
+          "sets": "3×8 (feet on floor)"
+        },
+        "Build": {
+          "sets": "3×8 (feet elevated on bench)",
+          "notes": "More shoulder loading at higher hip angle."
+        },
+        "Integration": {
+          "sets": "3×8 (feet elevated, lower to head)",
+          "notes": "Full handstand push-up negative. Slow descent."
+        }
       }
     },
     {
@@ -327,11 +536,21 @@
       "primaryMuscleGroup": "shoulders",
       "notes": "Side deltoid mass. The side delt is undertrained by all compound pushing and pulling movements — lateral raises are the most direct solution. Slight forward lean, lead with elbows, stop at shoulder height. Hypertrophy range.",
       "searchTerms": "lateral raise side raise side delt shoulder",
-      "tags": ["handstand", "hypertrophy", "shoulders"],
+      "tags": [
+        "handstand",
+        "hypertrophy",
+        "shoulders"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×12 (light weight, strict form)" },
-        "Build": { "sets": "3×12 (increase weight when 12 feels easy)" },
-        "Integration": { "sets": "3×12 (progressive overload; add drop set if desired)" }
+        "Foundation": {
+          "sets": "3×12 (light weight, strict form)"
+        },
+        "Build": {
+          "sets": "3×12 (increase weight when 12 feels easy)"
+        },
+        "Integration": {
+          "sets": "3×12 (progressive overload; add drop set if desired)"
+        }
       }
     },
     {
@@ -340,31 +559,55 @@
       "type": "reps_only",
       "equipmentCategory": "resistance_band",
       "primaryMuscleGroup": "shoulders",
-      "secondaryMuscleGroups": ["upper_back", "traps"],
+      "secondaryMuscleGroups": [
+        "upper_back",
+        "traps"
+      ],
       "notes": "Rear delt and external rotator maintenance — carried forward from Phase 1 shoulder rehab. Anchor band at face height. Pull to forehead, elbows high and wide. Counterbalances the heavy pressing volume in Session C and D.",
       "searchTerms": "face pull band rear delt external rotation",
-      "tags": ["handstand", "shoulder-health"],
+      "tags": [
+        "handstand",
+        "shoulder-health"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×15 (light band)" },
-        "Build": { "sets": "3×15 (medium band)" },
-        "Integration": { "sets": "3×15 (medium-heavy band)" }
+        "Foundation": {
+          "sets": "3×15 (light band)"
+        },
+        "Build": {
+          "sets": "3×15 (medium band)"
+        },
+        "Integration": {
+          "sets": "3×15 (medium-heavy band)"
+        }
       }
     },
-
     {
       "id": "planche-lean",
       "title": "Planche Lean",
       "type": "duration",
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "shoulders",
-      "secondaryMuscleGroups": ["abdominals", "chest"],
+      "secondaryMuscleGroups": [
+        "abdominals",
+        "chest"
+      ],
       "notes": "Straight-arm shoulder conditioning for planche. Hands on floor, arms locked, lean body forward past hands. The angle of lean determines the difficulty. This is the most direct planche prerequisite — it builds the straight-arm pressing strength and scapular protraction that conventional training doesn't develop.",
       "searchTerms": "planche lean planche progression straight arm",
-      "tags": ["tuck-planche"],
+      "tags": [
+        "tuck-planche"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×5-8s (5–10° lean)", "notes": "Hands turned slightly outward. Arms fully locked." },
-        "Build": { "sets": "3×10s (15–20° lean)" },
-        "Integration": { "sets": "3×10-15s (20–25° lean); attempt tuck planche", "notes": "Tuck planche: both feet off floor, knees to chest." }
+        "Foundation": {
+          "sets": "3×5-8s (5–10° lean)",
+          "notes": "Hands turned slightly outward. Arms fully locked."
+        },
+        "Build": {
+          "sets": "3×10s (15–20° lean)"
+        },
+        "Integration": {
+          "sets": "3×10-15s (20–25° lean); attempt tuck planche",
+          "notes": "Tuck planche: both feet off floor, knees to chest."
+        }
       }
     },
     {
@@ -373,14 +616,26 @@
       "type": "duration",
       "equipmentCategory": "pull_up_bar",
       "primaryMuscleGroup": "abdominals",
-      "secondaryMuscleGroups": ["hip_flexors", "shoulders"],
+      "secondaryMuscleGroups": [
+        "hip_flexors",
+        "shoulders"
+      ],
       "notes": "Hip flexor compression strength — a direct planche and handstand prerequisite. Can be performed on the dip bars or floor with fists. Foundation: bent-knee tuck hold. Build: one leg extended at a time. Integration: full L-sit, both legs extended.",
       "searchTerms": "L-sit hold parallel bars floor L-sit hip flexor",
-      "tags": ["tuck-planche", "handstand"],
+      "tags": [
+        "tuck-planche",
+        "handstand"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×3-5s (tuck hold, knees to chest)" },
-        "Build": { "sets": "3×5-8s (half L-sit, one leg extended at a time)" },
-        "Integration": { "sets": "3×5-10s (full L-sit, both legs extended and parallel to floor)" }
+        "Foundation": {
+          "sets": "3×3-5s (tuck hold, knees to chest)"
+        },
+        "Build": {
+          "sets": "3×5-8s (half L-sit, one leg extended at a time)"
+        },
+        "Integration": {
+          "sets": "3×5-10s (full L-sit, both legs extended and parallel to floor)"
+        }
       }
     },
     {
@@ -391,11 +646,24 @@
       "primaryMuscleGroup": "abdominals",
       "notes": "Anti-extension core. The hollow body position is a prerequisite for all 5 skill goals — it is the foundational body position for muscle-up, handstand, planche, and pistol. Arms overhead, legs straight, low back pressed to floor.",
       "searchTerms": "hollow body hold hollow body rock core",
-      "tags": ["tuck-planche", "handstand", "muscle-up", "core"],
+      "tags": [
+        "tuck-planche",
+        "handstand",
+        "muscle-up",
+        "core"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "3×15-20s (knees bent, arms at sides)", "notes": "Low back must stay pressed to floor." },
-        "Build": { "sets": "3×20-30s (arms overhead, knees bent or legs extended)" },
-        "Integration": { "sets": "3×30s holds + hollow body rocks", "notes": "Rock forward and back while maintaining shape." }
+        "Foundation": {
+          "sets": "3×15-20s (knees bent, arms at sides)",
+          "notes": "Low back must stay pressed to floor."
+        },
+        "Build": {
+          "sets": "3×20-30s (arms overhead, knees bent or legs extended)"
+        },
+        "Integration": {
+          "sets": "3×30s holds + hollow body rocks",
+          "notes": "Rock forward and back while maintaining shape."
+        }
       }
     },
     {
@@ -404,26 +672,43 @@
       "type": "weight_duration",
       "equipmentCategory": "dumbbell",
       "primaryMuscleGroup": "abdominals",
-      "secondaryMuscleGroups": ["traps", "forearms"],
+      "secondaryMuscleGroups": [
+        "traps",
+        "forearms"
+      ],
       "notes": "Anti-lateral-flexion core — the one core training vector not covered by hollow body (anti-extension) or Pallof press (anti-rotation). Walk upright, resist leaning toward the weight. Direct functional transfer to suitcase carry, single-arm overhead movements, and unilateral stability.",
       "searchTerms": "suitcase carry farmer carry anti lateral flexion",
-      "tags": ["tuck-planche", "core"],
+      "tags": [
+        "tuck-planche",
+        "core"
+      ],
       "progressionByPhase": {
-        "Foundation": { "sets": "2×20s each side (20–30 lb)" },
-        "Build": { "sets": "2×30s each side (30–45 lb)" },
-        "Integration": { "sets": "2×30s each side (45–55 lb)" }
+        "Foundation": {
+          "sets": "2×20s each side (20–30 lb)"
+        },
+        "Build": {
+          "sets": "2×30s each side (30–45 lb)"
+        },
+        "Integration": {
+          "sets": "2×30s each side (45–55 lb)"
+        }
       }
     },
-
     {
       "id": "plank",
       "title": "Plank",
       "type": "duration",
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "abdominals",
-      "secondaryMuscleGroups": ["shoulders", "glutes"],
+      "secondaryMuscleGroups": [
+        "shoulders",
+        "glutes"
+      ],
       "notes": "Benchmark test for Phase 1 gate: 60+ seconds pain-free. Forearms on floor, neutral spine, no hip sag.",
-      "tags": ["benchmark", "gate-test"]
+      "tags": [
+        "benchmark",
+        "gate-test"
+      ]
     },
     {
       "id": "cossack-squat",
@@ -431,9 +716,15 @@
       "type": "bodyweight_reps",
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "adductors",
-      "secondaryMuscleGroups": ["quadriceps", "glutes"],
+      "secondaryMuscleGroups": [
+        "quadriceps",
+        "glutes"
+      ],
       "notes": "Benchmark test for Phase 1 gate: full depth both sides, no support. Lateral squat — sit fully into one hip while extending the other leg.",
-      "tags": ["benchmark", "gate-test"]
+      "tags": [
+        "benchmark",
+        "gate-test"
+      ]
     },
     {
       "id": "wall-dorsiflexion-test",
@@ -442,7 +733,11 @@
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "calves",
       "notes": "Benchmark test: 4+ inches each side. Face wall, drive knee forward keeping heel down. Measure toe-to-wall distance when heel lifts. Right side tracks improvement post-Achilles repair.",
-      "tags": ["benchmark", "gate-test", "ankle-health"]
+      "tags": [
+        "benchmark",
+        "gate-test",
+        "ankle-health"
+      ]
     },
     {
       "id": "overhead-wall-test",
@@ -451,7 +746,11 @@
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "shoulders",
       "notes": "Benchmark test: thumbs touch wall with back flat. Stand with back, butt, and head to wall. Raise arms overhead. Pass = thumbs touch wall without lower back arching off.",
-      "tags": ["benchmark", "gate-test", "shoulder-mobility"]
+      "tags": [
+        "benchmark",
+        "gate-test",
+        "shoulder-mobility"
+      ]
     },
     {
       "id": "pistol-to-box",
@@ -459,12 +758,411 @@
       "type": "bodyweight_reps",
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "quadriceps",
-      "secondaryMuscleGroups": ["glutes", "calves"],
+      "secondaryMuscleGroups": [
+        "glutes",
+        "calves"
+      ],
       "notes": "Phase 2 benchmark: pistol squat to 16-inch box, both legs. Stand on one leg, extend other leg forward, lower to box. Right side may lag left due to Achilles — accept asymmetry.",
-      "tags": ["benchmark", "gate-test", "pistol-squat"]
+      "tags": [
+        "benchmark",
+        "gate-test",
+        "pistol-squat"
+      ]
+    },
+    {
+      "id": "tspine-rotation-quadruped",
+      "title": "T-Spine Rotation (Quadruped)",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "upper_back",
+      "secondaryMuscleGroups": [
+        "shoulders"
+      ],
+      "notes": "On all fours, place one hand behind your head. Rotate that elbow toward the ceiling, then down toward the opposite wrist. Follow your elbow with your eyes. This is the single most important addition for you — your desk-locked thoracic spine is the upstream bottleneck for your shoulders. If this doesn't rotate, your shoulder compensates during every press.",
+      "videoURL": "https://www.youtube.com/results?search_query=quadruped+thoracic+rotation+mobility+drill",
+      "searchTerms": "Quadruped thoracic rotation",
+      "archived": true
+    },
+    {
+      "id": "dead-hangs",
+      "title": "Dead Hangs",
+      "type": "duration",
+      "equipmentCategory": "pull_up_bar",
+      "primaryMuscleGroup": "lats",
+      "secondaryMuscleGroups": [
+        "forearms",
+        "shoulders"
+      ],
+      "notes": "Use your pull-up bar. Passive hang, let your shoulders stretch toward your ears. This decompresses the shoulder joint and builds grip. If 30s is easy, progress to active hangs (pull shoulders down while hanging).",
+      "videoURL": "https://www.youtube.com/results?search_query=dead+hang+shoulder+mobility+progression",
+      "searchTerms": "Dead hang shoulder health",
+      "archived": true
+    },
+    {
+      "id": "tspine-extension-foam-roller",
+      "title": "T-Spine Extension Over Foam Roller",
+      "type": "reps_only",
+      "equipmentCategory": "foam_roller",
+      "primaryMuscleGroup": "upper_back",
+      "notes": "Place foam roller across your mid-back. Support your head with hands, elbows pointed forward. Extend back over the roller, then crunch forward — 10 reps. Then hold the extended position for 30 seconds. Move the roller up or down one vertebra and repeat. This directly unlocks the thoracic extension your shoulders need for overhead pressing and front rack position.",
+      "videoURL": "https://www.youtube.com/results?search_query=thoracic+extension+foam+roller+mobility",
+      "searchTerms": "T-spine extension foam roller",
+      "tags": [
+        "tspine-integration"
+      ],
+      "archived": true
+    },
+    {
+      "id": "open-book",
+      "title": "Open Book (Thread the Needle)",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "upper_back",
+      "secondaryMuscleGroups": [
+        "shoulders"
+      ],
+      "notes": "Lie on your side, knees stacked and bent at 90°. Top arm opens toward the ceiling and behind you while keeping knees together. Follow your hand with your eyes. The rotation should come from your mid-back, NOT your lower back — keeping your knees stacked prevents lumbar rotation. This is the movement pattern that lets you actually rotate during daily life without shoulder or low back compensation.",
+      "videoURL": "https://www.youtube.com/results?search_query=open+book+thoracic+rotation+mobility+drill",
+      "searchTerms": "Open book thoracic rotation",
+      "tags": [
+        "tspine-integration"
+      ],
+      "archived": true
+    },
+    {
+      "id": "scapular-pushups",
+      "title": "Scapular Push-ups",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "chest",
+      "secondaryMuscleGroups": [
+        "shoulders"
+      ],
+      "notes": "Plank position, arms locked straight. Only your shoulder blades move — protract (spread apart) and retract (squeeze together). This trains serratus anterior, which is likely weak and causing your plank shoulder pain.",
+      "videoURL": "https://www.youtube.com/results?search_query=scapular+push+ups+tutorial+serratus",
+      "searchTerms": "Scapular push-ups serratus",
+      "archived": true
+    },
+    {
+      "id": "banded-external-rotation",
+      "title": "Banded External Rotation at 90°",
+      "type": "reps_only",
+      "equipmentCategory": "resistance_band",
+      "primaryMuscleGroup": "shoulders",
+      "notes": "Elbow at 90°, upper arm at shoulder height. Rotate forearm up against band resistance. Slow eccentric (3 sec lowering). This directly strengthens the rotator cuff in the position where it fails during pressing.",
+      "videoURL": "https://www.youtube.com/results?search_query=banded+external+rotation+90+degrees+rotator+cuff",
+      "searchTerms": "Banded external rotation 90 degrees",
+      "archived": true
+    },
+    {
+      "id": "prone-ytw-raises",
+      "title": "Prone Y-T-W Raises",
+      "type": "reps_only",
+      "equipmentCategory": "dumbbell",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": [
+        "upper_back"
+      ],
+      "notes": "Lie face down on bench, light dumbbells (3-5 lb to start). Y = arms overhead in a V. T = arms straight out. W = elbows bent, squeeze shoulder blades. If 5 lb is too much, start bodyweight. These are humbling.",
+      "videoURL": "https://www.youtube.com/results?search_query=prone+Y+T+W+raises+shoulder+rehab",
+      "searchTerms": "Prone Y-T-W raises",
+      "archived": true
+    },
+    {
+      "id": "wall-slides",
+      "title": "Wall Slides",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": [
+        "upper_back"
+      ],
+      "notes": "Back and arms flat against wall. Slide arms up overhead keeping everything in contact with the wall. If your lower back arches off the wall, that's a mobility restriction — only go as high as you can maintain contact.",
+      "videoURL": "https://www.youtube.com/results?search_query=wall+slides+shoulder+mobility+exercise",
+      "searchTerms": "Wall slides shoulder mobility",
+      "archived": true
+    },
+    {
+      "id": "shoulder-sleeper-stretch",
+      "title": "Shoulder Sleeper Stretch with PAILs/RAILs",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "shoulders",
+      "notes": "Lie on your side, bottom arm at 90°. Use top hand to gently press into internal rotation. Hold 60s passive. Then PAILs: push bottom hand INTO the floor (10s, 20% effort building to 70%). Then RAILs: try to rotate hand UP without moving (10s same ramp). Re-stretch — you'll gain range.",
+      "videoURL": "https://www.youtube.com/results?search_query=shoulder+PAILs+RAILs+sleeper+stretch+FRC",
+      "searchTerms": "PAILs RAILs shoulder sleeper stretch",
+      "archived": true
+    },
+    {
+      "id": "ninety-ninety-hip-switches",
+      "title": "90/90 Hip Switches",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "glutes",
+      "secondaryMuscleGroups": [
+        "hip_flexors"
+      ],
+      "notes": "Sit with both legs at 90°. Rotate from one side to the other. Keep spine tall. If you can't get your knees to the floor, that's fine — work the range you have. This is your hip mobility barometer.",
+      "videoURL": "https://www.youtube.com/results?search_query=90+90+hip+switches+mobility+tutorial",
+      "searchTerms": "90/90 hip switches mobility",
+      "archived": true
+    },
+    {
+      "id": "glute-bridge",
+      "title": "Glute Bridge with 3-sec Hold",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "glutes",
+      "secondaryMuscleGroups": [
+        "hamstrings"
+      ],
+      "notes": "Lie on back, knees bent, feet flat. Drive through heels, squeeze glutes HARD at the top, hold 3 seconds. Lower slowly. If you feel this in your hamstrings more than your glutes, bring your feet closer to your butt. This wakes up the glutes so they fire properly during squats, lunges, and walking. At 46 with desk work, your glutes are almost certainly underperforming — this fixes that.",
+      "videoURL": "https://www.youtube.com/results?search_query=glute+bridge+hold+activation+tutorial",
+      "searchTerms": "Glute bridge activation hold",
+      "tags": [
+        "glute-activation"
+      ],
+      "archived": true
+    },
+    {
+      "id": "banded-clamshells",
+      "title": "Banded Clamshells",
+      "type": "reps_only",
+      "equipmentCategory": "resistance_band",
+      "primaryMuscleGroup": "glutes",
+      "notes": "Lie on your side, knees bent, band around knees. Open top knee against band resistance while keeping feet together. Slow and controlled — don't let the band snap your knee back down. This targets the gluteus medius, which stabilizes your pelvis and directly protects your knees during lateral movements. If your Cossack squats and side lunges hurt, weak glute med is likely a big contributor.",
+      "videoURL": "https://www.youtube.com/results?search_query=banded+clamshell+glute+medius+activation",
+      "searchTerms": "Banded clamshell glute medius",
+      "tags": [
+        "glute-activation"
+      ],
+      "archived": true
+    },
+    {
+      "id": "tibialis-raises",
+      "title": "Tibialis Anterior Raises",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "calves",
+      "notes": "Stand with back against wall, feet ~12 inches out. Pull toes up toward shins, lower slowly. This strengthens the front of your shin and protects the knee. The Knees Over Toes Guy made this famous for good reason.",
+      "videoURL": "https://www.youtube.com/results?search_query=tibialis+raises+knees+over+toes+tutorial",
+      "searchTerms": "Tibialis raises Knees Over Toes",
+      "archived": true
+    },
+    {
+      "id": "banded-tke",
+      "title": "Banded Terminal Knee Extensions",
+      "type": "reps_only",
+      "equipmentCategory": "resistance_band",
+      "primaryMuscleGroup": "quadriceps",
+      "notes": "Attach band behind your knee to a low anchor. Stand facing away, slight bend. Squeeze to full lockout against band resistance. This isolates the VMO — the inner quad muscle that stabilizes the kneecap.",
+      "videoURL": "https://www.youtube.com/results?search_query=banded+terminal+knee+extension+VMO",
+      "searchTerms": "Banded TKE VMO strengthening",
+      "archived": true
+    },
+    {
+      "id": "active-frog-stretch",
+      "title": "Active Frog Stretch",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "adductors",
+      "secondaryMuscleGroups": [
+        "hip_flexors"
+      ],
+      "notes": "On all fours, knees wide, rock forward and back. Keep spine neutral. This opens the adductors (inner thigh) which are contributing to both your lateral lunge pain and cross-legged sitting difficulty. Active rocking > static hold.",
+      "videoURL": "https://www.youtube.com/results?search_query=active+frog+stretch+hip+adductor+mobility",
+      "searchTerms": "Active frog stretch adductors",
+      "archived": true
+    },
+    {
+      "id": "copenhagen-plank",
+      "title": "Copenhagen Plank",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "abdominals",
+      "secondaryMuscleGroups": [
+        "adductors"
+      ],
+      "notes": "Side plank position with top leg on a bench, bottom leg hanging free. This is a two-for-one — it trains lateral core strength AND adductor strength simultaneously. Directly addresses your lateral lunge knee pain. Regress by using bottom knee on the floor or shortening the hold. These are brutally hard at first — 10 seconds is fine to start.",
+      "videoURL": "https://www.youtube.com/results?search_query=copenhagen+plank+tutorial+regression+progression",
+      "searchTerms": "Copenhagen plank tutorial progression",
+      "tags": [
+        "core-integration"
+      ],
+      "archived": true
+    },
+    {
+      "id": "extended-ankle-cars",
+      "title": "Extended Ankle CARs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "calves",
+      "notes": "Slower and more deliberate than your daily CARs. Spend 5+ seconds per rotation on the right ankle. Map out the full range, note where it catches. Over weeks, the circle should get bigger.",
+      "videoURL": "https://www.youtube.com/results?search_query=ankle+CARs+FRC+detailed+tutorial",
+      "searchTerms": "Ankle CARs detailed FRC",
+      "archived": true
+    },
+    {
+      "id": "eccentric-calf-raises",
+      "title": "Eccentric Calf Raises (Alfredson Protocol)",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "calves",
+      "notes": "CRITICAL for your Achilles. Stand on step edge, raise up on BOTH feet, then lower slowly (3-4 sec) on ONE foot. Do both straight-knee (gastroc) and bent-knee (soleus) versions. The right side may feel tight — stay in a pain-free range. This is the gold standard for Achilles tendon health.",
+      "videoURL": "https://www.youtube.com/results?search_query=eccentric+calf+raises+achilles+alfredson+protocol",
+      "searchTerms": "Eccentric calf raises Alfredson Achilles",
+      "progressionByPhase": {
+        "Foundation": {
+          "notes": "Both-leg lower if single-leg is too intense on the right."
+        },
+        "Build": {
+          "notes": "Full single-leg protocol."
+        }
+      },
+      "archived": true
+    },
+    {
+      "id": "wall-dorsiflexion",
+      "title": "Wall Dorsiflexion Mobilization",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "calves",
+      "notes": "Face wall, foot ~4 inches away. Drive knee forward over toes, keeping heel DOWN. Measure progress by how far from the wall you can get your foot while still touching knee to wall. Your right side will be tighter — that's the Achilles repair limiting dorsiflexion.",
+      "videoURL": "https://www.youtube.com/results?search_query=wall+ankle+dorsiflexion+mobilization+test",
+      "searchTerms": "Wall dorsiflexion ankle mobilization",
+      "archived": true
+    },
+    {
+      "id": "supported-deep-squat",
+      "title": "Supported Deep Squat Hold",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "quadriceps",
+      "secondaryMuscleGroups": [
+        "glutes",
+        "calves"
+      ],
+      "notes": "Hold a doorframe, squat rack, or heavy dumbbell as counterbalance. Sink as deep as comfortable, heels down. Let your hips open and spine lengthen. This integrates ankle, knee, and hip mobility into one functional position. If heels lift, elevate them on a plate or book.",
+      "videoURL": "https://www.youtube.com/results?search_query=deep+squat+hold+mobility+assisted+progression",
+      "searchTerms": "Deep squat hold assisted mobility",
+      "progressionByPhase": {
+        "Load": {
+          "notes": "Weighted deep squat holds (goblet position)."
+        }
+      },
+      "archived": true
+    },
+    {
+      "id": "dead-bugs",
+      "title": "Dead Bugs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "abdominals",
+      "secondaryMuscleGroups": [
+        "hip_flexors"
+      ],
+      "notes": "Lie on your back, arms up, knees at 90°. Press lower back into floor. Slowly extend opposite arm and leg while maintaining ZERO low back movement. If your back arches, you've gone too far — shorten the range. This trains anti-extension and hip dissociation, directly improving your squat and overhead positions.",
+      "videoURL": "https://www.youtube.com/results?search_query=dead+bug+exercise+tutorial+anti+extension",
+      "searchTerms": "Dead bug exercise anti-extension",
+      "tags": [
+        "core-integration"
+      ],
+      "archived": true
+    },
+    {
+      "id": "bear-crawl",
+      "title": "Bear Crawl",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": [
+        "abdominals",
+        "quadriceps"
+      ],
+      "notes": "Hands and feet on ground, knees hovering ~2 inches off floor. Crawl forward and backward slowly. This integrates shoulder stability, hip mobility, and ankle mobility under load in a way that mimics real-world movement. Keep breathing.",
+      "videoURL": "https://www.youtube.com/results?search_query=bear+crawl+exercise+mobility+tutorial",
+      "searchTerms": "Bear crawl exercise mobility",
+      "archived": true
+    },
+    {
+      "id": "pallof-press",
+      "title": "Pallof Press",
+      "type": "reps_only",
+      "equipmentCategory": "resistance_band",
+      "primaryMuscleGroup": "abdominals",
+      "secondaryMuscleGroups": [
+        "obliques"
+      ],
+      "notes": "Attach band to anchor at chest height. Stand sideways, hold band at chest. Press straight out and hold 2 seconds. The band tries to rotate you — your core resists. This anti-rotation strength directly supports your Cossack squats and lateral lunge stability. Keep hips square, don't let the band pull you.",
+      "videoURL": "https://www.youtube.com/results?search_query=pallof+press+band+anti+rotation+core",
+      "searchTerms": "Pallof press band tutorial",
+      "archived": true
+    },
+    {
+      "id": "bird-dogs",
+      "title": "Bird Dogs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "lower_back",
+      "secondaryMuscleGroups": [
+        "abdominals",
+        "glutes"
+      ],
+      "notes": "On all fours, extend opposite arm and leg simultaneously. Hold top position for 2 seconds. Keep hips LEVEL — the most common mistake is letting the hip drop on the lifting side. Place a water bottle on your lower back as feedback — if it falls, you're rotating too much. This trains the cross-body stabilization pattern used in walking, running, and all unilateral exercises.",
+      "videoURL": "https://www.youtube.com/results?search_query=bird+dog+exercise+proper+form+tutorial",
+      "searchTerms": "Bird dog exercise proper form",
+      "archived": true
+    },
+    {
+      "id": "stationary-bike",
+      "title": "Stationary Bike — Easy Spin",
+      "type": "duration",
+      "equipmentCategory": "machine",
+      "primaryMuscleGroup": "quadriceps",
+      "secondaryMuscleGroups": [
+        "calves",
+        "glutes"
+      ],
+      "notes": "Conversational pace. RPE 3-4 out of 10. Slight resistance. This drives blood flow to your knees and ankles without impact stress. Good for Achilles flare-up days too.",
+      "archived": true
+    },
+    {
+      "id": "foam-roll-quads",
+      "title": "Foam Roll — Quads & IT Band",
+      "type": "duration",
+      "equipmentCategory": "foam_roller",
+      "primaryMuscleGroup": "quadriceps",
+      "notes": "Slow passes, pause on tender spots for 30s. Focus on the outer quad / IT band area — this feeds into your lateral lunge knee issue.",
+      "videoURL": "https://www.youtube.com/results?search_query=foam+roll+quads+IT+band+technique",
+      "searchTerms": "Foam roll quads IT band",
+      "archived": true
+    },
+    {
+      "id": "foam-roll-calves",
+      "title": "Foam Roll — Calves & Peroneals",
+      "type": "duration",
+      "equipmentCategory": "foam_roller",
+      "primaryMuscleGroup": "calves",
+      "notes": "Roll the back AND sides of the calf. Extra attention on the right side around the Achilles area — not directly on the tendon, but the muscle above it.",
+      "videoURL": "https://www.youtube.com/results?search_query=foam+roll+calves+achilles+area",
+      "searchTerms": "Foam roll calves",
+      "archived": true
+    },
+    {
+      "id": "lacrosse-ball-shoulder",
+      "title": "Lacrosse Ball — Shoulder / Upper Back",
+      "type": "duration",
+      "equipmentCategory": "other",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": [
+        "upper_back"
+      ],
+      "notes": "Pin ball between your back and the wall. Roll around the scapula (shoulder blade) area and posterior deltoid. Find the spots that refer sensation — those are the adhesions limiting your shoulder mobility.",
+      "videoURL": "https://www.youtube.com/results?search_query=lacrosse+ball+shoulder+upper+back+release",
+      "searchTerms": "Lacrosse ball shoulder release",
+      "archived": true
     }
   ],
-
   "routines": [
     {
       "id": "daily-cars",
@@ -476,16 +1174,36 @@
       "sortOrder": 1,
       "folderGroup": "Daily",
       "exercises": [
-        { "exerciseTemplateId": "neck-cars", "sets": "1×5 each direction" },
-        { "exerciseTemplateId": "shoulder-cars", "sets": "1×5 each direction, each arm" },
-        { "exerciseTemplateId": "hip-cars", "sets": "1×5 each direction, each leg" },
-        { "exerciseTemplateId": "ankle-cars", "sets": "1×5 each direction, each foot" },
-        { "exerciseTemplateId": "spine-cars", "sets": "1×8 slow reps" },
-        { "exerciseTemplateId": "wrist-cars", "sets": "1×5 each direction, each wrist" },
-        { "exerciseTemplateId": "tspine-rotation", "sets": "1×5 each side" }
+        {
+          "exerciseTemplateId": "neck-cars",
+          "sets": "1×5 each direction"
+        },
+        {
+          "exerciseTemplateId": "shoulder-cars",
+          "sets": "1×5 each direction, each arm"
+        },
+        {
+          "exerciseTemplateId": "hip-cars",
+          "sets": "1×5 each direction, each leg"
+        },
+        {
+          "exerciseTemplateId": "ankle-cars",
+          "sets": "1×5 each direction, each foot"
+        },
+        {
+          "exerciseTemplateId": "spine-cars",
+          "sets": "1×8 slow reps"
+        },
+        {
+          "exerciseTemplateId": "wrist-cars",
+          "sets": "1×5 each direction, each wrist"
+        },
+        {
+          "exerciseTemplateId": "tspine-rotation",
+          "sets": "1×5 each side"
+        }
       ]
     },
-
     {
       "id": "session-a",
       "title": "Session A — Muscle-Up",
@@ -517,7 +1235,6 @@
         }
       ]
     },
-
     {
       "id": "session-b",
       "title": "Session B — Pistol Squat",
@@ -549,7 +1266,6 @@
         }
       ]
     },
-
     {
       "id": "session-c",
       "title": "Session C — One-Arm Push-Up",
@@ -581,7 +1297,6 @@
         }
       ]
     },
-
     {
       "id": "session-d",
       "title": "Session D — Handstand",
@@ -613,7 +1328,6 @@
         }
       ]
     },
-
     {
       "id": "session-e",
       "title": "Session E — Tuck Planche",
@@ -645,7 +1359,6 @@
         }
       ]
     },
-
     {
       "id": "benchmark-session",
       "title": "Benchmark Session",
@@ -655,22 +1368,69 @@
       "sortOrder": 7,
       "folderGroup": "Benchmarks",
       "exercises": [
-        { "exerciseTemplateId": "plank", "sets": "1×max hold", "notes": "Gate test: 60+ sec pain-free. Zero shoulder discomfort required." },
-        { "exerciseTemplateId": "pull-up", "sets": "1×max", "notes": "Gate test: 12 strict reps. Dead hang start, chin over bar finish." },
-        { "exerciseTemplateId": "dip", "sets": "1×max", "notes": "Gate test: 15 clean reps. Full ROM." },
-        { "exerciseTemplateId": "cossack-squat", "sets": "5 each side (slow)", "notes": "Gate test: full depth both sides, no support, no pain." },
-        { "exerciseTemplateId": "single-leg-balance", "sets": "1×30s each leg", "notes": "Gate test: 30s each side, eyes closed." },
-        { "exerciseTemplateId": "wall-dorsiflexion-test", "sets": "1 test each side", "notes": "Gate test: 4+ inches each side. Mark tape on wall." },
-        { "exerciseTemplateId": "hollow-body-hold", "sets": "1×30s", "notes": "Gate test: 30s arms overhead, low back to floor throughout." },
-        { "exerciseTemplateId": "overhead-wall-test", "sets": "1 test", "notes": "Gate test: thumbs touch wall, back stays flat against wall." },
-        { "exerciseTemplateId": "false-grip-hang", "sets": "1×20s", "notes": "Phase 2 gate: 20s false grip (bar or towel)." },
-        { "exerciseTemplateId": "wall-handstand-hold", "sets": "1×45s", "notes": "Phase 2 gate: 45s wall handstand hold." },
-        { "exerciseTemplateId": "planche-lean", "sets": "1×10s", "notes": "Phase 2 gate: 10°+ lean, 10s hold." },
-        { "exerciseTemplateId": "pistol-to-box", "sets": "3 each leg", "notes": "Phase 2 gate: pistol to 16-inch box, both legs." }
+        {
+          "exerciseTemplateId": "plank",
+          "sets": "1×max hold",
+          "notes": "Gate test: 60+ sec pain-free. Zero shoulder discomfort required."
+        },
+        {
+          "exerciseTemplateId": "pull-up",
+          "sets": "1×max",
+          "notes": "Gate test: 12 strict reps. Dead hang start, chin over bar finish."
+        },
+        {
+          "exerciseTemplateId": "dip",
+          "sets": "1×max",
+          "notes": "Gate test: 15 clean reps. Full ROM."
+        },
+        {
+          "exerciseTemplateId": "cossack-squat",
+          "sets": "5 each side (slow)",
+          "notes": "Gate test: full depth both sides, no support, no pain."
+        },
+        {
+          "exerciseTemplateId": "single-leg-balance",
+          "sets": "1×30s each leg",
+          "notes": "Gate test: 30s each side, eyes closed."
+        },
+        {
+          "exerciseTemplateId": "wall-dorsiflexion-test",
+          "sets": "1 test each side",
+          "notes": "Gate test: 4+ inches each side. Mark tape on wall."
+        },
+        {
+          "exerciseTemplateId": "hollow-body-hold",
+          "sets": "1×30s",
+          "notes": "Gate test: 30s arms overhead, low back to floor throughout."
+        },
+        {
+          "exerciseTemplateId": "overhead-wall-test",
+          "sets": "1 test",
+          "notes": "Gate test: thumbs touch wall, back stays flat against wall."
+        },
+        {
+          "exerciseTemplateId": "false-grip-hang",
+          "sets": "1×20s",
+          "notes": "Phase 2 gate: 20s false grip (bar or towel)."
+        },
+        {
+          "exerciseTemplateId": "wall-handstand-hold",
+          "sets": "1×45s",
+          "notes": "Phase 2 gate: 45s wall handstand hold."
+        },
+        {
+          "exerciseTemplateId": "planche-lean",
+          "sets": "1×10s",
+          "notes": "Phase 2 gate: 10°+ lean, 10s hold."
+        },
+        {
+          "exerciseTemplateId": "pistol-to-box",
+          "sets": "3 each leg",
+          "notes": "Phase 2 gate: pistol to 16-inch box, both legs."
+        }
       ]
     }
   ],
-
   "weekTemplates": [
     {
       "id": "sequential-rotation",
@@ -680,43 +1440,62 @@
       "days": [
         {
           "dayOfWeek": 0,
-          "routineIDs": ["daily-cars", "session-a"],
+          "routineIDs": [
+            "daily-cars",
+            "session-a"
+          ],
           "note": "Session A — Muscle-Up (Pull)"
         },
         {
           "dayOfWeek": 1,
-          "routineIDs": ["daily-cars", "session-b"],
+          "routineIDs": [
+            "daily-cars",
+            "session-b"
+          ],
           "note": "Session B — Pistol Squat (Lower)"
         },
         {
           "dayOfWeek": 2,
-          "routineIDs": ["daily-cars", "session-c"],
+          "routineIDs": [
+            "daily-cars",
+            "session-c"
+          ],
           "note": "Session C — One-Arm Push-Up (Push)"
         },
         {
           "dayOfWeek": 3,
-          "routineIDs": ["daily-cars", "session-d"],
+          "routineIDs": [
+            "daily-cars",
+            "session-d"
+          ],
           "note": "Session D — Handstand (Overhead)"
         },
         {
           "dayOfWeek": 4,
-          "routineIDs": ["daily-cars", "session-e"],
+          "routineIDs": [
+            "daily-cars",
+            "session-e"
+          ],
           "note": "Session E — Tuck Planche (Core)"
         },
         {
           "dayOfWeek": 5,
-          "routineIDs": ["daily-cars", "benchmark-session"],
+          "routineIDs": [
+            "daily-cars",
+            "benchmark-session"
+          ],
           "note": "Benchmark session every 5th cycle only. On other cycles, take as active recovery or rest."
         },
         {
           "dayOfWeek": 6,
-          "routineIDs": ["daily-cars"],
+          "routineIDs": [
+            "daily-cars"
+          ],
           "note": "Rest day. CARs only."
         }
       ]
     }
   ],
-
   "progressions": [
     {
       "id": "foundation",
@@ -797,7 +1576,6 @@
       ]
     }
   ],
-
   "roadmap": [
     {
       "id": "phase-1-joint-restoration",
@@ -809,9 +1587,14 @@
       "summary": "Rebuilt shoulder stability, knee resilience, Achilles health, core strength, and thoracic mobility. 8 gate tests required to advance.",
       "keyFocus": "Foundation complete. Most gate tests passed. Pull-up count and single-leg balance were the main gaps at phase exit — both are active targets in Phase 2.",
       "gateTests": [
-        "pain-free-planks", "strict-pullups-8", "clean-dips-15",
-        "cossack-squat-full", "single-leg-balance-30", "wall-dorsiflexion-4in",
-        "hollow-body-30s", "overhead-wall-test"
+        "pain-free-planks",
+        "strict-pullups-8",
+        "clean-dips-15",
+        "cossack-squat-full",
+        "single-leg-balance-30",
+        "wall-dorsiflexion-4in",
+        "hollow-body-30s",
+        "overhead-wall-test"
       ]
     },
     {
@@ -824,10 +1607,18 @@
       "summary": "Build the raw strength and movement prerequisites for all 5 skill goals simultaneously. Evidence-based compound selection for maximum coverage per session.",
       "keyFocus": "This phase adds One-Arm Push-Up as a 5th equal skill goal alongside muscle-up, pistol squat, handstand, and tuck planche. Chest and arm hypertrophy is explicitly programmed to address mass loss. The benchmark session appears every 5th cycle — do not skip it.",
       "gateTests": [
-        "pain-free-planks", "strict-pullups-12", "clean-dips-15",
-        "cossack-squat-full", "single-leg-balance-30", "wall-dorsiflexion-4in",
-        "hollow-body-30s", "overhead-wall-test",
-        "false-grip-hang-20s", "wall-handstand-45s", "planche-lean-10s", "pistol-to-box"
+        "pain-free-planks",
+        "strict-pullups-12",
+        "clean-dips-15",
+        "cossack-squat-full",
+        "single-leg-balance-30",
+        "wall-dorsiflexion-4in",
+        "hollow-body-30s",
+        "overhead-wall-test",
+        "false-grip-hang-20s",
+        "wall-handstand-45s",
+        "planche-lean-10s",
+        "pistol-to-box"
       ]
     },
     {
@@ -840,8 +1631,11 @@
       "summary": "Active skill practice begins. Muscle-up transition training, planche progressions, pistol squat depth, handstand balance work, and one-arm push-up negatives.",
       "keyFocus": "Skill practice days replace some strength days. You'll be training 3–4 skills per session alongside maintenance mobility and strength. The muscle-up transition is a technique breakthrough — film every attempt.",
       "gateTests": [
-        "muscle-up-1", "tuck-planche-5s", "pistol-squat-full",
-        "freestanding-handstand-20s", "one-arm-push-up-negative-3s"
+        "muscle-up-1",
+        "tuck-planche-5s",
+        "pistol-squat-full",
+        "freestanding-handstand-20s",
+        "one-arm-push-up-negative-3s"
       ]
     },
     {
@@ -854,12 +1648,14 @@
       "summary": "Polish skill quality, add reps, begin harder progressions.",
       "keyFocus": "This becomes your ongoing training practice. All 5 skills available to rotate focus as interest and progress dictate.",
       "gateTests": [
-        "muscle-ups-3", "tuck-planche-10s", "freestanding-handstand-15s",
-        "pistol-squat-no-counterbalance", "one-arm-push-up-1"
+        "muscle-ups-3",
+        "tuck-planche-10s",
+        "freestanding-handstand-15s",
+        "pistol-squat-no-counterbalance",
+        "one-arm-push-up-1"
       ]
     }
   ],
-
   "skills": [
     {
       "id": "muscle-up",
@@ -872,13 +1668,34 @@
       "gapAnalysis": "Pulling strength is rebuilding. The false grip and transition are completely new skills. Session A addresses all three: pull-up volume, false grip hang, and bicep peak via curls. Dips in Session C cover the push-over phase.",
       "timeline": "False grip hang 20s: Week 12. High pull-ups to sternum: Week 20. Negative muscle-up: Week 24–28. First muscle-up: Week 30–36.",
       "milestones": [
-        { "name": "8 strict pull-ups (Phase 1 gate)", "targetWeek": 4 },
-        { "name": "12 strict pull-ups (Phase 2 gate)", "targetWeek": 20 },
-        { "name": "False grip hang 20s", "targetWeek": 12 },
-        { "name": "Pull-ups to sternum (high pull)", "targetWeek": 20 },
-        { "name": "Negative muscle-up (5s descent)", "targetWeek": 24 },
-        { "name": "First muscle-up", "targetWeek": 32 },
-        { "name": "3–5 consecutive muscle-ups", "targetWeek": 44 }
+        {
+          "name": "8 strict pull-ups (Phase 1 gate)",
+          "targetWeek": 4
+        },
+        {
+          "name": "12 strict pull-ups (Phase 2 gate)",
+          "targetWeek": 20
+        },
+        {
+          "name": "False grip hang 20s",
+          "targetWeek": 12
+        },
+        {
+          "name": "Pull-ups to sternum (high pull)",
+          "targetWeek": 20
+        },
+        {
+          "name": "Negative muscle-up (5s descent)",
+          "targetWeek": 24
+        },
+        {
+          "name": "First muscle-up",
+          "targetWeek": 32
+        },
+        {
+          "name": "3–5 consecutive muscle-ups",
+          "targetWeek": 44
+        }
       ]
     },
     {
@@ -892,12 +1709,30 @@
       "gapAnalysis": "Session B systematically addresses all three limiters: ATG split squat for ankle + quad + hip flexor, single-leg balance for proprioception, and RDL for posterior chain support.",
       "timeline": "Pistol to 16-inch box (Phase 2 gate): Week 12–16. Pistol to 8-inch box: Week 20. Full pistol with counterbalance: Week 28. Full pistol no counterbalance: Week 36.",
       "milestones": [
-        { "name": "Full Cossack squat, no support", "targetWeek": 4 },
-        { "name": "Pistol to 16-inch box (Phase 2 gate)", "targetWeek": 12 },
-        { "name": "Pistol to 8-inch box", "targetWeek": 20 },
-        { "name": "Full pistol with counterbalance", "targetWeek": 28 },
-        { "name": "Full pistol, no counterbalance", "targetWeek": 36 },
-        { "name": "Weighted pistol squat", "targetWeek": 44 }
+        {
+          "name": "Full Cossack squat, no support",
+          "targetWeek": 4
+        },
+        {
+          "name": "Pistol to 16-inch box (Phase 2 gate)",
+          "targetWeek": 12
+        },
+        {
+          "name": "Pistol to 8-inch box",
+          "targetWeek": 20
+        },
+        {
+          "name": "Full pistol with counterbalance",
+          "targetWeek": 28
+        },
+        {
+          "name": "Full pistol, no counterbalance",
+          "targetWeek": 36
+        },
+        {
+          "name": "Weighted pistol squat",
+          "targetWeek": 44
+        }
       ]
     },
     {
@@ -911,12 +1746,30 @@
       "gapAnalysis": "Session C uses dips (most comprehensive push exercise) + incline press (upper chest hypertrophy) + archer push-up (direct skill path) + floor press (flat angle + triceps). The chest mass loss concern is directly addressed by the hypertrophy prescription (3–4 sets, 8–12 reps, progressive overload).",
       "timeline": "15 strict push-ups: Week 10. Archer push-ups 5 each side: Week 20. One-arm negative (3s): Week 28. First one-arm push-up: Week 36. 3–5 reps: Week 48+.",
       "milestones": [
-        { "name": "15 strict push-ups (clean form)", "targetWeek": 10 },
-        { "name": "Close-grip push-ups 10 reps", "targetWeek": 14 },
-        { "name": "Archer push-ups 5 each side", "targetWeek": 20 },
-        { "name": "One-arm negative (3s descent)", "targetWeek": 28 },
-        { "name": "First one-arm push-up", "targetWeek": 36 },
-        { "name": "3–5 consecutive one-arm push-ups", "targetWeek": 48 }
+        {
+          "name": "15 strict push-ups (clean form)",
+          "targetWeek": 10
+        },
+        {
+          "name": "Close-grip push-ups 10 reps",
+          "targetWeek": 14
+        },
+        {
+          "name": "Archer push-ups 5 each side",
+          "targetWeek": 20
+        },
+        {
+          "name": "One-arm negative (3s descent)",
+          "targetWeek": 28
+        },
+        {
+          "name": "First one-arm push-up",
+          "targetWeek": 36
+        },
+        {
+          "name": "3–5 consecutive one-arm push-ups",
+          "targetWeek": 48
+        }
       ]
     },
     {
@@ -930,12 +1783,30 @@
       "gapAnalysis": "Session D covers all three shoulder heads (front via pike push-up, side via lateral raise, rear via face pull) plus wall practice. Wrist PAILs/RAILs in CARs weeks 9–12 add specific handstand wrist prep.",
       "timeline": "Wall handstand 45s (Phase 2 gate): Week 20. Wall handstand 60s: Week 28. Freestanding 5–10s: Week 32. Freestanding 15–30s: Week 44.",
       "milestones": [
-        { "name": "Overhead wall test pass", "targetWeek": 2 },
-        { "name": "Wall handstand 30s", "targetWeek": 8 },
-        { "name": "Wall handstand 45s (Phase 2 gate)", "targetWeek": 20 },
-        { "name": "Wall handstand 60s", "targetWeek": 28 },
-        { "name": "Freestanding handstand 5–10s", "targetWeek": 32 },
-        { "name": "Freestanding handstand 15–30s", "targetWeek": 44 }
+        {
+          "name": "Overhead wall test pass",
+          "targetWeek": 2
+        },
+        {
+          "name": "Wall handstand 30s",
+          "targetWeek": 8
+        },
+        {
+          "name": "Wall handstand 45s (Phase 2 gate)",
+          "targetWeek": 20
+        },
+        {
+          "name": "Wall handstand 60s",
+          "targetWeek": 28
+        },
+        {
+          "name": "Freestanding handstand 5–10s",
+          "targetWeek": 32
+        },
+        {
+          "name": "Freestanding handstand 15–30s",
+          "targetWeek": 44
+        }
       ]
     },
     {
@@ -949,17 +1820,37 @@
       "gapAnalysis": "Session E introduces planche lean (the primary prerequisite) plus L-sit compression strength. Hollow body in Session E is the foundational body shape. Archer push-up in Session C provides planche-relevant straight-arm loading.",
       "timeline": "Planche lean 10° (Phase 2 gate): Week 12. Planche lean 20°: Week 20. Frog stand: Week 14. Tuck planche 2–3s: Week 32. Tuck planche 5–10s: Week 44.",
       "milestones": [
-        { "name": "Pain-free plank 60s", "targetWeek": 4 },
-        { "name": "Planche lean 10° for 10s (Phase 2 gate)", "targetWeek": 12 },
-        { "name": "Frog stand hold (feet off floor, knees on arms)", "targetWeek": 14 },
-        { "name": "Planche lean 20°", "targetWeek": 20 },
-        { "name": "Tuck planche 2–3s", "targetWeek": 32 },
-        { "name": "Tuck planche 5–10s", "targetWeek": 44 },
-        { "name": "Advanced tuck planche 3–5s", "targetWeek": 56 }
+        {
+          "name": "Pain-free plank 60s",
+          "targetWeek": 4
+        },
+        {
+          "name": "Planche lean 10° for 10s (Phase 2 gate)",
+          "targetWeek": 12
+        },
+        {
+          "name": "Frog stand hold (feet off floor, knees on arms)",
+          "targetWeek": 14
+        },
+        {
+          "name": "Planche lean 20°",
+          "targetWeek": 20
+        },
+        {
+          "name": "Tuck planche 2–3s",
+          "targetWeek": 32
+        },
+        {
+          "name": "Tuck planche 5–10s",
+          "targetWeek": 44
+        },
+        {
+          "name": "Advanced tuck planche 3–5s",
+          "targetWeek": 56
+        }
       ]
     }
   ],
-
   "benchmarks": [
     {
       "id": "pain-free-planks",
@@ -1077,7 +1968,6 @@
       "frequencyDays": 28
     }
   ],
-
   "theme": {
     "backgroundColor": "#141210",
     "textColor": "#e8e4df",

@@ -195,6 +195,10 @@
               "notes": { "type": "string" }
             }
           }
+        },
+        "archived": {
+          "type": "boolean",
+          "description": "When true, the exercise was used in a prior phase but is no longer in active routines. Preserved for historic tracking."
         }
       }
     },
