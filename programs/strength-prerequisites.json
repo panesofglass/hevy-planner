@@ -1,0 +1,1086 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "title": "Strength Prerequisites",
+    "subtitle": "Phase 2: Building the Foundation for 5 Skills",
+    "description": "12-week sequential program (weeks 9–20). One session per skill goal in a rotating queue — muscle-up, pistol squat, one-arm push-up, handstand, and tuck planche. Evidence-based compound exercise selection for maximum muscle coverage per session, 20–30 min each.",
+    "author": "AI Coach",
+    "durationWeeks": 12,
+    "tags": ["strength", "calisthenics", "skills", "hypertrophy", "movesmethod", "phase2"]
+  },
+
+  "exerciseTemplates": [
+
+    {
+      "id": "neck-cars",
+      "title": "Neck CARs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "neck",
+      "notes": "Controlled Articular Rotation. Slow full circle each direction. Keep shoulders still. Week 4+: add 3–5s PAILs contraction at end range.",
+      "tags": ["cars", "daily", "movesmethod"]
+    },
+    {
+      "id": "shoulder-cars",
+      "title": "Shoulder CARs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "shoulders",
+      "notes": "Full circumduction each arm. Maximize range without compensation. Week 3–4: add PAILs hold at top/bottom. Week 5+: full PAILs/RAILs. Weeks 9–12: add wrist PAILs/RAILs at end for handstand prep.",
+      "tags": ["cars", "daily", "movesmethod"]
+    },
+    {
+      "id": "hip-cars",
+      "title": "Hip CARs (Standing)",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "hip_flexors",
+      "notes": "Full hip circumduction each leg, standing. Lock the stance leg. Week 3–4: add PAILs at end range. Week 5+: full PAILs/RAILs.",
+      "tags": ["cars", "daily", "movesmethod"]
+    },
+    {
+      "id": "ankle-cars",
+      "title": "Ankle CARs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "calves",
+      "notes": "Full ankle circumduction each foot. Focus on right side — repaired Achilles. Week 5+: add PAILs/RAILs at dorsiflexion end range.",
+      "tags": ["cars", "daily", "movesmethod", "achilles"]
+    },
+    {
+      "id": "spine-cars",
+      "title": "Spine CARs (Segmental Cat-Cow)",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "other",
+      "notes": "Slow segmental movement from cervical through lumbar. Move one vertebra at a time. Full effort with irradiation.",
+      "tags": ["cars", "daily", "movesmethod"]
+    },
+    {
+      "id": "wrist-cars",
+      "title": "Wrist CARs",
+      "type": "reps_only",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "forearms",
+      "notes": "Full wrist circumduction each wrist. Weeks 9–12: add PAILs/RAILs at extension end range for handstand loading.",
+      "tags": ["cars", "daily", "movesmethod"]
+    },
+    {
+      "id": "tspine-rotation",
+      "title": "T-Spine Rotation (Quadruped)",
+      "type": "reps_only",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "upper_back",
+      "notes": "Thread hand behind head, rotate to ceiling. Keep hips square. Full effort irradiation at end range.",
+      "tags": ["cars", "daily", "thoracic"]
+    },
+
+    {
+      "id": "pull-up",
+      "title": "Pull-Up",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "pull_up_bar",
+      "primaryMuscleGroup": "lats",
+      "secondaryMuscleGroups": ["biceps", "upper_back", "traps"],
+      "notes": "Alternate grip each session: pronated (pull-up) builds lat width, supinated (chin-up) increases bicep activation for the muscle-up transition. Do 2–3 scapular pull-ups (depress shoulders, no elbow bend) as warm-up before working sets. Use band assistance if needed.",
+      "searchTerms": "pull up chin up scapular pull up",
+      "tags": ["muscle-up", "vertical-pull"],
+      "progressionByPhase": {
+        "Foundation": {
+          "sets": "3×max (band-assisted; aim for 5+ unassisted by end of phase)",
+          "notes": "Use lightest band that allows full ROM. Focus on dead hang start and chin-over-bar finish."
+        },
+        "Build": {
+          "sets": "3×max (reduce band level; target 8+ unassisted)",
+          "notes": "Remove band when you can do 6+ clean reps unassisted. Add chin-up alternation."
+        },
+        "Integration": {
+          "sets": "3×max unassisted + attempt +5–10 lb weighted",
+          "notes": "10+ unassisted target. Use dip belt or weight vest for weighted sets."
+        }
+      }
+    },
+    {
+      "id": "dumbbell-row",
+      "title": "Dumbbell Row",
+      "type": "weight_reps",
+      "equipmentCategory": "dumbbell",
+      "primaryMuscleGroup": "upper_back",
+      "secondaryMuscleGroups": ["lats", "biceps", "traps"],
+      "notes": "Horizontal pull to complement vertical pull-up. Brace on bench, full ROM. Squeeze shoulder blade at top.",
+      "searchTerms": "dumbbell row one arm row",
+      "tags": ["muscle-up", "horizontal-pull"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×10-12 (moderate weight — focus on form)" },
+        "Build": { "sets": "3×10-12 (increase weight progressively)" },
+        "Integration": { "sets": "3×8-10 (heavier weight, control the eccentric)" }
+      }
+    },
+    {
+      "id": "false-grip-hang",
+      "title": "False Grip Hang",
+      "type": "duration",
+      "equipmentCategory": "pull_up_bar",
+      "primaryMuscleGroup": "forearms",
+      "secondaryMuscleGroups": ["lats", "shoulders"],
+      "notes": "Loop a towel over the bar and grip it so the bar presses into the heel of your palm (false grip position). This is the wrist position required at the muscle-up transition. Foundation: passive hang. Build: add active shoulder depression while hanging. Integration: commit to true false grip on the bar without towel.",
+      "searchTerms": "false grip hang muscle up rings",
+      "tags": ["muscle-up", "grip"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "2×10-15s (towel, passive grip)", "notes": "Just hold. Build tissue tolerance." },
+        "Build": { "sets": "2×15-20s (active depression)", "notes": "Depress shoulders while hanging — don't just dangle." },
+        "Integration": { "sets": "2×20-30s (bar false grip)", "notes": "Attempt on bar directly, no towel." }
+      }
+    },
+    {
+      "id": "dumbbell-curl",
+      "title": "Dumbbell Curl",
+      "type": "weight_reps",
+      "equipmentCategory": "dumbbell",
+      "primaryMuscleGroup": "biceps",
+      "secondaryMuscleGroups": ["forearms"],
+      "notes": "Hypertrophy range 10–12 reps. Full supination at top. Bicep peak contraction is critical for the muscle-up transition — this is direct skill-relevant hypertrophy, not vanity work.",
+      "searchTerms": "dumbbell curl bicep curl",
+      "tags": ["muscle-up", "hypertrophy", "arms"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×12 (moderate weight, strict form)" },
+        "Build": { "sets": "3×10-12 (increase weight when 12 feels easy)" },
+        "Integration": { "sets": "3×8-10 (heavier, controlled eccentric)" }
+      }
+    },
+
+    {
+      "id": "atg-split-squat",
+      "title": "ATG Split Squat",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "quadriceps",
+      "secondaryMuscleGroups": ["glutes", "hip_flexors", "calves"],
+      "notes": "ATG (Ass-to-Grass) split squat. EMG-confirmed to cover quads, glutes, hip flexors, and ankle dorsiflexion simultaneously — the most efficient path to pistol squat. Drive front knee over toes aggressively. Use bench support if needed in Foundation phase.",
+      "searchTerms": "ATG split squat Ben Patrick knees over toes split squat",
+      "tags": ["pistol-squat", "knee-health", "ankle-mobility"],
+      "progressionByPhase": {
+        "Foundation": {
+          "sets": "3×6 each leg (bodyweight, partial depth acceptable)",
+          "notes": "Hold doorframe if needed. Prioritize heel staying down."
+        },
+        "Build": {
+          "sets": "3×6 each leg (add 10–15 lb dumbbells, full depth)",
+          "notes": "Reduce or eliminate support. Knee should track over pinky toe."
+        },
+        "Integration": {
+          "sets": "3×6 each leg (20–25 lb dumbbells, pistol depth)",
+          "notes": "Approach pistol squat depth with support hand available if needed."
+        }
+      }
+    },
+    {
+      "id": "romanian-deadlift",
+      "title": "Romanian Deadlift",
+      "type": "weight_reps",
+      "equipmentCategory": "dumbbell",
+      "primaryMuscleGroup": "hamstrings",
+      "secondaryMuscleGroups": ["glutes", "lower_back"],
+      "notes": "Posterior chain: hamstrings, glutes, lower back in one movement. Push hips back, maintain neutral spine, feel the hamstring stretch. Pairs with ATG split squat to cover the entire lower body in two exercises.",
+      "searchTerms": "romanian deadlift RDL dumbbell hinge",
+      "tags": ["pistol-squat", "posterior-chain"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×8-10 (25–35 lb each, focus on hip hinge pattern)" },
+        "Build": { "sets": "3×8-10 (35–50 lb each, 1–2s pause at bottom stretch)" },
+        "Integration": { "sets": "3×8 (50–65 lb each; introduce single-leg RDL variation)" }
+      }
+    },
+    {
+      "id": "eccentric-calf-raise",
+      "title": "Eccentric Calf Raise",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "calves",
+      "notes": "Alfredson protocol — maintained from Phase 1 for repaired Achilles. Rise on two feet, lower on one (slow 3–5s eccentric). Do both straight-leg and bent-knee sets to target gastrocnemius and soleus.",
+      "searchTerms": "eccentric calf raise Alfredson protocol Achilles tendon",
+      "tags": ["achilles", "ankle-health"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "2×15 each leg", "notes": "Both straight and bent-knee sets." },
+        "Build": { "sets": "2×15 each leg", "notes": "Slow 5s eccentric. Use a step edge for full range." },
+        "Integration": { "sets": "2×15 each leg", "notes": "Add light weight (hold dumbbell) if no pain." }
+      }
+    },
+    {
+      "id": "single-leg-balance",
+      "title": "Single-Leg Balance (Eyes Closed)",
+      "type": "duration",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "calves",
+      "secondaryMuscleGroups": ["abdominals"],
+      "notes": "Eyes closed. Directly targets the Phase 1 gate test gap. Start on a firm surface. Progress to folded towel/pillow for increased proprioceptive challenge. Right side will be harder post-Achilles repair — accept asymmetry and work both sides.",
+      "searchTerms": "single leg balance proprioception eyes closed",
+      "tags": ["pistol-squat", "proprioception", "gate-test"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "2×20-30s each leg (firm surface)", "notes": "Touch wall lightly if about to fall — don't use it as support." },
+        "Build": { "sets": "2×30s each leg (folded towel)", "notes": "Unstable surface adds proprioceptive challenge." },
+        "Integration": { "sets": "2×30-45s each leg (pillow or balance pad)", "notes": "Gate test target: 30s each side." }
+      }
+    },
+
+    {
+      "id": "dip",
+      "title": "Dip",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "pull_up_bar",
+      "primaryMuscleGroup": "chest",
+      "secondaryMuscleGroups": ["triceps", "shoulders"],
+      "notes": "Research confirms dips as the most comprehensive push exercise: chest, triceps, anterior delts, and serratus anterior simultaneously. Lean forward for chest emphasis (one-arm push-up path). Stay upright for tricep emphasis (muscle-up push-over). Full ROM — shoulders below elbows at bottom.",
+      "searchTerms": "dip parallel bar dip chest dip tricep dip",
+      "tags": ["one-arm-push-up", "muscle-up", "hypertrophy", "chest"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "4×max (band-assisted if needed)", "notes": "Full ROM. Chest-forward lean." },
+        "Build": { "sets": "4×max (reduce or eliminate band; 2–3s pause at bottom)" },
+        "Integration": { "sets": "4×max + attempt +10–25 lb weighted", "notes": "Use dip belt. Aim for 15+ bodyweight reps." }
+      }
+    },
+    {
+      "id": "incline-dumbbell-press",
+      "title": "Incline Dumbbell Press",
+      "type": "weight_reps",
+      "equipmentCategory": "dumbbell",
+      "primaryMuscleGroup": "chest",
+      "secondaryMuscleGroups": ["shoulders", "triceps"],
+      "notes": "Upper chest angle — the most undertrained chest region. 30–45° incline. Hypertrophy range 10–12 reps with progressive overload. This directly addresses the chest mass loss concern.",
+      "searchTerms": "incline dumbbell press upper chest incline press",
+      "tags": ["one-arm-push-up", "hypertrophy", "chest"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×10-12 (25–35 lb each)" },
+        "Build": { "sets": "3×10-12 (increase 5 lb when top of range is easy)" },
+        "Integration": { "sets": "3×8-10 (progressive overload to comfortable max)" }
+      }
+    },
+    {
+      "id": "archer-push-up",
+      "title": "Archer Push-Up",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "chest",
+      "secondaryMuscleGroups": ["triceps", "shoulders"],
+      "notes": "Direct path to one-arm push-up. Wide stance, push to one side while extending the other arm. Mid-chest emphasis with high stability demand. Reduce support arm as strength builds. The asymmetric loading also serves as planche preparation.",
+      "searchTerms": "archer push up one arm push up progression",
+      "tags": ["one-arm-push-up", "chest"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×5 each side", "notes": "Support hand on fist for elevation if needed." },
+        "Build": { "sets": "3×5 each side", "notes": "Support arm nearly straight. Increase lean toward working arm." },
+        "Integration": { "sets": "3×5 each side", "notes": "Minimal support. Approach one-arm negative (lower slowly on one arm)." }
+      }
+    },
+    {
+      "id": "dumbbell-floor-press",
+      "title": "Dumbbell Floor Press",
+      "type": "weight_reps",
+      "equipmentCategory": "dumbbell",
+      "primaryMuscleGroup": "chest",
+      "secondaryMuscleGroups": ["triceps", "shoulders"],
+      "notes": "Flat chest angle + triceps. Floor press limits ROM at the bottom (protects shoulder in the stretched position) while fully loading the mid-range and top contraction. Covers the flat chest angle not addressed by incline or dip. Better than bench press at Phase 2 given the shoulder history.",
+      "searchTerms": "dumbbell floor press flat press chest",
+      "tags": ["one-arm-push-up", "hypertrophy", "chest"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×10-12 (20–30 lb each)" },
+        "Build": { "sets": "3×10-12 (progressive overload)" },
+        "Integration": { "sets": "3×8-10 (heavier; squeeze chest hard at top)" }
+      }
+    },
+
+    {
+      "id": "wall-handstand-hold",
+      "title": "Wall Handstand Hold",
+      "type": "duration",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": ["abdominals", "triceps", "forearms"],
+      "notes": "Face-to-wall kick-up. All 3 shoulder heads loaded simultaneously. Wrists, core, and balance all trained in one hold. Foundation: face to wall. Build: experiment with chest-to-wall (harder balance). Integration: begin controlled kick-up practice for freestanding prep.",
+      "searchTerms": "wall handstand hold handstand wall practice kick up",
+      "tags": ["handstand"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×10-20s (face to wall)", "notes": "Kick up gently. Find shoulder alignment (ears between arms)." },
+        "Build": { "sets": "3×30-45s (face or chest to wall)", "notes": "Controlled hold. Try chest-to-wall for balance skill." },
+        "Integration": { "sets": "3×45-60s + kick-up practice", "notes": "Gate test target: 45s. Begin practicing controlled kick-up and hold." }
+      }
+    },
+    {
+      "id": "pike-push-up",
+      "title": "Pike Push-Up",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": ["triceps", "upper_back"],
+      "notes": "Overhead push pattern — direct handstand push-up prereq. Hips high (inverted V), lower head toward floor. Front and side delts loaded heavily. Build: elevate feet on bench for greater shoulder angle. Integration: lower head to floor (full handstand push-up negative).",
+      "searchTerms": "pike push up handstand push up overhead press",
+      "tags": ["handstand"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×8 (feet on floor)" },
+        "Build": { "sets": "3×8 (feet elevated on bench)", "notes": "More shoulder loading at higher hip angle." },
+        "Integration": { "sets": "3×8 (feet elevated, lower to head)", "notes": "Full handstand push-up negative. Slow descent." }
+      }
+    },
+    {
+      "id": "lateral-raise",
+      "title": "Lateral Raise",
+      "type": "weight_reps",
+      "equipmentCategory": "dumbbell",
+      "primaryMuscleGroup": "shoulders",
+      "notes": "Side deltoid mass. The side delt is undertrained by all compound pushing and pulling movements — lateral raises are the most direct solution. Slight forward lean, lead with elbows, stop at shoulder height. Hypertrophy range.",
+      "searchTerms": "lateral raise side raise side delt shoulder",
+      "tags": ["handstand", "hypertrophy", "shoulders"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×12 (light weight, strict form)" },
+        "Build": { "sets": "3×12 (increase weight when 12 feels easy)" },
+        "Integration": { "sets": "3×12 (progressive overload; add drop set if desired)" }
+      }
+    },
+    {
+      "id": "band-face-pull",
+      "title": "Band Face Pull",
+      "type": "reps_only",
+      "equipmentCategory": "resistance_band",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": ["upper_back", "traps"],
+      "notes": "Rear delt and external rotator maintenance — carried forward from Phase 1 shoulder rehab. Anchor band at face height. Pull to forehead, elbows high and wide. Counterbalances the heavy pressing volume in Session C and D.",
+      "searchTerms": "face pull band rear delt external rotation",
+      "tags": ["handstand", "shoulder-health"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×15 (light band)" },
+        "Build": { "sets": "3×15 (medium band)" },
+        "Integration": { "sets": "3×15 (medium-heavy band)" }
+      }
+    },
+
+    {
+      "id": "planche-lean",
+      "title": "Planche Lean",
+      "type": "duration",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": ["abdominals", "chest"],
+      "notes": "Straight-arm shoulder conditioning for planche. Hands on floor, arms locked, lean body forward past hands. The angle of lean determines the difficulty. This is the most direct planche prerequisite — it builds the straight-arm pressing strength and scapular protraction that conventional training doesn't develop.",
+      "searchTerms": "planche lean planche progression straight arm",
+      "tags": ["tuck-planche"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×5-8s (5–10° lean)", "notes": "Hands turned slightly outward. Arms fully locked." },
+        "Build": { "sets": "3×10s (15–20° lean)" },
+        "Integration": { "sets": "3×10-15s (20–25° lean); attempt tuck planche", "notes": "Tuck planche: both feet off floor, knees to chest." }
+      }
+    },
+    {
+      "id": "l-sit-hold",
+      "title": "L-Sit Hold",
+      "type": "duration",
+      "equipmentCategory": "pull_up_bar",
+      "primaryMuscleGroup": "abdominals",
+      "secondaryMuscleGroups": ["hip_flexors", "shoulders"],
+      "notes": "Hip flexor compression strength — a direct planche and handstand prerequisite. Can be performed on the dip bars or floor with fists. Foundation: bent-knee tuck hold. Build: one leg extended at a time. Integration: full L-sit, both legs extended.",
+      "searchTerms": "L-sit hold parallel bars floor L-sit hip flexor",
+      "tags": ["tuck-planche", "handstand"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×3-5s (tuck hold, knees to chest)" },
+        "Build": { "sets": "3×5-8s (half L-sit, one leg extended at a time)" },
+        "Integration": { "sets": "3×5-10s (full L-sit, both legs extended and parallel to floor)" }
+      }
+    },
+    {
+      "id": "hollow-body-hold",
+      "title": "Hollow Body Hold",
+      "type": "duration",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "abdominals",
+      "notes": "Anti-extension core. The hollow body position is a prerequisite for all 5 skill goals — it is the foundational body position for muscle-up, handstand, planche, and pistol. Arms overhead, legs straight, low back pressed to floor.",
+      "searchTerms": "hollow body hold hollow body rock core",
+      "tags": ["tuck-planche", "handstand", "muscle-up", "core"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "3×15-20s (knees bent, arms at sides)", "notes": "Low back must stay pressed to floor." },
+        "Build": { "sets": "3×20-30s (arms overhead, knees bent or legs extended)" },
+        "Integration": { "sets": "3×30s holds + hollow body rocks", "notes": "Rock forward and back while maintaining shape." }
+      }
+    },
+    {
+      "id": "suitcase-carry",
+      "title": "Suitcase Carry",
+      "type": "weight_duration",
+      "equipmentCategory": "dumbbell",
+      "primaryMuscleGroup": "abdominals",
+      "secondaryMuscleGroups": ["traps", "forearms"],
+      "notes": "Anti-lateral-flexion core — the one core training vector not covered by hollow body (anti-extension) or Pallof press (anti-rotation). Walk upright, resist leaning toward the weight. Direct functional transfer to suitcase carry, single-arm overhead movements, and unilateral stability.",
+      "searchTerms": "suitcase carry farmer carry anti lateral flexion",
+      "tags": ["tuck-planche", "core"],
+      "progressionByPhase": {
+        "Foundation": { "sets": "2×20s each side (20–30 lb)" },
+        "Build": { "sets": "2×30s each side (30–45 lb)" },
+        "Integration": { "sets": "2×30s each side (45–55 lb)" }
+      }
+    },
+
+    {
+      "id": "plank",
+      "title": "Plank",
+      "type": "duration",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "abdominals",
+      "secondaryMuscleGroups": ["shoulders", "glutes"],
+      "notes": "Benchmark test for Phase 1 gate: 60+ seconds pain-free. Forearms on floor, neutral spine, no hip sag.",
+      "tags": ["benchmark", "gate-test"]
+    },
+    {
+      "id": "cossack-squat",
+      "title": "Cossack Squat",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "adductors",
+      "secondaryMuscleGroups": ["quadriceps", "glutes"],
+      "notes": "Benchmark test for Phase 1 gate: full depth both sides, no support. Lateral squat — sit fully into one hip while extending the other leg.",
+      "tags": ["benchmark", "gate-test"]
+    },
+    {
+      "id": "wall-dorsiflexion-test",
+      "title": "Wall Dorsiflexion Test",
+      "type": "duration",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "calves",
+      "notes": "Benchmark test: 4+ inches each side. Face wall, drive knee forward keeping heel down. Measure toe-to-wall distance when heel lifts. Right side tracks improvement post-Achilles repair.",
+      "tags": ["benchmark", "gate-test", "ankle-health"]
+    },
+    {
+      "id": "overhead-wall-test",
+      "title": "Overhead Reach (Wall Test)",
+      "type": "duration",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "shoulders",
+      "notes": "Benchmark test: thumbs touch wall with back flat. Stand with back, butt, and head to wall. Raise arms overhead. Pass = thumbs touch wall without lower back arching off.",
+      "tags": ["benchmark", "gate-test", "shoulder-mobility"]
+    },
+    {
+      "id": "pistol-to-box",
+      "title": "Pistol Squat to Box",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "quadriceps",
+      "secondaryMuscleGroups": ["glutes", "calves"],
+      "notes": "Phase 2 benchmark: pistol squat to 16-inch box, both legs. Stand on one leg, extend other leg forward, lower to box. Right side may lag left due to Achilles — accept asymmetry.",
+      "tags": ["benchmark", "gate-test", "pistol-squat"]
+    }
+  ],
+
+  "routines": [
+    {
+      "id": "daily-cars",
+      "title": "Daily CARs",
+      "subtitle": "Controlled Articular Rotations",
+      "description": "7–8 minutes of full-body joint maintenance. Progresses from Phase 1 (full effort with irradiation) to include PAILs/RAILs end-range isometric contractions by week 4. Never skip this — it is the foundation of everything else.",
+      "color": "rgb(96, 165, 224)",
+      "isDaily": true,
+      "sortOrder": 1,
+      "folderGroup": "Daily",
+      "exercises": [
+        { "exerciseTemplateId": "neck-cars", "sets": "1×5 each direction" },
+        { "exerciseTemplateId": "shoulder-cars", "sets": "1×5 each direction, each arm" },
+        { "exerciseTemplateId": "hip-cars", "sets": "1×5 each direction, each leg" },
+        { "exerciseTemplateId": "ankle-cars", "sets": "1×5 each direction, each foot" },
+        { "exerciseTemplateId": "spine-cars", "sets": "1×8 slow reps" },
+        { "exerciseTemplateId": "wrist-cars", "sets": "1×5 each direction, each wrist" },
+        { "exerciseTemplateId": "tspine-rotation", "sets": "1×5 each side" }
+      ]
+    },
+
+    {
+      "id": "session-a",
+      "title": "Session A — Muscle-Up",
+      "subtitle": "Pull Strength",
+      "description": "Vertical and horizontal pulling for lat width, mid-back thickness, and bicep mass. Pull-up and chin-up alternate each session — pull-up emphasizes lats, chin-up emphasizes biceps for the muscle-up transition. False grip hang builds the wrist position you'll need at the transition.",
+      "color": "rgb(96, 165, 224)",
+      "sortOrder": 2,
+      "folderGroup": "Phase 2: Strength Prerequisites",
+      "exercises": [
+        {
+          "exerciseTemplateId": "pull-up",
+          "sets": "3×max",
+          "notes": "Alternate grip each session: pronated grip (pull-up) today, or supinated grip (chin-up) next A session. 2–3 scapular pull-ups (no elbow bend, just shoulder depress) as warm-up first."
+        },
+        {
+          "exerciseTemplateId": "dumbbell-row",
+          "sets": "3×10-12 each side",
+          "notes": "Horizontal pull for mid-back coverage. Squeeze shoulder blade at top of each rep."
+        },
+        {
+          "exerciseTemplateId": "false-grip-hang",
+          "sets": "2×10-20s",
+          "notes": "Towel over bar in Foundation. Progress to bar false grip in Integration. Builds the wrist position required at the muscle-up transition."
+        },
+        {
+          "exerciseTemplateId": "dumbbell-curl",
+          "sets": "3×10-12",
+          "notes": "Bicep peak hypertrophy for the muscle-up pulling transition. Full supination at top."
+        }
+      ]
+    },
+
+    {
+      "id": "session-b",
+      "title": "Session B — Pistol Squat",
+      "subtitle": "Lower Loaded Mobility",
+      "description": "ATG split squat + RDL together cover the entire lower body in two movements (EMG-confirmed: ATG covers the anterior chain, RDL the posterior). Eccentric calf work maintains Achilles health from Phase 1. Single-leg balance directly closes the Phase 1 gate test gap.",
+      "color": "rgb(96, 200, 140)",
+      "sortOrder": 3,
+      "folderGroup": "Phase 2: Strength Prerequisites",
+      "exercises": [
+        {
+          "exerciseTemplateId": "atg-split-squat",
+          "sets": "3×6 each leg",
+          "notes": "Drive front knee aggressively over toes. Heel must stay down. This single exercise covers quads, glutes, hip flexors, and ankle dorsiflexion simultaneously."
+        },
+        {
+          "exerciseTemplateId": "romanian-deadlift",
+          "sets": "3×8-10",
+          "notes": "Push hips back — don't bend the knees much. Feel the hamstring stretch. This covers what ATG split squat doesn't: hamstrings, glutes, lower back."
+        },
+        {
+          "exerciseTemplateId": "eccentric-calf-raise",
+          "sets": "2×15 each leg",
+          "notes": "Rise on two feet, lower slowly on one (3–5s down). Do both straight and bent-knee sets for gastrocnemius and soleus. Alfredson protocol — maintained for repaired Achilles."
+        },
+        {
+          "exerciseTemplateId": "single-leg-balance",
+          "sets": "2×20-30s each leg",
+          "notes": "Eyes closed. This is a Phase 1 gate test gap. Progress to folded towel in Build phase."
+        }
+      ]
+    },
+
+    {
+      "id": "session-c",
+      "title": "Session C — One-Arm Push-Up",
+      "subtitle": "Push & Chest",
+      "description": "Dips are the most research-backed comprehensive push exercise (chest, triceps, anterior delts, serratus). Three chest angles across the session: upper (incline press), mid (archer push-up), lower (dip). Floor press adds the flat angle and tricep volume. Together these rebuild the chest and arm mass while building the one-arm push-up foundation.",
+      "color": "rgb(224, 134, 96)",
+      "sortOrder": 4,
+      "folderGroup": "Phase 2: Strength Prerequisites",
+      "exercises": [
+        {
+          "exerciseTemplateId": "dip",
+          "sets": "4×max",
+          "notes": "Lean forward for chest emphasis. Full ROM — shoulders below elbows at bottom. This is the most comprehensive push exercise available."
+        },
+        {
+          "exerciseTemplateId": "incline-dumbbell-press",
+          "sets": "3×10-12",
+          "notes": "30–45° incline. Upper chest — the most undertrained region. Increase weight by 5 lb when all 3 sets reach 12 reps cleanly."
+        },
+        {
+          "exerciseTemplateId": "archer-push-up",
+          "sets": "3×5 each side",
+          "notes": "Direct one-arm push-up path. Wide stance, push to one side while extending the other arm. Reduce support arm assistance as strength builds."
+        },
+        {
+          "exerciseTemplateId": "dumbbell-floor-press",
+          "sets": "3×10-12",
+          "notes": "Flat chest angle + tricep mass. Floor limits ROM at bottom — safer for shoulders at Phase 2. Full lockout at top, pause briefly."
+        }
+      ]
+    },
+
+    {
+      "id": "session-d",
+      "title": "Session D — Handstand",
+      "subtitle": "Overhead & Shoulders",
+      "description": "All three shoulder heads covered: front (pike push-up), side (lateral raise), rear (face pull). Wall handstand practice builds the skill directly while conditioning shoulders and wrists. This is the only session in the rotation where all three delt heads are explicitly targeted.",
+      "color": "rgb(200, 196, 120)",
+      "sortOrder": 5,
+      "folderGroup": "Phase 2: Strength Prerequisites",
+      "exercises": [
+        {
+          "exerciseTemplateId": "wall-handstand-hold",
+          "sets": "3×10-20s",
+          "notes": "Face-to-wall kick-up. Arms fully locked. Ears between arms. Gate test target by end of Phase 2: 45 seconds."
+        },
+        {
+          "exerciseTemplateId": "pike-push-up",
+          "sets": "3×8",
+          "notes": "Hips high, head toward floor. Front and side delts. Build: elevate feet on bench. Integration: lower head to floor for full handstand push-up negative."
+        },
+        {
+          "exerciseTemplateId": "lateral-raise",
+          "sets": "3×12",
+          "notes": "Side delt mass. Slight forward lean, lead with elbows. Side delt is undertrained by every other exercise in the program — this is the one place it gets direct work."
+        },
+        {
+          "exerciseTemplateId": "band-face-pull",
+          "sets": "3×15",
+          "notes": "Rear delt and external rotators. Counterbalances heavy pressing from Session C. Protects the shoulder health built in Phase 1."
+        }
+      ]
+    },
+
+    {
+      "id": "session-e",
+      "title": "Session E — Tuck Planche",
+      "subtitle": "Straight-Arm & Core",
+      "description": "Straight-arm conditioning and compressed body strength. Three core training modes: anti-extension (hollow body), compression (L-sit), and anti-lateral-flexion (suitcase carry). Hollow body is a prerequisite for all 5 skill goals. Planche lean is the most direct planche prerequisite.",
+      "color": "rgb(180, 140, 224)",
+      "sortOrder": 6,
+      "folderGroup": "Phase 2: Strength Prerequisites",
+      "exercises": [
+        {
+          "exerciseTemplateId": "planche-lean",
+          "sets": "3×5-8s",
+          "notes": "Arms locked, lean forward. Start with 5–10° lean. Increase angle as straight-arm shoulder strength builds. Integration: attempt tuck planche (both feet off floor, knees to chest)."
+        },
+        {
+          "exerciseTemplateId": "l-sit-hold",
+          "sets": "3×3-5s",
+          "notes": "On dip bars or fists on floor. Foundation: tuck hold (knees bent). Build: half L-sit (one leg). Integration: full L-sit. Hip flexor compression strength is essential for planche."
+        },
+        {
+          "exerciseTemplateId": "hollow-body-hold",
+          "sets": "3×15-20s",
+          "notes": "The foundational position for all 5 skill goals. Low back pressed to floor at all times. Foundation: knees bent. Build: arms overhead. Integration: hollow body rocks."
+        },
+        {
+          "exerciseTemplateId": "suitcase-carry",
+          "sets": "2×20s each side",
+          "notes": "Walk upright, resist lateral lean. This trains anti-lateral-flexion — the one core vector not covered by hollow body or plank."
+        }
+      ]
+    },
+
+    {
+      "id": "benchmark-session",
+      "title": "Benchmark Session",
+      "subtitle": "Gate Tests — Every 5th Cycle",
+      "description": "Appears every 5th cycle (~monthly at 5 sessions/week). Test all 8 Phase 1 gate tests plus 4 new Phase 2 standards. Record results and compare to prior benchmarks. You need all 12 to advance to Phase 3: Skill Acquisition.",
+      "color": "rgb(200, 80, 80)",
+      "sortOrder": 7,
+      "folderGroup": "Benchmarks",
+      "exercises": [
+        { "exerciseTemplateId": "plank", "sets": "1×max hold", "notes": "Gate test: 60+ sec pain-free. Zero shoulder discomfort required." },
+        { "exerciseTemplateId": "pull-up", "sets": "1×max", "notes": "Gate test: 12 strict reps. Dead hang start, chin over bar finish." },
+        { "exerciseTemplateId": "dip", "sets": "1×max", "notes": "Gate test: 15 clean reps. Full ROM." },
+        { "exerciseTemplateId": "cossack-squat", "sets": "5 each side (slow)", "notes": "Gate test: full depth both sides, no support, no pain." },
+        { "exerciseTemplateId": "single-leg-balance", "sets": "1×30s each leg", "notes": "Gate test: 30s each side, eyes closed." },
+        { "exerciseTemplateId": "wall-dorsiflexion-test", "sets": "1 test each side", "notes": "Gate test: 4+ inches each side. Mark tape on wall." },
+        { "exerciseTemplateId": "hollow-body-hold", "sets": "1×30s", "notes": "Gate test: 30s arms overhead, low back to floor throughout." },
+        { "exerciseTemplateId": "overhead-wall-test", "sets": "1 test", "notes": "Gate test: thumbs touch wall, back stays flat against wall." },
+        { "exerciseTemplateId": "false-grip-hang", "sets": "1×20s", "notes": "Phase 2 gate: 20s false grip (bar or towel)." },
+        { "exerciseTemplateId": "wall-handstand-hold", "sets": "1×45s", "notes": "Phase 2 gate: 45s wall handstand hold." },
+        { "exerciseTemplateId": "planche-lean", "sets": "1×10s", "notes": "Phase 2 gate: 10°+ lean, 10s hold." },
+        { "exerciseTemplateId": "pistol-to-box", "sets": "3 each leg", "notes": "Phase 2 gate: pistol to 16-inch box, both legs." }
+      ]
+    }
+  ],
+
+  "weekTemplates": [
+    {
+      "id": "sequential-rotation",
+      "name": "Sequential Rotation (Recommended)",
+      "description": "Follow sessions in order regardless of day of week. If you miss a day, pick up with the next session in sequence. Benchmark session appears every 5th cycle (~monthly at 5 sessions/week). Daily CARs every day.",
+      "sortOrder": 1,
+      "days": [
+        {
+          "dayOfWeek": 0,
+          "routineIDs": ["daily-cars", "session-a"],
+          "note": "Session A — Muscle-Up (Pull)"
+        },
+        {
+          "dayOfWeek": 1,
+          "routineIDs": ["daily-cars", "session-b"],
+          "note": "Session B — Pistol Squat (Lower)"
+        },
+        {
+          "dayOfWeek": 2,
+          "routineIDs": ["daily-cars", "session-c"],
+          "note": "Session C — One-Arm Push-Up (Push)"
+        },
+        {
+          "dayOfWeek": 3,
+          "routineIDs": ["daily-cars", "session-d"],
+          "note": "Session D — Handstand (Overhead)"
+        },
+        {
+          "dayOfWeek": 4,
+          "routineIDs": ["daily-cars", "session-e"],
+          "note": "Session E — Tuck Planche (Core)"
+        },
+        {
+          "dayOfWeek": 5,
+          "routineIDs": ["daily-cars", "benchmark-session"],
+          "note": "Benchmark session every 5th cycle only. On other cycles, take as active recovery or rest."
+        },
+        {
+          "dayOfWeek": 6,
+          "routineIDs": ["daily-cars"],
+          "note": "Rest day. CARs only."
+        }
+      ]
+    }
+  ],
+
+  "progressions": [
+    {
+      "id": "foundation",
+      "weekRange": "Weeks 1–4",
+      "phaseName": "Foundation",
+      "focus": "Learn Phase 2 movement patterns. Establish baseline loads. Prioritize form over load.",
+      "weekStart": 1,
+      "weekEnd": 4,
+      "sortOrder": 1,
+      "details": [
+        "Pull-ups: use band assistance. Aim for 5+ unassisted reps by end of phase.",
+        "False grip hang: towel over bar, passive grip, 10–15s.",
+        "ATG split squat: bodyweight only, partial depth acceptable. Use doorframe support if needed.",
+        "Romanian deadlift: 25–35 lb each, focus on hip hinge pattern first.",
+        "Dips: band-assisted if needed. Full ROM is the priority.",
+        "Incline press: 25–35 lb each. Controlled.",
+        "Archer push-up: support hand on fist for elevation if needed.",
+        "Floor press: 20–30 lb each.",
+        "Wall handstand: face-to-wall kick-up, hold 10–20s.",
+        "Pike push-up: feet on floor, controlled descent.",
+        "Planche lean: 5–10° lean, 5–8s hold.",
+        "L-sit: bent-knee tuck hold on bars or fists, 3–5s.",
+        "Hollow body: knees bent, 15–20s. Low back must stay down.",
+        "Suitcase carry: 20–30 lb, 20s each side.",
+        "CARs: full effort with irradiation on all movements. Weeks 3–4: add 3–5s PAILs contract at shoulder and hip end ranges."
+      ]
+    },
+    {
+      "id": "build",
+      "weekRange": "Weeks 5–8",
+      "phaseName": "Build",
+      "focus": "Increase load and time under tension. Reduce assistance. Push into end ranges.",
+      "weekStart": 5,
+      "weekEnd": 8,
+      "sortOrder": 2,
+      "details": [
+        "Pull-ups: reduce band by one level. Target 8+ unassisted reps.",
+        "False grip hang: add active shoulder depression, 15–20s. Both hands.",
+        "ATG split squat: add 10–15 lb dumbbells, full depth.",
+        "Romanian deadlift: 35–50 lb each, 1–2s pause at hamstring stretch.",
+        "Dips: reduce or eliminate band. Add 2–3s pause at bottom.",
+        "Incline press: increase 5 lb when top of rep range feels easy.",
+        "Archer push-up: reduce support arm, increase lean toward working arm.",
+        "Floor press: increase weight progressively.",
+        "Wall handstand: increase hold to 30–45s. Try chest-to-wall position.",
+        "Pike push-up: elevate feet on bench for greater shoulder loading.",
+        "Planche lean: increase to 15–20° lean, 10s hold.",
+        "L-sit: half L-sit (one leg extended at a time), 5–8s.",
+        "Hollow body: arms overhead, 20–30s.",
+        "Suitcase carry: 30–45 lb, 30s each side.",
+        "CARs: full PAILs/RAILs on shoulder, hip, and ankle — contract → relax → reach deeper."
+      ]
+    },
+    {
+      "id": "integration",
+      "weekRange": "Weeks 9–12",
+      "phaseName": "Integration",
+      "focus": "Peak strength expression. First skill emergence. Benchmark test at end of phase.",
+      "weekStart": 9,
+      "weekEnd": 12,
+      "sortOrder": 3,
+      "details": [
+        "Pull-ups: 10+ unassisted. Attempt first weighted reps (+5–10 lb belt or vest).",
+        "False grip hang: commit to bar false grip position, no towel, 20–30s.",
+        "ATG split squat: 20–25 lb dumbbells. Approach pistol depth — use support hand if needed.",
+        "Romanian deadlift: 50–65 lb each. Introduce single-leg RDL variation.",
+        "Dips: bodyweight + attempt +10–25 lb weighted.",
+        "Incline press: progressive overload to comfortable max.",
+        "Archer push-up: minimal support. Approach one-arm negative (lower slowly on one arm).",
+        "Floor press: continue progressive overload.",
+        "Wall handstand: 45–60s holds. Begin controlled kick-up from standing.",
+        "Pike push-up: lower head to floor (full handstand push-up negative).",
+        "Planche lean: 20–25° lean, 10–15s. Attempt first tuck planche (feet off floor, knees to chest).",
+        "L-sit: full L-sit (both legs extended), 5–10s.",
+        "Hollow body: full hollow body rocks while maintaining shape.",
+        "Suitcase carry: 45–55 lb, 30s each side.",
+        "CARs: add wrist PAILs/RAILs at extension end range for handstand loading prep."
+      ]
+    }
+  ],
+
+  "roadmap": [
+    {
+      "id": "phase-1-joint-restoration",
+      "name": "Phase 1: Joint Restoration",
+      "weeks": "Weeks 1–8",
+      "status": "completed",
+      "color": "rgb(96, 165, 224)",
+      "sortOrder": 1,
+      "summary": "Rebuilt shoulder stability, knee resilience, Achilles health, core strength, and thoracic mobility. 8 gate tests required to advance.",
+      "keyFocus": "Foundation complete. Most gate tests passed. Pull-up count and single-leg balance were the main gaps at phase exit — both are active targets in Phase 2.",
+      "gateTests": [
+        "pain-free-planks", "strict-pullups-8", "clean-dips-15",
+        "cossack-squat-full", "single-leg-balance-30", "wall-dorsiflexion-4in",
+        "hollow-body-30s", "overhead-wall-test"
+      ]
+    },
+    {
+      "id": "phase-2-strength-prerequisites",
+      "name": "Phase 2: Strength Prerequisites",
+      "weeks": "Weeks 9–20",
+      "status": "current",
+      "color": "rgb(224, 134, 96)",
+      "sortOrder": 2,
+      "summary": "Build the raw strength and movement prerequisites for all 5 skill goals simultaneously. Evidence-based compound selection for maximum coverage per session.",
+      "keyFocus": "This phase adds One-Arm Push-Up as a 5th equal skill goal alongside muscle-up, pistol squat, handstand, and tuck planche. Chest and arm hypertrophy is explicitly programmed to address mass loss. The benchmark session appears every 5th cycle — do not skip it.",
+      "gateTests": [
+        "pain-free-planks", "strict-pullups-12", "clean-dips-15",
+        "cossack-squat-full", "single-leg-balance-30", "wall-dorsiflexion-4in",
+        "hollow-body-30s", "overhead-wall-test",
+        "false-grip-hang-20s", "wall-handstand-45s", "planche-lean-10s", "pistol-to-box"
+      ]
+    },
+    {
+      "id": "phase-3-skill-acquisition",
+      "name": "Phase 3: Skill Acquisition",
+      "weeks": "Weeks 21–36",
+      "status": "future",
+      "color": "rgb(96, 200, 140)",
+      "sortOrder": 3,
+      "summary": "Active skill practice begins. Muscle-up transition training, planche progressions, pistol squat depth, handstand balance work, and one-arm push-up negatives.",
+      "keyFocus": "Skill practice days replace some strength days. You'll be training 3–4 skills per session alongside maintenance mobility and strength. The muscle-up transition is a technique breakthrough — film every attempt.",
+      "gateTests": [
+        "muscle-up-1", "tuck-planche-5s", "pistol-squat-full",
+        "freestanding-handstand-20s", "one-arm-push-up-negative-3s"
+      ]
+    },
+    {
+      "id": "phase-4-refinement",
+      "name": "Phase 4: Refinement & Beyond",
+      "weeks": "Weeks 37–52+",
+      "status": "future",
+      "color": "rgb(180, 140, 224)",
+      "sortOrder": 4,
+      "summary": "Polish skill quality, add reps, begin harder progressions.",
+      "keyFocus": "This becomes your ongoing training practice. All 5 skills available to rotate focus as interest and progress dictate.",
+      "gateTests": [
+        "muscle-ups-3", "tuck-planche-10s", "freestanding-handstand-15s",
+        "pistol-squat-no-counterbalance", "one-arm-push-up-1"
+      ]
+    }
+  ],
+
+  "skills": [
+    {
+      "id": "muscle-up",
+      "name": "Muscle Up",
+      "priority": 1,
+      "icon": "★",
+      "color": "rgb(224, 134, 96)",
+      "currentState": "Phase 1 complete. Shoulder stability rebuilt. Pull-up count at ~6–8 (approaching Phase 1 gate of 8). No muscle-up experience. False grip position untrained.",
+      "requirements": "12+ strict pull-ups, 15+ dips, false grip strength, explosive pulling power, bicep peak contraction, and the transition technique.",
+      "gapAnalysis": "Pulling strength is rebuilding. The false grip and transition are completely new skills. Session A addresses all three: pull-up volume, false grip hang, and bicep peak via curls. Dips in Session C cover the push-over phase.",
+      "timeline": "False grip hang 20s: Week 12. High pull-ups to sternum: Week 20. Negative muscle-up: Week 24–28. First muscle-up: Week 30–36.",
+      "milestones": [
+        { "name": "8 strict pull-ups (Phase 1 gate)", "targetWeek": 4 },
+        { "name": "12 strict pull-ups (Phase 2 gate)", "targetWeek": 20 },
+        { "name": "False grip hang 20s", "targetWeek": 12 },
+        { "name": "Pull-ups to sternum (high pull)", "targetWeek": 20 },
+        { "name": "Negative muscle-up (5s descent)", "targetWeek": 24 },
+        { "name": "First muscle-up", "targetWeek": 32 },
+        { "name": "3–5 consecutive muscle-ups", "targetWeek": 44 }
+      ]
+    },
+    {
+      "id": "pistol-squat",
+      "name": "Pistol Squat",
+      "priority": 1,
+      "icon": "●",
+      "color": "rgb(96, 200, 140)",
+      "currentState": "Phase 1 built knee stability and improved ankle dorsiflexion. ATG split squat at bodyweight. Single-leg balance is the remaining Phase 1 gap.",
+      "requirements": "Full ankle dorsiflexion (especially right post-Achilles), strong VMO, hip flexor endurance, single-leg balance, and hip mobility for full depth.",
+      "gapAnalysis": "Session B systematically addresses all three limiters: ATG split squat for ankle + quad + hip flexor, single-leg balance for proprioception, and RDL for posterior chain support.",
+      "timeline": "Pistol to 16-inch box (Phase 2 gate): Week 12–16. Pistol to 8-inch box: Week 20. Full pistol with counterbalance: Week 28. Full pistol no counterbalance: Week 36.",
+      "milestones": [
+        { "name": "Full Cossack squat, no support", "targetWeek": 4 },
+        { "name": "Pistol to 16-inch box (Phase 2 gate)", "targetWeek": 12 },
+        { "name": "Pistol to 8-inch box", "targetWeek": 20 },
+        { "name": "Full pistol with counterbalance", "targetWeek": 28 },
+        { "name": "Full pistol, no counterbalance", "targetWeek": 36 },
+        { "name": "Weighted pistol squat", "targetWeek": 44 }
+      ]
+    },
+    {
+      "id": "one-arm-push-up",
+      "name": "One-Arm Push-Up",
+      "priority": 1,
+      "icon": "◉",
+      "color": "rgb(224, 100, 80)",
+      "currentState": "Added in Phase 2. Phase 1 built shoulder stability and core. Coming off rehab — regular push-ups available. Chest experiencing mass loss from Phase 1 focus on mobility over strength.",
+      "requirements": "Chest strength at all angles, tricep mass, core anti-rotation, wrist conditioning, scapular stability. All addressed by Session C.",
+      "gapAnalysis": "Session C uses dips (most comprehensive push exercise) + incline press (upper chest hypertrophy) + archer push-up (direct skill path) + floor press (flat angle + triceps). The chest mass loss concern is directly addressed by the hypertrophy prescription (3–4 sets, 8–12 reps, progressive overload).",
+      "timeline": "15 strict push-ups: Week 10. Archer push-ups 5 each side: Week 20. One-arm negative (3s): Week 28. First one-arm push-up: Week 36. 3–5 reps: Week 48+.",
+      "milestones": [
+        { "name": "15 strict push-ups (clean form)", "targetWeek": 10 },
+        { "name": "Close-grip push-ups 10 reps", "targetWeek": 14 },
+        { "name": "Archer push-ups 5 each side", "targetWeek": 20 },
+        { "name": "One-arm negative (3s descent)", "targetWeek": 28 },
+        { "name": "First one-arm push-up", "targetWeek": 36 },
+        { "name": "3–5 consecutive one-arm push-ups", "targetWeek": 48 }
+      ]
+    },
+    {
+      "id": "handstand",
+      "name": "Handstand",
+      "priority": 1,
+      "icon": "▲",
+      "color": "rgb(200, 196, 120)",
+      "currentState": "Phase 1 cleared the thoracic and shoulder mobility blockers. Overhead wall test approaching pass. No handstand history.",
+      "requirements": "Full overhead shoulder mobility (cleared), conditioned wrists, scapular elevation strength, proprioceptive balance, and extensive wall practice before freestanding.",
+      "gapAnalysis": "Session D covers all three shoulder heads (front via pike push-up, side via lateral raise, rear via face pull) plus wall practice. Wrist PAILs/RAILs in CARs weeks 9–12 add specific handstand wrist prep.",
+      "timeline": "Wall handstand 45s (Phase 2 gate): Week 20. Wall handstand 60s: Week 28. Freestanding 5–10s: Week 32. Freestanding 15–30s: Week 44.",
+      "milestones": [
+        { "name": "Overhead wall test pass", "targetWeek": 2 },
+        { "name": "Wall handstand 30s", "targetWeek": 8 },
+        { "name": "Wall handstand 45s (Phase 2 gate)", "targetWeek": 20 },
+        { "name": "Wall handstand 60s", "targetWeek": 28 },
+        { "name": "Freestanding handstand 5–10s", "targetWeek": 32 },
+        { "name": "Freestanding handstand 15–30s", "targetWeek": 44 }
+      ]
+    },
+    {
+      "id": "tuck-planche",
+      "name": "Tuck Planche",
+      "priority": 1,
+      "icon": "◆",
+      "color": "rgb(180, 140, 224)",
+      "currentState": "Phase 1 built scapular stability. Plank position now pain-free. No planche training history.",
+      "requirements": "Strong scapular protraction (serratus anterior), straight-arm pressing strength, progressive lean tolerance, conditioned wrists. None of this is built by conventional lifting.",
+      "gapAnalysis": "Session E introduces planche lean (the primary prerequisite) plus L-sit compression strength. Hollow body in Session E is the foundational body shape. Archer push-up in Session C provides planche-relevant straight-arm loading.",
+      "timeline": "Planche lean 10° (Phase 2 gate): Week 12. Planche lean 20°: Week 20. Frog stand: Week 14. Tuck planche 2–3s: Week 32. Tuck planche 5–10s: Week 44.",
+      "milestones": [
+        { "name": "Pain-free plank 60s", "targetWeek": 4 },
+        { "name": "Planche lean 10° for 10s (Phase 2 gate)", "targetWeek": 12 },
+        { "name": "Frog stand hold (feet off floor, knees on arms)", "targetWeek": 14 },
+        { "name": "Planche lean 20°", "targetWeek": 20 },
+        { "name": "Tuck planche 2–3s", "targetWeek": 32 },
+        { "name": "Tuck planche 5–10s", "targetWeek": 44 },
+        { "name": "Advanced tuck planche 3–5s", "targetWeek": 56 }
+      ]
+    }
+  ],
+
+  "benchmarks": [
+    {
+      "id": "pain-free-planks",
+      "name": "Pain-Free Plank",
+      "howTo": "Standard forearm plank. Time until you either fail or feel shoulder discomfort.",
+      "target": "60+ seconds with zero shoulder pain",
+      "frequency": "Every 4 weeks",
+      "unit": "seconds",
+      "frequencyDays": 28
+    },
+    {
+      "id": "strict-pullups-8",
+      "name": "Strict Pull-Ups 8 (Phase 1 Gate)",
+      "howTo": "Dead hang start, chin over bar finish, no kipping.",
+      "target": "8 strict pull-ups",
+      "frequency": "Every 4 weeks",
+      "unit": "reps",
+      "frequencyDays": 28
+    },
+    {
+      "id": "strict-pullups-12",
+      "name": "Strict Pull-Ups 12 (Phase 2 Gate)",
+      "howTo": "Dead hang start, chin over bar finish, no kipping.",
+      "target": "12 strict pull-ups",
+      "frequency": "Every 4 weeks",
+      "unit": "reps",
+      "frequencyDays": 28
+    },
+    {
+      "id": "clean-dips-15",
+      "name": "Clean Dips 15",
+      "howTo": "Parallel bar dips, full ROM, shoulders below elbows at bottom.",
+      "target": "15 clean dips",
+      "frequency": "Every 4 weeks",
+      "unit": "reps",
+      "frequencyDays": 28
+    },
+    {
+      "id": "cossack-squat-full",
+      "name": "Cossack Squat Full Depth",
+      "howTo": "Lateral squat, sit fully into one hip, other leg extended. Both sides.",
+      "target": "Full depth both sides, no support, no pain",
+      "frequency": "Every 4 weeks",
+      "frequencyDays": 28
+    },
+    {
+      "id": "single-leg-balance-30",
+      "name": "Single-Leg Balance 30s (Eyes Closed)",
+      "howTo": "Stand on one foot, eyes closed, time until touch down.",
+      "target": "30 seconds each side",
+      "frequency": "Every 2 weeks",
+      "unit": "seconds",
+      "frequencyDays": 14
+    },
+    {
+      "id": "wall-dorsiflexion-4in",
+      "name": "Wall Dorsiflexion 4+ Inches",
+      "howTo": "Face wall, drive knee forward keeping heel down. Measure toe-to-wall distance at heel-lift point.",
+      "target": "4+ inches each side. Track right side separately.",
+      "frequency": "Every 2 weeks",
+      "unit": "inches",
+      "frequencyDays": 14
+    },
+    {
+      "id": "hollow-body-30s",
+      "name": "Hollow Body Hold 30s",
+      "howTo": "Arms overhead, legs straight. Time until low back lifts from floor.",
+      "target": "30+ seconds, arms overhead",
+      "frequency": "Every 3 weeks",
+      "unit": "seconds",
+      "frequencyDays": 21
+    },
+    {
+      "id": "overhead-wall-test",
+      "name": "Overhead Wall Test",
+      "howTo": "Back, butt, and head against wall. Raise arms overhead.",
+      "target": "Thumbs touch wall while back stays flat against wall",
+      "frequency": "Every 3 weeks",
+      "frequencyDays": 21
+    },
+    {
+      "id": "false-grip-hang-20s",
+      "name": "False Grip Hang 20s (Phase 2 Gate)",
+      "howTo": "False grip on bar (heel of palm on bar). Active shoulder depression. Time the hold.",
+      "target": "20 seconds",
+      "frequency": "Every 4 weeks",
+      "unit": "seconds",
+      "frequencyDays": 28
+    },
+    {
+      "id": "wall-handstand-45s",
+      "name": "Wall Handstand Hold 45s (Phase 2 Gate)",
+      "howTo": "Face-to-wall kick-up. Arms locked, ears between arms. Time the hold.",
+      "target": "45 seconds",
+      "frequency": "Every 4 weeks",
+      "unit": "seconds",
+      "frequencyDays": 28
+    },
+    {
+      "id": "planche-lean-10s",
+      "name": "Planche Lean 10°/10s (Phase 2 Gate)",
+      "howTo": "Hands on floor, arms locked, lean body forward. Estimate 10° lean angle. Time the hold.",
+      "target": "10°+ lean, 10 seconds",
+      "frequency": "Every 4 weeks",
+      "unit": "seconds",
+      "frequencyDays": 28
+    },
+    {
+      "id": "pistol-to-box",
+      "name": "Pistol Squat to 16-Inch Box (Phase 2 Gate)",
+      "howTo": "Stand on one leg, extend other leg forward, lower to a 16-inch box. Both legs.",
+      "target": "3 clean reps each leg, controlled descent, no touch-and-fall",
+      "frequency": "Every 4 weeks",
+      "unit": "reps",
+      "frequencyDays": 28
+    }
+  ],
+
+  "theme": {
+    "backgroundColor": "#141210",
+    "textColor": "#e8e4df",
+    "accentColor": "rgb(96, 165, 224)"
+  }
+}
