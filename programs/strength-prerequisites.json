@@ -27,7 +27,8 @@
         "cars",
         "daily",
         "movesmethod"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=2Ot6wm12xvI"
     },
     {
       "id": "shoulder-cars",
@@ -40,7 +41,8 @@
         "cars",
         "daily",
         "movesmethod"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=CLWFwun1BfQ"
     },
     {
       "id": "hip-cars",
@@ -53,7 +55,8 @@
         "cars",
         "daily",
         "movesmethod"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=aESY3wR0hBQ"
     },
     {
       "id": "ankle-cars",
@@ -67,7 +70,8 @@
         "daily",
         "movesmethod",
         "achilles"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=vIDJiMShg4o"
     },
     {
       "id": "spine-cars",
@@ -80,7 +84,8 @@
         "cars",
         "daily",
         "movesmethod"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=PTN_MN7yRb4"
     },
     {
       "id": "wrist-cars",
@@ -93,7 +98,8 @@
         "cars",
         "daily",
         "movesmethod"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=KdM1KlmVgek"
     },
     {
       "id": "tspine-rotation",
@@ -106,7 +112,8 @@
         "cars",
         "daily",
         "thoracic"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=AzCghjjWt5k"
     },
     {
       "id": "pull-up",
@@ -138,7 +145,8 @@
           "sets": "3×max unassisted + attempt +5–10 lb weighted",
           "notes": "10+ unassisted target. Use dip belt or weight vest for weighted sets."
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=MhokcbRLP5w"
     },
     {
       "id": "dumbbell-row",
@@ -167,7 +175,8 @@
         "Integration": {
           "sets": "3×8-10 (heavier weight, control the eccentric)"
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=djKXLt7kv7Q"
     },
     {
       "id": "false-grip-hang",
@@ -198,7 +207,8 @@
           "sets": "2×20-30s (bar false grip)",
           "notes": "Attempt on bar directly, no towel."
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=Xz-6EI1abKo"
     },
     {
       "id": "dumbbell-curl",
@@ -226,7 +236,8 @@
         "Integration": {
           "sets": "3×8-10 (heavier, controlled eccentric)"
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=GNO4OtYoCYk"
     },
     {
       "id": "atg-split-squat",
@@ -259,7 +270,8 @@
           "sets": "3×6 each leg (20–25 lb dumbbells, pistol depth)",
           "notes": "Approach pistol squat depth with support hand available if needed."
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=g6KrlrOq4mw"
     },
     {
       "id": "romanian-deadlift",
@@ -287,7 +299,8 @@
         "Integration": {
           "sets": "3×8 (50–65 lb each; introduce single-leg RDL variation)"
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=_oyxCn2iSjU"
     },
     {
       "id": "eccentric-calf-raise",
@@ -314,7 +327,8 @@
           "sets": "2×15 each leg",
           "notes": "Add light weight (hold dumbbell) if no pain."
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=OhlfA8FUxVc"
     },
     {
       "id": "single-leg-balance",
@@ -345,7 +359,8 @@
           "sets": "2×30-45s each leg (pillow or balance pad)",
           "notes": "Gate test target: 30s each side."
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=mJmrSvIc3Y4"
     },
     {
       "id": "dip",
@@ -377,7 +392,8 @@
           "sets": "4×max + attempt +10–25 lb weighted",
           "notes": "Use dip belt. Aim for 15+ bodyweight reps."
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=KoS_NMmuxMM"
     },
     {
       "id": "incline-dumbbell-press",
@@ -406,7 +422,8 @@
         "Integration": {
           "sets": "3×8-10 (progressive overload to comfortable max)"
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=nwUjPJR5wxw"
     },
     {
       "id": "archer-push-up",
@@ -437,7 +454,8 @@
           "sets": "3×5 each side",
           "notes": "Minimal support. Approach one-arm negative (lower slowly on one arm)."
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=A0r8ploEnZY"
     },
     {
       "id": "dumbbell-floor-press",
@@ -466,7 +484,8 @@
         "Integration": {
           "sets": "3×8-10 (heavier; squeeze chest hard at top)"
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=AqYFvc9t_vU"
     },
     {
       "id": "wall-handstand-hold",
@@ -497,7 +516,8 @@
           "sets": "3×45-60s + kick-up practice",
           "notes": "Gate test target: 45s. Begin practicing controlled kick-up and hold."
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=2-3wv5kLNnw"
     },
     {
       "id": "pike-push-up",
@@ -526,7 +546,8 @@
           "sets": "3×8 (feet elevated, lower to head)",
           "notes": "Full handstand push-up negative. Slow descent."
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=VnQU_lLBFW0"
     },
     {
       "id": "lateral-raise",
@@ -551,7 +572,8 @@
         "Integration": {
           "sets": "3×12 (progressive overload; add drop set if desired)"
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=v_ZkxWzYnMc"
     },
     {
       "id": "band-face-pull",
@@ -579,7 +601,8 @@
         "Integration": {
           "sets": "3×15 (medium-heavy band)"
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=HXfjE3DHbxU"
     },
     {
       "id": "planche-lean",
@@ -608,7 +631,8 @@
           "sets": "3×10-15s (20–25° lean); attempt tuck planche",
           "notes": "Tuck planche: both feet off floor, knees to chest."
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=wKV5zVJTYBo"
     },
     {
       "id": "l-sit-hold",
@@ -636,7 +660,8 @@
         "Integration": {
           "sets": "3×5-10s (full L-sit, both legs extended and parallel to floor)"
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=BbAkWxDZKIM"
     },
     {
       "id": "hollow-body-hold",
@@ -664,7 +689,8 @@
           "sets": "3×30s holds + hollow body rocks",
           "notes": "Rock forward and back while maintaining shape."
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=uZqTUwq96iU"
     },
     {
       "id": "suitcase-carry",
@@ -692,7 +718,8 @@
         "Integration": {
           "sets": "2×30s each side (45–55 lb)"
         }
-      }
+      },
+      "videoURL": "https://www.youtube.com/watch?v=byBxlMhgggc"
     },
     {
       "id": "plank",
@@ -708,7 +735,8 @@
       "tags": [
         "benchmark",
         "gate-test"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=euxIgQSde8E"
     },
     {
       "id": "cossack-squat",
@@ -724,7 +752,8 @@
       "tags": [
         "benchmark",
         "gate-test"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=41om-6NClHo"
     },
     {
       "id": "wall-dorsiflexion-test",
@@ -737,7 +766,8 @@
         "benchmark",
         "gate-test",
         "ankle-health"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=Clutk_VsgUY"
     },
     {
       "id": "overhead-wall-test",
@@ -750,7 +780,8 @@
         "benchmark",
         "gate-test",
         "shoulder-mobility"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=K3pLHmnkD0A"
     },
     {
       "id": "pistol-to-box",
@@ -767,7 +798,8 @@
         "benchmark",
         "gate-test",
         "pistol-squat"
-      ]
+      ],
+      "videoURL": "https://www.youtube.com/watch?v=Huy0Le3k_Ak"
     },
     {
       "id": "tspine-rotation-quadruped",
@@ -1124,7 +1156,8 @@
         "glutes"
       ],
       "notes": "Conversational pace. RPE 3-4 out of 10. Slight resistance. This drives blood flow to your knees and ankles without impact stress. Good for Achilles flare-up days too.",
-      "archived": true
+      "archived": true,
+      "videoURL": "https://www.youtube.com/watch?v=L0-6OFLL2BE"
     },
     {
       "id": "foam-roll-quads",
