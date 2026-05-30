@@ -17,7 +17,6 @@ import { buildProgramProjection } from "../projections/program";
 
 export type SseEvent =
   | { type: "patch"; html: string }
-  | { type: "append"; target: string; html: string }
   | { type: "remove"; target: string }
   | { type: "signals"; json: string; onlyIfMissing?: boolean }
   | { type: "error"; html: string };
@@ -187,9 +186,6 @@ export class SessionActor implements DurableObject {
     switch (event.type) {
       case "patch":
         sse.patchElements(event.html);
-        break;
-      case "append":
-        sse.patchElements(event.html, { selector: event.target, mode: "append" });
         break;
       case "remove":
         sse.removeElements(event.target);

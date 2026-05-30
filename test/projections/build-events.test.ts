@@ -22,11 +22,13 @@ describe("buildContentEvents", () => {
 
   it("returns single patch for a single fragment", () => {
     const events = buildContentEvents(["<p>only</p>"]);
-    expect(events[0].html).toBe('<div id="content"><p>only</p></div>');
+    expect(events[0]).toHaveProperty("html");
+    expect((events[0] as any).html).toBe('<div id="content"><p>only</p></div>');
   });
 
   it("returns empty content div for no fragments", () => {
     const events = buildContentEvents([]);
-    expect(events[0].html).toBe('<div id="content"></div>');
+    expect(events[0]).toHaveProperty("html");
+    expect((events[0] as any).html).toBe('<div id="content"></div>');
   });
 });
