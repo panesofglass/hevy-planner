@@ -71,7 +71,7 @@ export class SessionActor implements DurableObject {
   private async buildEventsForPage(page: string, db: D1Database, userId: string, tz?: string): Promise<SseEvent[]> {
     switch (page) {
       case "today":
-        return (await buildTodayProjection(db, userId, tz)).events;
+        return (await buildTodayProjection(db, userId, tz, this.env.ENCRYPTION_KEY)).events;
       case "progress":
         return (await buildProgressProjection(db, userId, tz)).events;
       case "program":

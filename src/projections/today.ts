@@ -1,5 +1,6 @@
 import type { SseEvent } from "../actor/session-actor";
 import { getUser, loadProgram, getQueueItems, getRoutineMappings } from "../storage/queries";
+import { decryptAesGcm } from "../utils/crypto";
 import { getNextRoutine, getCompletedRoutines } from "../domain/queue";
 import { computeUpcoming } from "../domain/reflow";
 import { setupPage } from "../fragments/setup";
@@ -14,7 +15,7 @@ export interface TodayProjection {
 }
 
 /** Build SseEvent[] for the Today page — used by the SessionActor DO on connect. */
-export async function buildTodayProjection(db: D1Database, userId: string, tz?: string): Promise<TodayProjection> {
+export async function buildTodayProjection(db: D1Database, userId: string, tz?: string, encryptionKey?: string): Promise<TodayProjection> {
   const user = await getUser(db, userId);
   if (!user) {
     return {
@@ -78,7 +79,15 @@ export async function buildTodayProjection(db: D1Database, userId: string, tz?: 
     }
   }
 
-  fragments.push(syncButton(user.webhook_id, null, user.last_sync_at, tz));
+  let webhookBearerToken: string | null = null;
+  if (user.webhook_id && user.webhook_bearer_token && encryptionKey) {
+    try {
+      webhookBearerToken = await decryptAesGcm(user.webhook_bearer_token, encryptionKey);
+    } catch {
+      // Non-fatal: show registered state without credentials if decryption fails
+    }
+  }
+  fragments.push(syncButton(user.webhook_id, webhookBearerToken, user.last_sync_at, tz));
 
   return { events: buildContentEvents(fragments), subtitle: program.meta.subtitle, isSetup: false };
 }

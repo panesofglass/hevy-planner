@@ -148,7 +148,7 @@ export default {
         let content: string;
         let subtitle: string | undefined;
         try {
-          const projection = await buildTodayProjection(env.DB, auth.userId, tz);
+          const projection = await buildTodayProjection(env.DB, auth.userId, tz, env.ENCRYPTION_KEY);
           content = unwrapContentEvents(projection.events);
           subtitle = projection.isSetup ? undefined : projection.subtitle;
         } catch {
