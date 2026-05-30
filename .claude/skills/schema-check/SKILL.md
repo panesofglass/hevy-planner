@@ -19,14 +19,21 @@ Validate a program JSON file against `schema/program.schema.json`.
 
 ## After Schema Changes
 
-When you modify `schema/program.schema.json`, validate ALL program files:
+When you modify `schema/program.schema.json`:
 
-```bash
-npx ajv validate -s schema/program.schema.json -d "programs/*.json" --spec=draft2020 --all-errors
-```
+1. Validate ALL program files:
+   ```bash
+   npx ajv validate -s schema/program.schema.json -d "programs/*.json" --spec=draft2020 --strict=false --all-errors
+   ```
+2. Regenerate the compiled validator (REQUIRED — the app uses this, not the schema file directly):
+   ```bash
+   npm run build:schema
+   ```
+   Do NOT use `npx ajv compile` — it outputs CJS. The `build:schema` script uses the AJV Node API with `{ esm: true }` to produce proper ESM output for Cloudflare Workers.
 
 ## Common Issues
 
-- **Missing ajv-cli**: Install with `npm install -g ajv-cli ajv-formats`.
+- **Validation passes locally but fails in the app**: The compiled validator at `src/domain/compiled-validator.mjs` is stale. Run `npm run build:schema`.
+- **Build error "No matching export … for import default"**: `compiled-validator.mjs` has CJS exports. It was generated with `npx ajv compile` instead of `npm run build:schema`. Regenerate with the script.
 - **Draft version mismatch**: The schema uses Draft 2020-12. Always pass `--spec=draft2020`.
-- **$ref resolution**: If the schema uses `$ref`, ensure referenced files are resolvable relative to the schema location.
+- **Unknown format "uri" warning**: Expected — pass `--strict=false` to suppress.
