@@ -26,6 +26,8 @@ html {
 body {
   min-height: 100dvh;
   padding-bottom: calc(72px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
 }
 
 .page-header {
@@ -47,6 +49,15 @@ body {
 .page-main {
   padding: 8px 16px 24px;
   container-type: inline-size;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Cards ── */
@@ -853,7 +864,8 @@ body {
 /* ── Sync section ── */
 .sync-section {
   text-align: center;
-  margin-top: 20px;
+  margin-top: auto;
+  padding-top: 20px;
 }
 
 .sync-status {
