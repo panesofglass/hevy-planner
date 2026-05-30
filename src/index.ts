@@ -37,7 +37,7 @@ function isSSERequest(request: Request): boolean {
  *  since the caller provides its own #content wrapper. */
 function unwrapContentEvents(events: SseEvent[]): string {
   return events
-    .filter((e): e is Extract<SseEvent, { html: string }> => "html" in e)
+    .filter((e): e is Extract<SseEvent, { type: "patch" }> => e.type === "patch")
     .map((e) => e.html.replace(/^<div id="content">([\s\S]*)<\/div>$/, "$1"))
     .join("\n");
 }
