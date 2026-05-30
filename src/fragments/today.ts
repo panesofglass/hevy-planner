@@ -196,12 +196,17 @@ const DISABLE_BUTTON = `<button class="btn btn-ghost btn-sm" data-on:click="@pos
       <span data-show="$_unregistering">Disabling\u2026</span>
     </button>`;
 
-function syncJustRegistered(callbackUrl: string, bearerToken: string): string {
+function syncJustRegistered(callbackUrl: string, bearerToken: string, lastSyncAt?: string | null, tz?: string): string {
+  const statusLabel = lastSyncAt
+    ? `<div class="sync-last-synced">Last synced: ${escapeHtml(new Date(lastSyncAt).toLocaleString("en-US", { timeZone: tz ?? "UTC" }))}</div>`
+    : `<div class="sync-last-synced">Waiting for first sync from Hevy&hellip;</div>`;
+
   return `<div class="sync-section">
   <div class="sync-status">
     <span class="sync-status-label">&#9679; Auto-sync enabled</span>
     ${DISABLE_BUTTON}
   </div>
+  ${statusLabel}
   <div class="sync-credentials">
     <div class="sync-credentials-hint">Paste these into <a href="https://hevy.com/settings?developer" target="_blank" style="color:var(--blue)">Hevy developer settings</a>:</div>
     <div style="margin-bottom:6px">
@@ -245,7 +250,7 @@ function syncNotRegistered(): string {
 }
 
 export function syncButton(callbackUrl?: string | null, bearerToken?: string | null, lastSyncAt?: string | null, tz?: string): string {
-  if (callbackUrl && bearerToken) return syncJustRegistered(callbackUrl, bearerToken);
+  if (callbackUrl && bearerToken) return syncJustRegistered(callbackUrl, bearerToken, lastSyncAt, tz);
   if (callbackUrl) return syncRegistered(lastSyncAt, tz);
   return syncNotRegistered();
 }
