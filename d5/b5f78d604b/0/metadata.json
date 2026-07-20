@@ -1,0 +1,108 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "d5b5f78d604b",
+  "session_id": "2afd116d-8d5a-4c41-9f4a-80420ea5b601",
+  "strategy": "manual-commit",
+  "created_at": "2026-07-20T19:08:45.308747Z",
+  "branch": "fix/sync-window-and-skip-tracking",
+  "checkpoints_count": 3,
+  "save_step_count": 3,
+  "files_touched": [
+    "src/domain/queue.ts",
+    "src/services/sync.ts",
+    "src/storage/queries.ts",
+    "src/types.ts",
+    "test/domain/queue.test.ts",
+    "test/domain/sync-fetch.test.ts"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5",
+  "turn_id": "7a42b564e478",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 110,
+    "cache_creation_tokens": 234505,
+    "cache_read_tokens": 6139645,
+    "output_tokens": 31027,
+    "api_call_count": 55
+  },
+  "skill_events_version": 1,
+  "skill_events": [
+    {
+      "id": "claude-skill-toolu_01FAdgU94sDc2iErkpdfBDR7",
+      "event_type": "tool_invocation",
+      "skill": {
+        "name": "superpowers:systematic-debugging"
+      },
+      "source": {
+        "agent": "claude-code",
+        "signal": "skill_tool_use",
+        "confidence": "explicit"
+      },
+      "turn_id": "7a42b564e478",
+      "transcript_anchor": {
+        "unit": "line",
+        "start": 25,
+        "end": 26,
+        "entry_ids": [
+          "78558b36-ae27-4441-b18c-576e754597b6"
+        ],
+        "tool_use_id": "toolu_01FAdgU94sDc2iErkpdfBDR7"
+      },
+      "native": {
+        "tool_name": "Skill",
+        "tool_use_id": "toolu_01FAdgU94sDc2iErkpdfBDR7"
+      },
+      "collapse": {
+        "target": "tool_pair",
+        "label": "Skill: superpowers:systematic-debugging",
+        "default_collapsed": true
+      }
+    }
+  ],
+  "session_metrics": {
+    "turn_count": 3
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-07-20T19:08:45.269554Z",
+    "agent_lines": 219,
+    "agent_removed": 15,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 219,
+    "total_lines_changed": 234,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 4,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 219,
+      "agent_lines_removed": 15
+    }
+  ]
+}

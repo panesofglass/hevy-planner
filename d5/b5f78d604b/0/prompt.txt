@@ -1,0 +1,143 @@
+My app does not appear to be syncing properly. I did Session A a few days ago, then Session B, but the app still shows Session A as having not yet been completed. I did Daily CARs AFTER Session A. Did that throw off the sequence somehow? That should not happen. Also, if I pick a different workout, it should look at the schedule and move to that point rather than continue to force whatever sequence it thinks necessary. For example, if I skip Session C and move to D, then the next sync should show Session E next, not continue to show Session C.
+
+---
+
+<task-notification>
+<task-id>ab102b0ba25dd6b86</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ryanr-Code-hevy-planner/2afd116d-8d5a-4c41-9f4a-80420ea5b601/tasks/ab102b0ba25dd6b86.output</output-file>
+<status>completed</status>
+<summary>Agent "Locate queue sync/reflow logic" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Now I have the complete picture. Here is the report.
+
+## 1. Sync / matching logic (workout → queue_item)
+
+**`/Users/ryanr/Code/hevy-planner/src/domain/hevy-sync.ts:202-230`** — `matchCompletions`. This is the only place a Hevy workout is matched to a `queue_item`. Matching key is the **routine identity** (`hevy_routine_id`), not queue position:
+
+```ts
+202  export function matchCompletions(
+203    items: Pick&lt;QueueItemRow, "id" | "hevy_routine_id"&gt;[],
+204    workouts: HevyWorkout[],
+205    getRoutineId: (workout: HevyWorkout) =&gt; string | null
+206  ): CompletionMatch[] {
+207    // Build a map: routine_id → queue item id (first match wins)
+208    const routineToItem = new Map&lt;string, number&gt;();
+209    for (const item of items) {
+210      if (item.hevy_routine_id &amp;&amp; !routineToItem.has(item.hevy_routine_id)) {
+211        routineToItem.set(item.hevy_routine_id, item.id);
+212      }
+213    }
+214  
+215    const matches: CompletionMatch[] = [];
+216    const usedItems = new Set&lt;number&gt;();
+217  
+218    for (const workout of workouts) {
+219      const routineId = getRoutineId(workout);
+220      if (!routineId) continue;
+221  
+222      const itemId = routineToItem.get(routineId);
+223      if (itemId !== undefined &amp;&amp; !usedItems.has(itemId)) {
+224        matches.push({ queueItemId: itemId, workoutId: workout.id });
+225        usedItems.add(itemId);
+226      }
+227    }
+228  
+229    return matches;
+230  }
+```
+
+Caller: **`/Users/ryanr/Code/hevy-planner/src/services/sync.ts:11-76`** (`performSync`), invoked from both manual pull (`/Users/ryanr/Code/hevy-planner/src/routes/sync.ts:127`, `handlePull`) and webhook events (`/Users/ryanr/Code/hevy-planner/src/routes/webhooks.ts:85`).
+
+```ts
+27    const pendingItems = items.filter((i) =&gt; i.status === "pending" &amp;&amp; i.hevy_routine_id);
+28  
+29    const nameToRoutineId = new Map&lt;string, string&gt;();
+30    for (const item of pendingItems) {
+31      const routine = routineMap.get(item.routine_id);
+32      if (routine &amp;&amp; item.hevy_routine_id) {
+33        nameToRoutineId.set(routine.title, item.hevy_routine_id);
+34      }
+35    }
+36  
+37    const matches = matchCompletions(
+38      pendingItems,
+39      newWorkouts,
+40      (w) =&gt; nameToRoutineId.get(w.title) ?? null
+41    );
+```
+
+The routine ID for an incoming Hevy workout is resolved via `w.title` → `nameToRoutineId` → `hevy_routine_id`, i.e. matching is by **routine title** (not a Hevy-native `routine_id` field on the workout object). Only queue items that already carry a `hevy_routine_id` (i.e. were previously "pushed" via `handlePush`) are eligible to match — see `/Users/ryanr/Code/hevy-planner/src/routes/sync.ts:91-104`.
+
+Completion writes: `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts:84-99` (`batchMarkQueueItemsCompleted`) sets `status='completed', completed_date, hevy_workout_id, hevy_workout_data` — keyed purely by `itemId`, no position logic involved.
+
+There is also a manual-complete path that bypasses matching entirely: `/Users/ryanr/Code/hevy-planner/src/routes/sync.ts:181-193` (`handleManualComplete`) → `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts:101-114` (`markQueueItemCompletedForUser`), which marks whatever `itemId` the client posts as completed, no routine/order check at all.
+
+## 2. Reflow / "next" determination
+
+**Strictly sequential by `position` — not based on what was actually completed.**
+
+`/Users/ryanr/Code/hevy-planner/src/domain/queue.ts:39-42`:
+
+```ts
+39  export function getNextRoutine(items: QueueItemRow[]): QueueItemRow | null {
+40    const sorted = [...items].sort((a, b) =&gt; a.position - b.position);
+41    return sorted.find((item) =&gt; item.status === "pending") ?? null;
+42  }
+```
+
+This is the sole "what's next" function, used by `/Users/ryanr/Code/hevy-planner/src/projections/today.ts:49` to render the hero "Next Session" card. It simply returns the lowest-`position` item whose `status === "pending"`. It has no awareness of which routine the user actually just completed.
+
+`position` values are assigned once at queue creation (`/Users/ryanr/Code/hevy-planner/src/storage/queries.ts:56-67`, `insertQueueItems`, called from playlist generation in `/Users/ryanr/Code/hevy-planner/src/domain/queue.ts:8-37`, `generatePlaylist`) and are **never updated afterward** — no reorder/renumber/skip code exists anywhere in `src/` (`grep -rn "position ="` finds only the initial insert and the `UNIQUE(user_id, position)` constraint in `/Users/ryanr/Code/hevy-planner/migrations/0001_initial.sql:19`).
+
+"Coming Up" / reflow of the *upcoming list* (not "next") is in `/Users/ryanr/Code/hevy-planner/src/domain/reflow.ts:23-83` (`computeUpcoming`). It walks calendar days starting tomorrow and consumes `pendingItems` in queue order, matching them to the week-template's routine slots ("smart shift" — rest days that have already passed just don't appear). Called from `/Users/ryanr/Code/hevy-planner/src/projections/today.ts:69-79`, and it explicitly skips the hero item (`pendingItems.slice(1)` at line 72) — i.e. it assumes the hero (`getNextRoutine`) is always item #0 of the pending list, reinforcing that "next" = "lowest pending position", full stop.
+
+## 3. Out-of-order completion / different-routine handling
+
+There is **no explicit "out-of-order" or "skip" handling** anywhere. What exists:
+
+- Any routine's detail page has its own "Push to Hevy" button (`/Users/ryanr/Code/hevy-planner/src/fragments/routine-detail.ts:84`), not just the hero/next one, so a user can push and complete a routine other than the one shown as "Next Session."
+- `handlePush` (`/Users/ryanr/Code/hevy-planner/src/routes/sync.ts:98-104`) attaches the new `hevy_routine_id` to the **earliest pending queue item matching that `routine_id`**, regardless of whether it's the current "next" item:
+
+```ts
+98      const items = await getQueueItems(env.DB, userId, programId);
+99      const queueItem = items.find(
+100       (i) =&gt; i.routine_id === routineId &amp;&amp; i.status === "pending"
+101     );
+102     if (queueItem) {
+103       await updateQueueItemHevyRoutineId(env.DB, queueItem.id, created.id);
+104     }
+```
+
+- When that workout later syncs, `matchCompletions` marks that specific (possibly out-of-order-position) queue item `completed` — but `getNextRoutine` (queue.ts:39-42) is purely position-based, so **completing a later-position item does not advance "Next Session."** The item at the lowest remaining pending position still shows as next, even though a later item was actually finished. Any items skipped between them stay `pending` forever with no mechanism to mark/skip/reconcile them.
+- There is no logic that reconciles "the workout the user actually did" against "the queue item currently flagged as next" beyond routine-title equality; if the completed workout's title doesn't match any pending item's mapped routine, `matchCompletions` silently drops it (no match created, no error surfaced).
+
+## 4. "Daily CARs" / recurring routine handling
+
+Daily/recurring routines (`Routine.isDaily === true`) are handled through a **completely separate path**, not through `queue_items` at all:
+
+- Excluded from queue generation: `/Users/ryanr/Code/hevy-planner/src/domain/queue.ts:16-24` (`generatePlaylist`) filters `!routine.isDaily` when building the main-session playlist — CARs never gets a `queue_items` row.
+- Completion tracked on the `users` row instead, via `daily_completed_date`: `/Users/ryanr/Code/hevy-planner/src/storage/queries.ts:226-235` (`updateDailyCompleted`).
+- Matching is by **exact title equality against the full recent-workouts list** (not `newWorkouts`, not routine-ID mapping like `matchCompletions` uses), in `/Users/ryanr/Code/hevy-planner/src/services/sync.ts:66-73`:
+
+```ts
+66    // Check for daily routine completion (use workout date, not sync date)
+67    const dailyRoutine = program.routines.find((r) =&gt; r.isDaily);
+68    if (dailyRoutine) {
+69      const dailyWorkout = workouts.find((w) =&gt; w.title === dailyRoutine.title);
+70      if (dailyWorkout) {
+71        await updateDailyCompleted(db, userId, toLocalDate(dailyWorkout.start_time, tz));
+72      }
+73    }
+```
+
+  Note `workouts.find` takes the first (per Hevy API ordering, presumably most-recent) match by title among the last `pageSize=5` workouts fetched (`/Users/ryanr/Code/hevy-planner/src/hevy/client.ts:225-232`), and always overwrites `daily_completed_date` to that workout's date regardless of whether it's today.
+- Rendering: `/Users/ryanr/Code/hevy-planner/src/projections/today.ts:42-47` computes `dailyDoneToday = dailyRoutine &amp;&amp; user.daily_completed_date === today` and shows the CARs card only when not done today — this is a once-per-day recurring completion flag, decoupled from the sequential queue entirely.
+- `computeUpcoming` (`/Users/ryanr/Code/hevy-planner/src/domain/reflow.ts:31-32, 74-76`) treats the daily routine specially as a non-consuming "spacer" in the Coming Up list (`dailyRoutine?.title ?? "Rest"`), distinct from ordinary session routines which consume `pendingIdx`/`sessionCount`.
+- `computeFolderAssignments` (`/Users/ryanr/Code/hevy-planner/src/domain/hevy-sync.ts:110-119`) also special-cases `isDaily` for Hevy folder naming (`"Daily"` vs. program title), unrelated to queue/reflow but confirming `isDaily` is a first-class tag threaded through several modules — just never through `queue_items`/position logic.</result>
+<usage><subagent_tokens>67793</subagent_tokens><tool_uses>26</tool_uses><duration_ms>124742</duration_ms></usage>
+</task-notification>
+
+---
+
+yes, implement both

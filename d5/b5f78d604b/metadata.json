@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "d5b5f78d604b",
+  "strategy": "manual-commit",
+  "branch": "fix/sync-window-and-skip-tracking",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "src/domain/queue.ts",
+    "src/services/sync.ts",
+    "src/storage/queries.ts",
+    "src/types.ts",
+    "test/domain/queue.test.ts",
+    "test/domain/sync-fetch.test.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/d5/b5f78d604b/0/metadata.json",
+      "transcript": "/d5/b5f78d604b/0/full.jsonl",
+      "compact_transcript": "/d5/b5f78d604b/0/transcript.jsonl",
+      "content_hash": "/d5/b5f78d604b/0/content_hash.txt",
+      "prompt": "/d5/b5f78d604b/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 110,
+    "cache_creation_tokens": 234505,
+    "cache_read_tokens": 6139645,
+    "output_tokens": 31027,
+    "api_call_count": 55
+  }
+}
