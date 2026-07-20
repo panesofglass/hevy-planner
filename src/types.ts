@@ -35,7 +35,7 @@ export interface QueueItemRow {
   readonly user_id: string;
   readonly routine_id: string;
   readonly position: number;
-  readonly status: "pending" | "completed";
+  readonly status: "pending" | "completed" | "skipped";
   readonly completed_date: string | null;
   readonly hevy_routine_id: string | null;
   readonly hevy_workout_id: string | null;

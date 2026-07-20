@@ -98,6 +98,16 @@ export async function batchMarkQueueItemsCompleted(
   );
 }
 
+/** Batch-mark multiple queue items as skipped (out of order — user moved past them) */
+export async function batchMarkQueueItemsSkipped(db: D1Database, itemIds: number[]): Promise<void> {
+  if (itemIds.length === 0) return;
+  await db.batch(
+    itemIds.map((itemId) =>
+      db.prepare("UPDATE queue_items SET status = 'skipped' WHERE id = ?").bind(itemId)
+    )
+  );
+}
+
 export async function markQueueItemCompletedForUser(
   db: D1Database,
   itemId: number,
