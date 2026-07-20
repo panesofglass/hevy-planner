@@ -41,6 +41,30 @@ export function getNextRoutine(items: QueueItemRow[]): QueueItemRow | null {
   return sorted.find((item) => item.status === "pending") ?? null;
 }
 
+/**
+ * When a queue item completes out of order, any still-pending items ahead
+ * of it in the queue are stuck — the user moved past them. Mark them
+ * skipped so getNextRoutine advances past them instead of showing them
+ * forever.
+ */
+export function computeSkippedItemIds(
+  items: Pick<QueueItemRow, "id" | "position" | "status">[],
+  completedItemIds: number[]
+): number[] {
+  if (completedItemIds.length === 0) return [];
+
+  const completedSet = new Set(completedItemIds);
+  const completedPositions = items
+    .filter((item) => completedSet.has(item.id))
+    .map((item) => item.position);
+  if (completedPositions.length === 0) return [];
+
+  const maxCompletedPosition = Math.max(...completedPositions);
+  return items
+    .filter((item) => item.status === "pending" && !completedSet.has(item.id) && item.position < maxCompletedPosition)
+    .map((item) => item.id);
+}
+
 export function getCompletedRoutines(items: QueueItemRow[], today: string): QueueItemRow[] {
   return items
     .filter((item) => item.status === "completed" && item.completed_date === today)

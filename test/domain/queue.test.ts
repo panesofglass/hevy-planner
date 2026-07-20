@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generatePlaylist, getNextRoutine, getCompletedRoutines } from "../../src/domain/queue";
+import { generatePlaylist, getNextRoutine, getCompletedRoutines, computeSkippedItemIds } from "../../src/domain/queue";
 import type { WeekTemplate, Routine, QueueItemRow } from "../../src/types";
 
 const routines: Routine[] = [
@@ -60,6 +60,57 @@ describe("getNextRoutine", () => {
       { id: 1, user_id: "u", routine_id: "a", position: 0, status: "completed", completed_date: "2026-03-20", hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
     ];
     expect(getNextRoutine(items)).toBeNull();
+  });
+
+  it("skips over items marked skipped", () => {
+    const items: QueueItemRow[] = [
+      { id: 1, user_id: "u", routine_id: "c", position: 0, status: "skipped", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+      { id: 2, user_id: "u", routine_id: "d", position: 1, status: "completed", completed_date: "2026-03-21", hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+      { id: 3, user_id: "u", routine_id: "e", position: 2, status: "pending", completed_date: null, hevy_routine_id: null, hevy_workout_id: null, hevy_workout_data: null, program_id: null },
+    ];
+    const next = getNextRoutine(items);
+    expect(next?.routine_id).toBe("e");
+  });
+});
+
+describe("computeSkippedItemIds", () => {
+  it("marks earlier pending items skipped when a later item completes", () => {
+    const items = [
+      { id: 1, position: 0, status: "pending" as const },
+      { id: 2, position: 1, status: "pending" as const },
+      { id: 3, position: 2, status: "pending" as const },
+      { id: 4, position: 3, status: "pending" as const },
+    ];
+    // user completed item 3 (position 2), skipping items 1 and 2
+    const skipped = computeSkippedItemIds(items, [3]);
+    expect(skipped.sort()).toEqual([1, 2]);
+  });
+
+  it("returns nothing when the completed item is already the earliest pending", () => {
+    const items = [
+      { id: 1, position: 0, status: "pending" as const },
+      { id: 2, position: 1, status: "pending" as const },
+    ];
+    expect(computeSkippedItemIds(items, [1])).toEqual([]);
+  });
+
+  it("returns nothing when no items were completed", () => {
+    const items = [
+      { id: 1, position: 0, status: "pending" as const },
+    ];
+    expect(computeSkippedItemIds(items, [])).toEqual([]);
+  });
+
+  it("does not re-skip items that are already completed or skipped", () => {
+    const items = [
+      { id: 1, position: 0, status: "completed" as const },
+      { id: 2, position: 1, status: "skipped" as const },
+      { id: 3, position: 2, status: "pending" as const },
+      { id: 4, position: 3, status: "pending" as const },
+    ];
+    // item 4 (position 3) completes; only item 3 (still pending) should skip
+    const skipped = computeSkippedItemIds(items, [4]);
+    expect(skipped).toEqual([3]);
   });
 });
 
