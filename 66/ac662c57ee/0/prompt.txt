@@ -1,0 +1,45 @@
+What's the command to push to prod?
+
+---
+
+What happened to my wrangler install?
+
+---
+
+how do I update wrangler?
+
+---
+
+❯ npm install -D wrangler@latest
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: wrangler@4.113.0
+npm error Found: @cloudflare/workers-types@4.20260411.1
+npm error node_modules/@cloudflare/workers-types
+npm error   peerOptional @cloudflare/workers-types@"^4.20260317.1" from wrangler@4.78.0
+npm error   node_modules/@cloudflare/vitest-pool-workers/node_modules/wrangler
+npm error     wrangler@"4.78.0" from @cloudflare/vitest-pool-workers@0.13.5
+npm error     node_modules/@cloudflare/vitest-pool-workers
+npm error       dev @cloudflare/vitest-pool-workers@"^0.13.3" from the root project
+npm error   dev @cloudflare/workers-types@"^4.20260317.1" from the root project
+npm error
+npm error Could not resolve dependency:
+npm error peerOptional @cloudflare/workers-types@"^5.20260721.1" from wrangler@4.113.0
+npm error node_modules/wrangler
+npm error   dev wrangler@"4.113.0" from the root project
+npm error
+npm error Conflicting peer dependency: @cloudflare/workers-types@5.20260721.1
+npm error node_modules/@cloudflare/workers-types
+npm error   peerOptional @cloudflare/workers-types@"^5.20260721.1" from wrangler@4.113.0
+npm error   node_modules/wrangler
+npm error     dev wrangler@"4.113.0" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error /Users/ryanr/.npm/_logs/2026-07-21T23_17_47_323Z-eresolve-report.txt
+npm error A complete log of this run can be found in: /Users/ryanr/.npm/_logs/2026-07-21T23_17_47_323Z-debug-0.log

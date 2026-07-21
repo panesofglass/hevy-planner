@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "66ac662c57ee",
+  "strategy": "manual-commit",
+  "branch": "chore/upgrade-wrangler-4.113",
+  "checkpoints_count": 4,
+  "files_touched": [
+    "package-lock.json",
+    "package.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/66/ac662c57ee/0/metadata.json",
+      "transcript": "/66/ac662c57ee/0/full.jsonl",
+      "compact_transcript": "/66/ac662c57ee/0/transcript.jsonl",
+      "content_hash": "/66/ac662c57ee/0/content_hash.txt",
+      "prompt": "/66/ac662c57ee/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 28,
+    "cache_creation_tokens": 81830,
+    "cache_read_tokens": 1030508,
+    "output_tokens": 2812,
+    "api_call_count": 14
+  }
+}
