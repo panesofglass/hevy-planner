@@ -132,6 +132,7 @@ hevy-planner/
 - When marking completions from Hevy, use the workout's `start_time` converted to user timezone (`request.cf.timezone`) — not `todayString()`.
 - Before matching workouts to queue items in sync, filter out workouts whose ID already appears as `hevy_workout_id` on a completed queue item.
 - Hevy API rejects `repRange: {start: null, end: null}` — use `{start: 0, end: 0}` instead.
+- Hevy paginated GET endpoints cap `pageSize` at 10 (`400 Bad Request: {"error":"pageSize must be less than or equal to 10"}`). Never request more than 10 per page — paginate via `page`/`page_count` instead.
 - Hevy `update-routine` replaces ALL exercises — always send the complete exercise list, not just changed exercises.
 - `wrangler d1 execute --file` uses the /import API endpoint which can fail with OAuth token auth (error 10000). Use `--command` for small queries or `d1 migrations apply` for larger SQL.
 - The `migrations/` directory is for schema migrations only — do NOT commit data-only migrations.

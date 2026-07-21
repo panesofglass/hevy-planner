@@ -23,7 +23,7 @@ Hit the Hevy API to verify connectivity and inspect recent data.
    ```
 4. Fetch exercise templates (for mapping verification):
    ```bash
-   curl -s -H "api-key: $HEVY_API_KEY" "https://api.hevyapp.com/v1/exercise_templates?page=1&pageSize=20" | jq '.data[] | {id, title}'
+   curl -s -H "api-key: $HEVY_API_KEY" "https://api.hevyapp.com/v1/exercise_templates?page=1&pageSize=10" | jq '.data[] | {id, title}'
    ```
 5. Report: connection status, number of workouts/routines returned, most recent workout date.
 
@@ -32,7 +32,7 @@ Hit the Hevy API to verify connectivity and inspect recent data.
 To check if a program exercise name matches a Hevy exercise:
 
 ```bash
-curl -s -H "api-key: $HEVY_API_KEY" "https://api.hevyapp.com/v1/exercise_templates?page=1&pageSize=100" | jq --arg q "<exercise name>" '.data[] | select(.title | test($q; "i")) | {id, title}'
+curl -s -H "api-key: $HEVY_API_KEY" "https://api.hevyapp.com/v1/exercise_templates?page=1&pageSize=10" | jq --arg q "<exercise name>" '.data[] | select(.title | test($q; "i")) | {id, title}'
 ```
 
 ## Common Issues
