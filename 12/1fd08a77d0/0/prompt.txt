@@ -1,0 +1,19 @@
+Why did you push a branch? We are doing trunk based development here
+
+---
+
+npx wrangler is what gave me the error
+
+---
+
+❯ npx wrangler d1 migrations apply hevy-planner-db --remote --env production
+
+ ⛅️ wrangler 4.113.0
+────────────────────
+Resource location: remote 
+
+
+✘ [ERROR] Couldn't find a D1 DB with the name or binding 'hevy-planner-db' in your wrangler.toml file.
+
+
+🪵  Logs were written to "/Users/ryanr/Library/Preferences/.wrangler/logs/wrangler-2026-07-21_23-24-08_743.log"
