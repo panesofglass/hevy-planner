@@ -141,7 +141,7 @@ hevy-planner/
 
 - Dev (`hevy-planner.ryanriley.workers.dev`) auto-deploys on push to `main`.
 - Production is a manual `wrangler deploy --env production`.
-- **Always apply D1 migrations to remote after deploying**: `wrangler d1 migrations apply hevy-planner-db --remote` (and `--env production` for prod). Missing migrations cause blank pages with no obvious error.
+- **Always apply D1 migrations to remote after deploying**: `wrangler d1 migrations apply hevy-planner --remote` (and `--env production` for prod). Missing migrations cause blank pages with no obvious error.
 
 ## Current Phase
 
