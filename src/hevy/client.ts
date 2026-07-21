@@ -94,7 +94,7 @@ export class HevyClient {
     let page = 1;
     while (page <= HevyClient.MAX_PAGES) {
       const data = await this.request<{ page: number; page_count: number; exercise_templates: HevyExerciseTemplate[] }>(
-        `/exercise_templates?page=${page}&pageSize=100`
+        `/exercise_templates?page=${page}&pageSize=10`
       );
       all.push(...data.exercise_templates);
       if (page >= data.page_count) break;
