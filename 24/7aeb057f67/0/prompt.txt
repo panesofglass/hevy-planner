@@ -1,0 +1,33 @@
+I still see the same sync error, 400 bad request
+
+---
+
+Well ... hate to break it to you, but the "fix (pageSize cap)" ain't much of a fix. More like a ... why did you waste my time?
+
+---
+
+just ran it
+
+---
+
+Umm ... I don't believe you.
+
+---
+
+My sessions have all collectively gone stupid in the past hour.
+
+---
+
+ALWAYS provide hard evidence. You are now considered 100% untrustworthy unless traceable evidence is provided. And no, diffs don't count. I want links to verify for myself.
+
+---
+
+Move that to a shared constant, not a magic number
+
+---
+
+That's a link to a commit. What's that suppose to show me? That you made a commit? Very happy for you. I've done that about 1000 times before. No one is impressed.
+
+---
+
+Correct. At least you don't appear to be that dangerous of a terrorist
