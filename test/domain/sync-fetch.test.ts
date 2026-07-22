@@ -58,13 +58,13 @@ describe("fetchWorkoutsCoveringTitles", () => {
   it("does not page forever when a title never shows up (bounded loop)", async () => {
     let pagesFetched = 0;
     const client = {
-      async getRecentWorkouts(page = 1, pageSize = 20) {
+      async getRecentWorkouts(page = 1, pageSize = 10) {
         pagesFetched++;
         return Array.from({ length: pageSize }, (_, i) => workout(`w${page}-${i}`, "Unrelated"));
       },
     };
     await fetchWorkoutsCoveringTitles(client, new Set(["Never Logged"]), new Set());
-    expect(pagesFetched).toBe(10);
+    expect(pagesFetched).toBe(20);
   });
 
   it("ignores already-used workout IDs when checking whether a title was found", async () => {

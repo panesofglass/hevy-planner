@@ -1,3 +1,6 @@
+/** Hevy paginated GET endpoints reject pageSize > 10 with 400 Bad Request. */
+export const HEVY_MAX_PAGE_SIZE = 10;
+
 export interface HevyExerciseTemplate {
   id: string;
   title: string;
@@ -82,7 +85,7 @@ export class HevyClient {
     }
   }
 
-  async getExerciseTemplates(page = 1, pageSize = 10): Promise<HevyExerciseTemplate[]> {
+  async getExerciseTemplates(page = 1, pageSize = HEVY_MAX_PAGE_SIZE): Promise<HevyExerciseTemplate[]> {
     const data = await this.request<{ page: number; page_count: number; exercise_templates: HevyExerciseTemplate[] }>(
       `/exercise_templates?page=${page}&pageSize=${pageSize}`
     );
@@ -94,7 +97,7 @@ export class HevyClient {
     let page = 1;
     while (page <= HevyClient.MAX_PAGES) {
       const data = await this.request<{ page: number; page_count: number; exercise_templates: HevyExerciseTemplate[] }>(
-        `/exercise_templates?page=${page}&pageSize=10`
+        `/exercise_templates?page=${page}&pageSize=${HEVY_MAX_PAGE_SIZE}`
       );
       all.push(...data.exercise_templates);
       if (page >= data.page_count) break;
@@ -108,7 +111,7 @@ export class HevyClient {
     let page = 1;
     while (page <= HevyClient.MAX_PAGES) {
       const data = await this.request<{ page: number; page_count: number; routine_folders: { id: number; title: string }[] }>(
-        `/routine_folders?page=${page}&pageSize=10`
+        `/routine_folders?page=${page}&pageSize=${HEVY_MAX_PAGE_SIZE}`
       );
       all.push(...data.routine_folders);
       if (page >= data.page_count) break;
@@ -189,7 +192,7 @@ export class HevyClient {
     let page = 1;
     while (page <= HevyClient.MAX_PAGES) {
       const data = await this.request<{ page: number; page_count: number; routines: HevyRoutine[] }>(
-        `/routines?page=${page}&pageSize=10`
+        `/routines?page=${page}&pageSize=${HEVY_MAX_PAGE_SIZE}`
       );
       all.push(...data.routines);
       if (page >= data.page_count) break;

@@ -1,11 +1,11 @@
 import { loadProgram, getQueueItems, batchMarkQueueItemsCompleted, batchMarkQueueItemsSkipped, updateDailyCompleted, updateLastSyncAt } from "../storage/queries";
 import { matchCompletions } from "../domain/hevy-sync";
 import { computeSkippedItemIds } from "../domain/queue";
-import { HevyClient, type HevyWorkout } from "../hevy/client";
+import { HevyClient, HEVY_MAX_PAGE_SIZE, type HevyWorkout } from "../hevy/client";
 import { todayString, toLocalDate } from "../utils/date";
 
-const SYNC_MAX_PAGES = 10;
-const SYNC_PAGE_SIZE = 20;
+const SYNC_MAX_PAGES = 20;
+const SYNC_PAGE_SIZE = HEVY_MAX_PAGE_SIZE;
 
 /**
  * Fetch recent workouts, paging back until every title we're looking for has
