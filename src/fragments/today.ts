@@ -40,15 +40,15 @@ export function carsCard(routine: Routine, hevyRoutineId?: string): string {
  * Hero routine card — the next main routine from the queue.
  * Blue accent label, description preview, Push to Hevy + Details.
  */
-export function heroRoutineCard(routine: Routine, queueItem: QueueItemRow): string {
+export function heroRoutineCard(routine: Routine, queueItem: QueueItemRow, hevyRoutineId?: string): string {
   const count = routine.exercises.length;
   const subtitle = routine.subtitle ?? `${count} exercises`;
   const desc = routine.description
     ? `<div class="card-desc">${escapeHtml(truncate(routine.description, 120))}</div>`
     : "";
 
-  const hevyButton = queueItem.hevy_routine_id
-    ? `<a href="https://hevy.com/routine/${escapeAttr(queueItem.hevy_routine_id)}" target="_blank" class="btn btn-blue">Open in Hevy</a>`
+  const hevyButton = hevyRoutineId
+    ? `<a href="https://hevy.com/routine/${escapeAttr(hevyRoutineId)}" target="_blank" class="btn btn-blue">Open in Hevy</a>`
     : `<button class="btn btn-blue" data-on:click="@post('/api/push-hevy/${escapeAttr(queueItem.routine_id)}')" data-indicator:_pushingHero data-attr:disabled="$_pushingHero">
   <span data-show="!$_pushingHero">Push to Hevy</span>
   <span data-show="$_pushingHero">Pushing\u2026</span>

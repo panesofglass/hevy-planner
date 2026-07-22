@@ -1,4 +1,4 @@
-import { loadProgram, getQueueItems, batchMarkQueueItemsCompleted, batchMarkQueueItemsSkipped, updateDailyCompleted, updateLastSyncAt } from "../storage/queries";
+import { loadProgram, getQueueItems, getRoutineMappings, batchMarkQueueItemsCompleted, batchMarkQueueItemsSkipped, updateDailyCompleted, updateLastSyncAt } from "../storage/queries";
 import { matchCompletions } from "../domain/hevy-sync";
 import { computeSkippedItemIds } from "../domain/queue";
 import { HevyClient, HEVY_MAX_PAGE_SIZE, type HevyWorkout } from "../hevy/client";
@@ -46,6 +46,8 @@ export async function performSync(db: D1Database, userId: string, apiKey: string
   const client = new HevyClient(apiKey);
 
   const items = await getQueueItems(db, userId, programId);
+  const routineMappings = await getRoutineMappings(db, userId, programId);
+  const routineIdToHevyId = new Map(routineMappings.map((m) => [m.program_routine_id, m.hevy_routine_id]));
 
   // Skip workouts already matched to a completed queue item
   const usedWorkoutIds = new Set<string>(
@@ -54,14 +56,17 @@ export async function performSync(db: D1Database, userId: string, apiKey: string
 
   // Matchable items include "skipped" ones too, so a late-arriving workout
   // can still retroactively complete an item the user actually did.
-  const matchableItems = items.filter(
-    (i) => (i.status === "pending" || i.status === "skipped") && i.hevy_routine_id
-  );
+  // Resolve hevy_routine_id from routine_mappings (source of truth) rather
+  // than the item's own column, which may never have been backfilled.
+  const matchableItems = items
+    .filter((i) => i.status === "pending" || i.status === "skipped")
+    .map((i) => ({ ...i, hevy_routine_id: routineIdToHevyId.get(i.routine_id) ?? null }))
+    .filter((i): i is typeof i & { hevy_routine_id: string } => i.hevy_routine_id != null);
 
   const nameToRoutineId = new Map<string, string>();
   for (const item of matchableItems) {
     const routine = routineMap.get(item.routine_id);
-    if (routine && item.hevy_routine_id) {
+    if (routine) {
       nameToRoutineId.set(routine.title, item.hevy_routine_id);
     }
   }

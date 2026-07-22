@@ -51,7 +51,7 @@ export async function buildTodayProjection(db: D1Database, userId: string, tz?: 
   if (nextItem) {
     const routine = routineMap.get(nextItem.routine_id);
     if (routine) {
-      fragments.push(heroRoutineCard(routine, nextItem));
+      fragments.push(heroRoutineCard(routine, nextItem, routineToHevyId.get(nextItem.routine_id)));
     }
   }
 
