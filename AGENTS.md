@@ -1,10 +1,44 @@
-# CLAUDE.md
+# AGENTS.md
+
+## Guiding Rules
+
+**Karpathy — working style**
+1. Think before coding: state assumptions, surface tradeoffs, push back when a simpler approach exists.
+2. Simplicity first: minimum code that solves the ask. Nothing speculative, no unrequested flexibility, match existing style.
+3. Surgical changes: every changed line traces to the request. Don't "improve" adjacent code.
+4. Prove it: turn tasks into verifiable goals — bug fix = failing test first, then green. Loop until verified.
+
+**NASA/JPL Power of 10 (Holzmann) — code safety**
+1. Simple control flow only: no goto, no unbounded recursion.
+2. Every loop has a fixed upper bound (Hevy pageSize ≤ 10, capped retries/backoff).
+3. No dynamic memory allocation after init: avoid avoidable copies/allocations on hot paths.
+4. Functions stay small: ≤ ~60 lines, one job.
+5. At least two runtime assertions per non-trivial function, checking invariants.
+6. Declare data at the smallest possible scope.
+7. Check every return value; validate every input.
+8. Use the boring language subset — no clever idioms.
+9. Initialize state before use.
+10. Compile clean: `tsc --noEmit`, warnings treated as errors.
+
+**Universal defaults**
+- Terse responses; no trailing summaries; no emojis unless asked.
+- No comments unless the WHY is non-obvious.
+- Run build + tests before claiming done.
+- Never commit directly on `main` — branch or worktree.
 
 ## Project Overview
 
 A training companion web app that adds scheduling intelligence to Hevy. Read `SPEC.md` for the full product spec — screens, user flows, Hevy integration, and queue/reflow rules.
 
 Hevy handles workout logging (sets, reps, PRs, Apple Watch). This companion handles everything else: program management, queue-based scheduling with automatic reflow, multi-phase roadmaps, benchmark tracking, and skill progression.
+
+## Commands
+
+- `npm run dev` — local worker (wrangler)
+- `npm test` — unit tests; `npx vitest run <file>` for one
+- `npm run test:e2e` — Playwright browser tests
+- `npx tsc --noEmit` — typecheck
+- `npm run db:migrate` — apply local D1 migrations
 
 ## Tech Stack
 
@@ -72,7 +106,7 @@ D1 tables: `exercise_template_mappings` (our template ID → Hevy template ID), 
 
 ```
 hevy-planner/
-├── CLAUDE.md
+├── AGENTS.md
 ├── SPEC.md
 ├── schema/
 │   └── program.schema.json     ← JSON Schema for program definition
@@ -143,6 +177,7 @@ hevy-planner/
 - Production is a manual `wrangler deploy --env production`.
 - **Always apply D1 migrations to remote after deploying**: `wrangler d1 migrations apply hevy-planner --remote` (and `--env production` for prod). Missing migrations cause blank pages with no obvious error.
 
-## Current Phase
+## Current Work
 
-**SSE architecture migration** — Adopting official `@starfederation/datastar-sdk`, separating command/query channels via Durable Object actor. 98 vitest domain tests + 42 Playwright E2E tests. Design spec: `docs/superpowers/specs/2026-04-11-sse-architecture-design.md`.
+- Queue scheduling for `strength-prerequisites`: per-day cadence (`every` field, Nth cycle) in schema + queue/reflow.
+- Rendering/webhook fixes: atomic SSE patch + always-visible sync credentials — `docs/superpowers/specs/2026-05-29-rendering-and-webhook-fixes-design.md`.
