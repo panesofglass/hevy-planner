@@ -1194,6 +1194,242 @@
       "videoURL": "https://www.youtube.com/results?search_query=lacrosse+ball+shoulder+upper+back+release",
       "searchTerms": "Lacrosse ball shoulder release",
       "archived": true
+    },
+    {
+      "id": "yoga-child-pose",
+      "title": "Child's Pose",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "lower_back",
+      "secondaryMuscleGroups": [
+        "glutes",
+        "shoulders"
+      ],
+      "notes": "Kneel, sit back on the heels, walk the hands forward. Let the head rest heavy and the low back soften. Sink a little deeper with each exhale. A reset after loaded training — never a stretch to force.",
+      "videoURL": "https://www.youtube.com/results?search_query=child%27s+pose+yoga",
+      "searchTerms": "Child's pose yoga",
+      "tags": [
+        "yoga",
+        "recovery"
+      ]
+    },
+    {
+      "id": "yoga-downward-dog",
+      "title": "Downward Dog",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "hamstrings",
+      "secondaryMuscleGroups": [
+        "shoulders",
+        "calves"
+      ],
+      "notes": "Hands and feet on the floor, hips pressed up and back. Pedal the heels one at a time. Opens the hamstrings, calves, lats, and shoulders and lengthens the spine. 5 slow breaths.",
+      "videoURL": "https://www.youtube.com/results?search_query=downward+dog+yoga",
+      "searchTerms": "Downward dog yoga",
+      "tags": [
+        "yoga",
+        "recovery"
+      ]
+    },
+    {
+      "id": "yoga-low-lunge-twist",
+      "title": "Low Lunge with Twist",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "hip_flexors",
+      "secondaryMuscleGroups": [
+        "obliques",
+        "shoulders"
+      ],
+      "notes": "Back knee down, front knee stacked over the ankle. Reach one arm up and back into a gentle twist. Stretches the hip flexors, quads, chest, and shoulders. 3–5 breaths each side.",
+      "videoURL": "https://www.youtube.com/results?search_query=revolving+low+lunge+yoga",
+      "searchTerms": "Low lunge twist yoga",
+      "tags": [
+        "yoga",
+        "recovery"
+      ]
+    },
+    {
+      "id": "yoga-pigeon",
+      "title": "Pigeon Pose",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "glutes",
+      "secondaryMuscleGroups": [
+        "hip_flexors",
+        "lower_back"
+      ],
+      "notes": "From all fours, bring one shin across the body and extend the back leg, keeping the hips square. Targets the deep glute and hip rotators — the release you want after heavy squat and hinge days. 3–5 breaths each side.",
+      "videoURL": "https://www.youtube.com/results?search_query=pigeon+pose+glute+stretch",
+      "searchTerms": "Pigeon pose glute stretch",
+      "tags": [
+        "yoga",
+        "recovery"
+      ]
+    },
+    {
+      "id": "yoga-seated-forward-fold",
+      "title": "Seated Forward Fold",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "hamstrings",
+      "secondaryMuscleGroups": [
+        "lower_back"
+      ],
+      "notes": "Sit tall, hinge at the hips, and reach for the feet. Keep the spine long — fold from the hips, not the back. Restores hamstring length after posterior-chain work.",
+      "videoURL": "https://www.youtube.com/results?search_query=seated+forward+fold+hamstring",
+      "searchTerms": "Seated forward fold",
+      "tags": [
+        "yoga",
+        "recovery",
+        "stretching"
+      ]
+    },
+    {
+      "id": "yoga-figure-4",
+      "title": "Figure-4 Glute Stretch",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "glutes",
+      "secondaryMuscleGroups": [
+        "lower_back"
+      ],
+      "notes": "Lie on the back, one ankle across the opposite knee, and gently pull the leg toward the chest. Opens the hips and glutes without loading the spine. 30–45s each side.",
+      "videoURL": "https://www.youtube.com/results?search_query=figure+4+glute+stretch",
+      "searchTerms": "Figure 4 glute stretch",
+      "tags": [
+        "yoga",
+        "recovery",
+        "stretching"
+      ]
+    },
+    {
+      "id": "yoga-thread-needle",
+      "title": "Thread the Needle",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "upper_back",
+      "secondaryMuscleGroups": [
+        "shoulders",
+        "chest"
+      ],
+      "notes": "On all fours, slide one arm under the chest and rest that shoulder on the floor. Opens the mid-back and rear shoulder — the direct antidote to a pressing-heavy week. 30–45s each side.",
+      "videoURL": "https://www.youtube.com/results?search_query=thread+the+needle+stretch",
+      "searchTerms": "Thread the needle stretch",
+      "tags": [
+        "yoga",
+        "recovery",
+        "stretching"
+      ]
+    },
+    {
+      "id": "yoga-supine-twist",
+      "title": "Supine Spinal Twist",
+      "type": "duration",
+      "equipmentCategory": "none",
+      "primaryMuscleGroup": "obliques",
+      "secondaryMuscleGroups": [
+        "lower_back",
+        "hip_flexors"
+      ],
+      "notes": "Lie on the back with knees bent and let both knees fall to one side, arms open. Gentle spinal rotation to release the low back after a week of loaded compression. 30–45s each side.",
+      "videoURL": "https://www.youtube.com/results?search_query=supine+spinal+twist+yoga",
+      "searchTerms": "Supine spinal twist",
+      "tags": [
+        "yoga",
+        "recovery"
+      ]
+    },
+    {
+      "id": "hiit-high-knees",
+      "title": "High Knees",
+      "type": "duration",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "cardio",
+      "secondaryMuscleGroups": [
+        "hip_flexors",
+        "calves"
+      ],
+      "notes": "Run in place driving the knees to waist height, arms pumping. 20s all-out work / 40s easy recovery. Stay on the balls of the feet.",
+      "videoURL": "https://www.youtube.com/results?search_query=high+knees+cardio",
+      "searchTerms": "High knees cardio",
+      "tags": [
+        "hiit",
+        "cardio"
+      ]
+    },
+    {
+      "id": "hiit-squat-jumps",
+      "title": "Squat Jumps",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "quadriceps",
+      "secondaryMuscleGroups": [
+        "cardio",
+        "calves",
+        "glutes"
+      ],
+      "notes": "Drop into a squat and explode up, landing soft and quiet into the next rep. 20s all-out work / 40s easy recovery. A quiet landing protects the knees.",
+      "videoURL": "https://www.youtube.com/results?search_query=squat+jumps+plyometric",
+      "searchTerms": "Squat jumps plyometric",
+      "tags": [
+        "hiit",
+        "cardio"
+      ]
+    },
+    {
+      "id": "hiit-mountain-climbers",
+      "title": "Mountain Climbers",
+      "type": "duration",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "cardio",
+      "secondaryMuscleGroups": [
+        "abdominals",
+        "shoulders"
+      ],
+      "notes": "In a plank position, drive the knees to the chest fast and low. 20s all-out work / 40s easy recovery. Pace is the goal — the floor is not a rest surface.",
+      "videoURL": "https://www.youtube.com/results?search_query=mountain+climbers+exercise",
+      "searchTerms": "Mountain climbers exercise",
+      "tags": [
+        "hiit",
+        "cardio"
+      ]
+    },
+    {
+      "id": "hiit-burpees",
+      "title": "Burpees",
+      "type": "bodyweight_reps",
+      "equipmentCategory": "bodyweight",
+      "primaryMuscleGroup": "cardio",
+      "secondaryMuscleGroups": [
+        "chest",
+        "quadriceps"
+      ],
+      "notes": "Full squat to floor to jump, staying fast with an open chest. Land soft. 20s all-out work / 40s easy recovery.",
+      "videoURL": "https://www.youtube.com/results?search_query=burpee+proper+form",
+      "searchTerms": "Burpee proper form",
+      "tags": [
+        "hiit",
+        "cardio"
+      ]
+    },
+    {
+      "id": "hiit-dumbbell-thrusters",
+      "title": "Dumbbell Thrusters",
+      "type": "weight_reps",
+      "equipmentCategory": "dumbbell",
+      "primaryMuscleGroup": "shoulders",
+      "secondaryMuscleGroups": [
+        "quadriceps",
+        "cardio"
+      ],
+      "notes": "Front-rack a light pair of dumbbells (15–20 lb), squat, and drive up pressing overhead. 20s all-out work / 40s easy recovery. Combines squat power with an overhead press — maximum output in minimum time.",
+      "videoURL": "https://www.youtube.com/results?search_query=dumbbell+thruster+form",
+      "searchTerms": "Dumbbell thrusters",
+      "tags": [
+        "hiit",
+        "cardio"
+      ]
     }
   ],
   "routines": [
@@ -1462,13 +1698,87 @@
           "notes": "Phase 2 gate: pistol to 16-inch box, both legs."
         }
       ]
+    },
+    {
+      "id": "yoga-recovery",
+      "title": "Yoga Recovery",
+      "subtitle": "Stretching & De-Stress",
+      "description": "12–15 minute yoga flow for recovery and flexibility. Lengthens the week's most worked areas — hips, hamstrings, mid-back — and settles the nervous system so you arrive at the next session recovered. Active recovery, not another workout: slow, deliberate, and breathing-led.",
+      "color": "rgb(96, 200, 140)",
+      "sortOrder": 8,
+      "folderGroup": "Recovery & Cardio",
+      "exercises": [
+        {
+          "exerciseTemplateId": "yoga-child-pose",
+          "sets": "2 min (5 slow breaths)"
+        },
+        {
+          "exerciseTemplateId": "yoga-downward-dog",
+          "sets": "1 min (5 slow breaths)"
+        },
+        {
+          "exerciseTemplateId": "yoga-low-lunge-twist",
+          "sets": "3-5 breaths each side"
+        },
+        {
+          "exerciseTemplateId": "yoga-pigeon",
+          "sets": "3-5 breaths each side"
+        },
+        {
+          "exerciseTemplateId": "yoga-seated-forward-fold",
+          "sets": "1 min"
+        },
+        {
+          "exerciseTemplateId": "yoga-figure-4",
+          "sets": "30-45s each side"
+        },
+        {
+          "exerciseTemplateId": "yoga-thread-needle",
+          "sets": "30-45s each side"
+        },
+        {
+          "exerciseTemplateId": "yoga-supine-twist",
+          "sets": "30-45s each side"
+        }
+      ]
+    },
+    {
+      "id": "hiit-cardio",
+      "title": "HIIT Cardio",
+      "subtitle": "Conditioning Finisher",
+      "description": "12–15 minute conditioning finisher: 5 movements, 20s all-out work / 40s easy recovery, repeated for 2–3 rounds. Run after the strength work so the cardio never displaces a strength session. The 40s rests must feel easy — walk and recover.",
+      "color": "rgb(255, 160, 80)",
+      "sortOrder": 9,
+      "folderGroup": "Recovery & Cardio",
+      "exercises": [
+        {
+          "exerciseTemplateId": "hiit-high-knees",
+          "sets": "20s work / 40s rest"
+        },
+        {
+          "exerciseTemplateId": "hiit-squat-jumps",
+          "sets": "20s work / 40s rest"
+        },
+        {
+          "exerciseTemplateId": "hiit-mountain-climbers",
+          "sets": "20s work / 40s rest"
+        },
+        {
+          "exerciseTemplateId": "hiit-burpees",
+          "sets": "20s work / 40s rest"
+        },
+        {
+          "exerciseTemplateId": "hiit-dumbbell-thrusters",
+          "sets": "20s work / 40s rest"
+        }
+      ]
     }
   ],
   "weekTemplates": [
     {
       "id": "sequential-rotation",
       "name": "Sequential Rotation (Recommended)",
-      "description": "Follow sessions in order regardless of day of week. If you miss a day, pick up with the next session in sequence. Benchmark session appears every 6th cycle. Daily CARs every day.",
+      "description": "Follow sessions in order regardless of day of week. If you miss a day, pick up with the next session in sequence. Benchmark session appears every 6th cycle. Session E combines with HIIT Cardio as a conditioning finisher; Sunday pairs CARs with the Yoga Recovery flow. Daily CARs every day.",
       "sortOrder": 1,
       "days": [
         {
@@ -1507,9 +1817,10 @@
           "dayOfWeek": 4,
           "routineIDs": [
             "daily-cars",
-            "session-e"
+            "session-e",
+            "hiit-cardio"
           ],
-          "note": "Session E — Tuck Planche (Core)"
+          "note": "Session E — Tuck Planche (Core) + HIIT Cardio finisher. Combination day: core first, then conditioning."
         },
         {
           "dayOfWeek": 5,
@@ -1518,14 +1829,15 @@
             "benchmark-session"
           ],
           "every": 6,
-          "note": "Benchmark session every 6th cycle only. On other cycles: active recovery or rest."
+          "note": "Benchmark session every 6th cycle only. On other cycles: active recovery — a walk, the Yoga Recovery flow, or an easy HIIT round."
         },
         {
           "dayOfWeek": 6,
           "routineIDs": [
-            "daily-cars"
+            "daily-cars",
+            "yoga-recovery"
           ],
-          "note": "Rest day. CARs only."
+          "note": "Rest & Recovery — CARs + Yoga Recovery flow for stretching and recovery."
         }
       ]
     }
@@ -1639,7 +1951,7 @@
       "color": "rgb(224, 134, 96)",
       "sortOrder": 2,
       "summary": "Build the raw strength and movement prerequisites for all 5 skill goals simultaneously. Evidence-based compound selection for maximum coverage per session.",
-      "keyFocus": "This phase adds One-Arm Push-Up as a 5th equal skill goal alongside muscle-up, pistol squat, handstand, and tuck planche. Chest and arm hypertrophy is explicitly programmed to address mass loss. The benchmark session appears every 5th cycle — do not skip it.",
+      "keyFocus": "This phase adds One-Arm Push-Up as a 5th equal skill goal alongside muscle-up, pistol squat, handstand, and tuck planche. Chest and arm hypertrophy is explicitly programmed to address mass loss. The benchmark session appears every 6th cycle — do not skip it.",
       "gateTests": [
         "pain-free-planks",
         "strict-pullups-12",
