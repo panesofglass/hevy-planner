@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/ryanriley/mobility-tracker/schema/program.schema.json",
+  "$id": "https://hevy-planner.dev/schema/program.schema.json",
   "title": "Training Program",
   "description": "Schema for defining a training program. Programs contain exercise templates, routines, weekly schedule templates, progression phases, optional skill goals, benchmarks, and a long-term roadmap.",
   "type": "object",

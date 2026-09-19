@@ -68,7 +68,7 @@ vitest.config.ts            → Vitest config with miniflare pool
 - [ ] **Step 1: Initialize package.json**
 
 ```bash
-cd /Users/ryanr/Code/hevy-planner
+cd $HOME/Code/hevy-planner
 npm init -y
 ```
 
@@ -362,7 +362,7 @@ export interface ExerciseMappingRow {
 
 - [ ] **Step 2: Create the bundled program JSON**
 
-Create `programs/mobility-joint-restoration.json` conforming to `schema/program.schema.json`. Use the prototype JSON at `/Users/ryanr/OneDrive/Documents/hevy-planner/mobility-program.json` and the prototype SQLite DB as reference data, but restructure to match the schema exactly. The JSON must include all sessions, exercises, weekTemplates, progressions, roadmap, skills, and benchmarks.
+Create `programs/mobility-joint-restoration.json` conforming to `schema/program.schema.json`. Use the prototype JSON at `$HOME/OneDrive/Documents/hevy-planner/mobility-program.json` and the prototype SQLite DB as reference data, but restructure to match the schema exactly. The JSON must include all sessions, exercises, weekTemplates, progressions, roadmap, skills, and benchmarks.
 
 This is a data-conversion task: read the prototype files, produce a conforming JSON file. Validate against `schema/program.schema.json`.
 

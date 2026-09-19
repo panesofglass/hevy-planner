@@ -173,9 +173,10 @@ hevy-planner/
 
 ## Deployment
 
-- Dev (`hevy-planner.ryanriley.workers.dev`) auto-deploys on push to `main`.
+- Dev (`$DEV_WORKER_URL`) auto-deploys on push to `main`. Set `DEV_WORKER_URL` in the gitignored `.env.local` (template in `.env.example`).
 - Production is a manual `wrangler deploy --env production`.
 - **Always apply D1 migrations to remote after deploying**: `wrangler d1 migrations apply hevy-planner --remote` (and `--env production` for prod). Missing migrations cause blank pages with no obvious error.
+- Git authorship (`GIT_AUTHOR_NAME`/`GIT_AUTHOR_EMAIL`) lives in the local `git config` or `.env.local` — never in committed files.
 
 ## Current Work
 

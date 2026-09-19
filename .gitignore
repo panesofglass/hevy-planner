@@ -9,6 +9,7 @@ dist/
 .dev.vars
 .env
 .env.*
+!.env.example
 
 # Cloudflare
 wrangler.toml.bak

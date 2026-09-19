@@ -14,6 +14,13 @@ const schema = JSON.parse(
   readFileSync("schema/program.schema.json", "utf-8")
 );
 
+// Optional build-time override for the schema $id (e.g. CI injecting the
+// original user-scoped URI). Unset by default so committed artifacts stay
+// free of personal identifiers.
+if (process.env.SCHEMA_PROGRAM_ID) {
+  schema["$id"] = process.env.SCHEMA_PROGRAM_ID;
+}
+
 const ajv = new Ajv2020({ code: { source: true, esm: true }, allErrors: true });
 addFormats(ajv);
 const validate = ajv.compile(schema);
