@@ -1039,12 +1039,12 @@ describe("storage queries", () => {
 
   it("upserts and retrieves a user", async () => {
     await upsertUser(env.DB, {
-      id: "test@example.com",
+      id: "user@example.com",
       active_program: "mobility",
       template_id: "5day",
       start_date: "2026-03-21",
     });
-    const user = await getUser(env.DB, "test@example.com");
+    const user = await getUser(env.DB, "user@example.com");
     expect(user?.active_program).toBe("mobility");
   });
 
