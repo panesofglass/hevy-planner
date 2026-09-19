@@ -25,25 +25,26 @@ export function computeUpcoming(
   template: WeekTemplate,
   routines: Routine[],
   maxSessions: number,
-  todayDow: number
+  todayDow: number,
+  currentWeek = 0
 ): UpcomingItem[] {
   const routineMap = new Map(routines.map((r) => [r.id, r]));
   const dailyRoutine = routines.find((r) => r.isDaily);
   const spacerTitle = dailyRoutine?.title ?? "Rest";
 
-  // Build a lookup: template dayOfWeek → { type, mainCount }
-  const daySlots = new Map<number, { type: "routine" | "spacer" | "rest"; mainCount: number }>();
+  // Build a lookup: template dayOfWeek → { type, mainCount, every }
+  const daySlots = new Map<number, { type: "routine" | "spacer" | "rest"; mainCount: number; every: number }>();
   for (const day of template.days) {
     const mainIds = (day.routineIDs ?? []).filter((rid) => {
       const r = routineMap.get(rid);
       return r && !r.isDaily;
     });
     if (mainIds.length > 0) {
-      daySlots.set(day.dayOfWeek, { type: "routine", mainCount: mainIds.length });
+      daySlots.set(day.dayOfWeek, { type: "routine", mainCount: mainIds.length, every: day.every ?? 1 });
     } else if ((day.routineIDs ?? []).length > 0) {
-      daySlots.set(day.dayOfWeek, { type: "spacer", mainCount: 0 });
+      daySlots.set(day.dayOfWeek, { type: "spacer", mainCount: 0, every: 1 });
     } else {
-      daySlots.set(day.dayOfWeek, { type: "rest", mainCount: 0 });
+      daySlots.set(day.dayOfWeek, { type: "rest", mainCount: 0, every: 1 });
     }
   }
 
@@ -51,6 +52,7 @@ export function computeUpcoming(
   let pendingIdx = 0;
   let sessionCount = 0;
   let dow = (todayDow + 1) % 7; // start from tomorrow
+  let week = currentWeek;
 
   // Walk up to 14 days (2 full weeks) to avoid infinite loops when the
   // template has fewer routine slots than maxSessions pending items.
@@ -58,18 +60,26 @@ export function computeUpcoming(
     const slot = daySlots.get(dow);
 
     if (slot?.type === "routine") {
-      for (let i = 0; i < slot.mainCount && sessionCount < maxSessions && pendingIdx < pendingItems.length; i++) {
-        const item = pendingItems[pendingIdx];
-        const routine = routineMap.get(item.routine_id);
-        result.push({
-          type: "routine",
-          routineId: item.routine_id,
-          title: routine?.title ?? item.routine_id,
-          exerciseCount: routine?.exercises.length,
-          color: routine?.color,
-        });
-        pendingIdx++;
-        sessionCount++;
+      // Cadence days (e.g. every-6th-week benchmark) only hold a main
+      // session when this walk's week is on cycle; otherwise they show as
+      // a CARs-only spacer and consume no queue item.
+      const active = slot.every === 1 || week % slot.every === 0;
+      if (!active) {
+        result.push({ type: "spacer", title: spacerTitle });
+      } else {
+        for (let i = 0; i < slot.mainCount && sessionCount < maxSessions && pendingIdx < pendingItems.length; i++) {
+          const item = pendingItems[pendingIdx];
+          const routine = routineMap.get(item.routine_id);
+          result.push({
+            type: "routine",
+            routineId: item.routine_id,
+            title: routine?.title ?? item.routine_id,
+            exerciseCount: routine?.exercises.length,
+            color: routine?.color,
+          });
+          pendingIdx++;
+          sessionCount++;
+        }
       }
     } else if (slot?.type === "spacer") {
       result.push({ type: "spacer", title: spacerTitle });
@@ -77,6 +87,7 @@ export function computeUpcoming(
     // rest days: no entry in result
 
     dow = (dow + 1) % 7;
+    if (dow === 0) week++; // crossed from Sunday to Monday
   }
 
   return result;

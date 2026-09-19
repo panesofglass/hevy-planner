@@ -1,7 +1,7 @@
 import type { SseEvent } from "../actor/session-actor";
 import { getUser, loadProgram, getQueueItems, getRoutineMappings } from "../storage/queries";
 import { decryptAesGcm } from "../utils/crypto";
-import { getNextRoutine, getCompletedRoutines } from "../domain/queue";
+import { getNextRoutine, getCompletedRoutines, weekOfPosition } from "../domain/queue";
 import { computeUpcoming } from "../domain/reflow";
 import { setupPage } from "../fragments/setup";
 import { carsCard, heroRoutineCard, completedSection, upcomingSection, syncButton } from "../fragments/today";
@@ -73,7 +73,10 @@ export async function buildTodayProjection(db: D1Database, userId: string, tz?: 
     const upcomingPending = pendingItems.slice(1);
     const jsDay = new Date(today + "T12:00:00Z").getDay();
     const todayDow = jsDay === 0 ? 6 : jsDay - 1;
-    const upcoming = computeUpcoming(upcomingPending, template, program.routines, 5, todayDow);
+    const currentWeek = nextItem
+      ? weekOfPosition(template, program.routines, nextItem.position)
+      : 0;
+    const upcoming = computeUpcoming(upcomingPending, template, program.routines, 5, todayDow, currentWeek);
     if (upcoming.length > 0) {
       fragments.push(upcomingSection(upcoming));
     }

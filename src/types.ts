@@ -127,6 +127,8 @@ export interface TemplateDay {
   dayOfWeek: number;
   label?: string;
   routineIDs?: string[];
+  /** Include this day's main routines every Nth cycle (default 1 = every week). */
+  every?: number;
 }
 
 export interface WeekTemplate {

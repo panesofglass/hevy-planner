@@ -304,6 +304,12 @@
         "note": {
           "type": ["string", "null"],
           "description": "Optional coaching note for the day (e.g., 'Strength training — CARs as warmup')."
+        },
+        "every": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Include this day's main routines in the queue only every Nth cycle (one cycle = one pass through the weekly rotation). 1 = every cycle (default). E.g. 6 = once every 6 weeks. Off cycles are treated as rest or user-directed."
         }
       }
     },
