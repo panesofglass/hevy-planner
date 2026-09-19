@@ -54,3 +54,10 @@ npm-debug.log*
 *.har
 test-results/
 screenshots/
+
+# Tool-local state
+.serena/
+
+# Debug screenshots
+/today-mobile.png
+/today-page.png
