@@ -125,9 +125,9 @@ Tapping a session card expands it to show the full exercise list with coaching c
 │  Session B: Knees & Hips        │
 │  15-20 min · 9 exercises        │
 │                                 │
-│  Your lateral lunge pain and    │
+│  Lateral lunge discomfort and  │
 │  cross-legged sitting difficulty│
-│  both point to tight hip        │
+│  often point to tight hip        │
 │  adductors and weak VMO...      │
 │                                 │
 │  ── Foundation Phase Notes ──   │
@@ -215,12 +215,12 @@ Track measurable assessments over time.
 │                                 │
 │  ── Due This Week ──────────    │
 │  Wall Dorsiflexion Test         │
-│  Last: 3.5 in (R) · 2 wks ago  │
+│  Last: 3.5 in · 2 wks ago        │
 │  Target: 4-5 in                 │
 │  [Log Result]                   │
 │                                 │
 │  Single-Leg Balance             │
-│  Last: 22 sec (R) · 2 wks ago  │
+│  Last: 22 sec · 2 wks ago        │
 │  Target: 30 sec                 │
 │  [Log Result]                   │
 │                                 │
@@ -231,7 +231,7 @@ Track measurable assessments over time.
 │                                 │
 │  ── History ────────────────    │
 │  Wall Dorsiflexion: 2.5→3.0→3.5│
-│  Balance (R): 12→18→22 sec     │
+│  Balance: 12→18→22 sec         │
 │                                 │
 │  [Today] [Roadmap] [Benchmarks] │
 └─────────────────────────────────┘

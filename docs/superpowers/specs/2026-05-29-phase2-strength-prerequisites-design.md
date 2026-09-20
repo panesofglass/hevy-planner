@@ -15,7 +15,7 @@ Key constraints:
 - Session length: 20–30 min, 3–5 days/week
 - Scheduling: sequential queue rotation — no day-of-week locking; "what's next" regardless of day
 - Exercise philosophy: maximum muscle coverage per movement (evidence-based compound selection)
-- Hypertrophy goal: chest and arms specifically — user is experiencing mass loss
+- Hypertrophy goal: chest and arms specifically
 
 ---
 
@@ -31,7 +31,7 @@ All five skills are equal priority. The user wants to arrive at them together as
 | D | Handstand |
 | E | Tuck Planche |
 
-One-Arm Push-Up was added because it directly addresses the chest and arm mass loss concern and provides a concrete skill goal justifying dedicated chest/tricep work.
+One-Arm Push-Up was added to drive chest and arm development and provides a concrete skill goal justifying dedicated chest/tricep work.
 
 ---
 
@@ -52,7 +52,7 @@ Exercises were selected using a "maximum muscle coverage per movement" criterion
 - **Dumbbell row:** horizontal pull — covers mid-back and rear delts not reached by vertical pull alone
 - **ATG split squat + RDL:** EMG-confirmed to cover the entire lower body in two movements (ATG = anterior chain; RDL = posterior chain)
 - **Dips:** research confirms the most comprehensive push exercise (chest, triceps, anterior delts, serratus anterior simultaneously)
-- **Incline press + archer push-up + floor press:** three chest angles (upper/mid/lower) for hypertrophy; addresses the mass loss concern
+- **Incline press + archer push-up + floor press:** three chest angles (upper/mid/lower) for hypertrophy
 - **Lateral raise + face pull:** all three shoulder heads require distinct exercises; lateral (side delt) is undertrained by all compound movements
 - **Suitcase carry:** adds anti-lateral-flexion — the one core training vector not covered by hollow body (anti-extension) or Pallof press (anti-rotation)
 
@@ -71,7 +71,7 @@ Wall sit was considered but research found it primarily activates quads isometri
 ### Session B — Pistol Squat
 1. **ATG Split Squat** *(Hevy)* — 3×6 each leg
 2. **Romanian Deadlift** *(Hevy)* — 3×8-10
-3. **Eccentric Calf Raise** *(Hevy)* — 2×15 each leg; Alfredson protocol for repaired Achilles
+3. **Eccentric Calf Raise** *(Hevy)* — 2×15 each leg; Alfredson protocol for tendon health
 4. **Single-Leg Balance** *(custom)* — 2×30s each leg, eyes closed; Phase 1 gate test gap
 
 ### Session C — One-Arm Push-Up
