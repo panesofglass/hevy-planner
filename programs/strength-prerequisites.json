@@ -64,7 +64,7 @@
       "type": "reps_only",
       "equipmentCategory": "none",
       "primaryMuscleGroup": "calves",
-      "notes": "Full ankle circumduction each foot. Focus on right side — repaired Achilles. Week 5+: add PAILs/RAILs at dorsiflexion end range.",
+      "notes": "Full ankle circumduction each foot. Week 5+: add PAILs/RAILs at dorsiflexion end range. Spend extra time on the stiffer side.",
       "tags": [
         "cars",
         "daily",
@@ -308,7 +308,7 @@
       "type": "bodyweight_reps",
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "calves",
-      "notes": "Alfredson protocol — maintained from Phase 1 for repaired Achilles. Rise on two feet, lower on one (slow 3–5s eccentric). Do both straight-leg and bent-knee sets to target gastrocnemius and soleus.",
+      "notes": "Alfredson protocol — consistent eccentric loading for Achilles tendon resilience. Rise on two feet, lower on one (slow 3–5s eccentric). Do both straight-leg and bent-knee sets to target gastrocnemius and soleus.",
       "searchTerms": "eccentric calf raise Alfredson protocol Achilles tendon",
       "tags": [
         "achilles",
@@ -339,7 +339,7 @@
       "secondaryMuscleGroups": [
         "abdominals"
       ],
-      "notes": "Eyes closed. Directly targets the Phase 1 gate test gap. Start on a firm surface. Progress to folded towel/pillow for increased proprioceptive challenge. Right side will be harder post-Achilles repair — accept asymmetry and work both sides.",
+      "notes": "Eyes closed. Directly targets the Phase 1 gate test gap. Start on a firm surface. Progress to folded towel/pillow for increased proprioceptive challenge. Sides will differ — accept asymmetry and work both sides.",
       "searchTerms": "single leg balance proprioception eyes closed",
       "tags": [
         "pistol-squat",
@@ -405,7 +405,7 @@
         "shoulders",
         "triceps"
       ],
-      "notes": "Upper chest angle — the most undertrained chest region. 30–45° incline. Hypertrophy range 10–12 reps with progressive overload. This directly addresses the chest mass loss concern.",
+      "notes": "Upper chest angle — the most undertrained chest region. 30–45° incline. Hypertrophy range 10–12 reps with progressive overload — the primary upper-chest size driver.",
       "searchTerms": "incline dumbbell press upper chest incline press",
       "tags": [
         "one-arm-push-up",
@@ -467,7 +467,7 @@
         "triceps",
         "shoulders"
       ],
-      "notes": "Flat chest angle + triceps. Floor press limits ROM at the bottom (protects shoulder in the stretched position) while fully loading the mid-range and top contraction. Covers the flat chest angle not addressed by incline or dip. Better than bench press at Phase 2 given the shoulder history.",
+      "notes": "Flat chest angle + triceps. Floor press limits ROM at the bottom (protects shoulder in the stretched position) while fully loading the mid-range and top contraction. Covers the flat chest angle not addressed by incline or dip. Better than bench press at Phase 2 when the shoulders need a shorter end-range stretch.",
       "searchTerms": "dumbbell floor press flat press chest",
       "tags": [
         "one-arm-push-up",
@@ -585,7 +585,7 @@
         "upper_back",
         "traps"
       ],
-      "notes": "Rear delt and external rotator maintenance — carried forward from Phase 1 shoulder rehab. Anchor band at face height. Pull to forehead, elbows high and wide. Counterbalances the heavy pressing volume in Session C and D.",
+      "notes": "Rear delt and external rotator maintenance — carried forward from Phase 1 shoulder stability work. Anchor band at face height. Pull to forehead, elbows high and wide. Counterbalances the heavy pressing volume in Session C and D.",
       "searchTerms": "face pull band rear delt external rotation",
       "tags": [
         "handstand",
@@ -761,7 +761,7 @@
       "type": "duration",
       "equipmentCategory": "bodyweight",
       "primaryMuscleGroup": "calves",
-      "notes": "Benchmark test: 4+ inches each side. Face wall, drive knee forward keeping heel down. Measure toe-to-wall distance when heel lifts. Right side tracks improvement post-Achilles repair.",
+      "notes": "Benchmark test: 4+ inches each side. Face wall, drive knee forward keeping heel down. Measure toe-to-wall distance when heel lifts. Track each side separately — they improve at their own pace.",
       "tags": [
         "benchmark",
         "gate-test",
@@ -793,7 +793,7 @@
         "glutes",
         "calves"
       ],
-      "notes": "Phase 2 benchmark: pistol squat to 16-inch box, both legs. Stand on one leg, extend other leg forward, lower to box. Right side may lag left due to Achilles — accept asymmetry.",
+      "notes": "Phase 2 benchmark: pistol squat to 16-inch box, both legs. Stand on one leg, extend other leg forward, lower to box. One side may lag the other — accept asymmetry and keep both sides working.",
       "tags": [
         "benchmark",
         "gate-test",
@@ -810,7 +810,7 @@
       "secondaryMuscleGroups": [
         "shoulders"
       ],
-      "notes": "On all fours, place one hand behind your head. Rotate that elbow toward the ceiling, then down toward the opposite wrist. Follow your elbow with your eyes. This is the single most important addition for you — your desk-locked thoracic spine is the upstream bottleneck for your shoulders. If this doesn't rotate, your shoulder compensates during every press.",
+      "notes": "On all fours, place one hand behind your head. Rotate that elbow toward the ceiling, then down toward the opposite wrist. Follow your elbow with your eyes. This is the single most important upper-body addition — a stiff thoracic spine is the upstream bottleneck for healthy shoulders. If this doesn't rotate, the shoulders compensate during every press.",
       "videoURL": "https://www.youtube.com/results?search_query=quadruped+thoracic+rotation+mobility+drill",
       "searchTerms": "Quadruped thoracic rotation",
       "archived": true
@@ -870,7 +870,7 @@
       "secondaryMuscleGroups": [
         "shoulders"
       ],
-      "notes": "Plank position, arms locked straight. Only your shoulder blades move — protract (spread apart) and retract (squeeze together). This trains serratus anterior, which is likely weak and causing your plank shoulder pain.",
+      "notes": "Plank position, arms locked straight. Only your shoulder blades move — protract (spread apart) and retract (squeeze together). This trains serratus anterior, which when weak shows up as shoulder pain during planks and pressing.",
       "videoURL": "https://www.youtube.com/results?search_query=scapular+push+ups+tutorial+serratus",
       "searchTerms": "Scapular push-ups serratus",
       "archived": true
@@ -948,7 +948,7 @@
       "secondaryMuscleGroups": [
         "hamstrings"
       ],
-      "notes": "Lie on back, knees bent, feet flat. Drive through heels, squeeze glutes HARD at the top, hold 3 seconds. Lower slowly. If you feel this in your hamstrings more than your glutes, bring your feet closer to your butt. This wakes up the glutes so they fire properly during squats, lunges, and walking. At 46 with desk work, your glutes are almost certainly underperforming — this fixes that.",
+      "notes": "Lie on back, knees bent, feet flat. Drive through heels, squeeze glutes HARD at the top, hold 3 seconds. Lower slowly. If you feel this in your hamstrings more than your glutes, bring your feet closer to your butt. This wakes up the glutes so they fire properly during squats, lunges, and walking. With hours of sitting, underperforming glutes are common — this fixes that.",
       "videoURL": "https://www.youtube.com/results?search_query=glute+bridge+hold+activation+tutorial",
       "searchTerms": "Glute bridge activation hold",
       "tags": [
@@ -1001,7 +1001,7 @@
       "secondaryMuscleGroups": [
         "hip_flexors"
       ],
-      "notes": "On all fours, knees wide, rock forward and back. Keep spine neutral. This opens the adductors (inner thigh) which are contributing to both your lateral lunge pain and cross-legged sitting difficulty. Active rocking > static hold.",
+      "notes": "On all fours, knees wide, rock forward and back. Keep spine neutral. This opens the adductors (inner thigh) — the muscles behind lateral lunge comfort and cross-legged sitting ease. Active rocking > static hold.",
       "videoURL": "https://www.youtube.com/results?search_query=active+frog+stretch+hip+adductor+mobility",
       "searchTerms": "Active frog stretch adductors",
       "archived": true
@@ -1015,7 +1015,7 @@
       "secondaryMuscleGroups": [
         "adductors"
       ],
-      "notes": "Side plank position with top leg on a bench, bottom leg hanging free. This is a two-for-one — it trains lateral core strength AND adductor strength simultaneously. Directly addresses your lateral lunge knee pain. Regress by using bottom knee on the floor or shortening the hold. These are brutally hard at first — 10 seconds is fine to start.",
+      "notes": "Side plank position with top leg on a bench, bottom leg hanging free. This is a two-for-one — it trains lateral core strength AND adductor strength simultaneously, directly supporting lateral knee stability. Regress by using bottom knee on the floor or shortening the hold. These are brutally hard at first — 10 seconds is fine to start.",
       "videoURL": "https://www.youtube.com/results?search_query=copenhagen+plank+tutorial+regression+progression",
       "searchTerms": "Copenhagen plank tutorial progression",
       "tags": [
@@ -1029,7 +1029,7 @@
       "type": "reps_only",
       "equipmentCategory": "none",
       "primaryMuscleGroup": "calves",
-      "notes": "Slower and more deliberate than your daily CARs. Spend 5+ seconds per rotation on the right ankle. Map out the full range, note where it catches. Over weeks, the circle should get bigger.",
+      "notes": "Slower and more deliberate than your daily CARs. Spend 5+ seconds per rotation on each ankle. Map out the full range, note where it catches. Over weeks, the circle should get bigger.",
       "videoURL": "https://www.youtube.com/results?search_query=ankle+CARs+FRC+detailed+tutorial",
       "searchTerms": "Ankle CARs detailed FRC",
       "archived": true
@@ -1040,7 +1040,7 @@
       "type": "reps_only",
       "equipmentCategory": "none",
       "primaryMuscleGroup": "calves",
-      "notes": "CRITICAL for your Achilles. Stand on step edge, raise up on BOTH feet, then lower slowly (3-4 sec) on ONE foot. Do both straight-knee (gastroc) and bent-knee (soleus) versions. The right side may feel tight — stay in a pain-free range. This is the gold standard for Achilles tendon health.",
+      "notes": "Stand on step edge, raise up on BOTH feet, then lower slowly (3-4 sec) on ONE foot. Do both straight-knee (gastroc) and bent-knee (soleus) versions. Stay in a pain-free range — tightness here is normal. This is the gold standard for Achilles tendon health.",
       "videoURL": "https://www.youtube.com/results?search_query=eccentric+calf+raises+achilles+alfredson+protocol",
       "searchTerms": "Eccentric calf raises Alfredson Achilles",
       "progressionByPhase": {
@@ -1059,7 +1059,7 @@
       "type": "duration",
       "equipmentCategory": "none",
       "primaryMuscleGroup": "calves",
-      "notes": "Face wall, foot ~4 inches away. Drive knee forward over toes, keeping heel DOWN. Measure progress by how far from the wall you can get your foot while still touching knee to wall. Your right side will be tighter — that's the Achilles repair limiting dorsiflexion.",
+      "notes": "Face wall, foot ~4 inches away. Drive knee forward over toes, keeping heel DOWN. Measure progress by how far from the wall you can get your foot while still touching knee to wall. One side is usually tighter — track each separately; the gap closes with consistent work.",
       "videoURL": "https://www.youtube.com/results?search_query=wall+ankle+dorsiflexion+mobilization+test",
       "searchTerms": "Wall dorsiflexion ankle mobilization",
       "archived": true
@@ -1155,7 +1155,7 @@
         "calves",
         "glutes"
       ],
-      "notes": "Conversational pace. RPE 3-4 out of 10. Slight resistance. This drives blood flow to your knees and ankles without impact stress. Good for Achilles flare-up days too.",
+      "notes": "Conversational pace. RPE 3-4 out of 10. Slight resistance. This drives blood flow to the knees and ankles without impact stress — a good low-impact option on high-soreness days.",
       "archived": true,
       "videoURL": "https://www.youtube.com/watch?v=L0-6OFLL2BE"
     },
@@ -1165,7 +1165,7 @@
       "type": "duration",
       "equipmentCategory": "foam_roller",
       "primaryMuscleGroup": "quadriceps",
-      "notes": "Slow passes, pause on tender spots for 30s. Focus on the outer quad / IT band area — this feeds into your lateral lunge knee issue.",
+      "notes": "Slow passes, pause on tender spots for 30s. Focus on the outer quad / IT band area — a common source of lateral knee discomfort.",
       "videoURL": "https://www.youtube.com/results?search_query=foam+roll+quads+IT+band+technique",
       "searchTerms": "Foam roll quads IT band",
       "archived": true
@@ -1176,7 +1176,7 @@
       "type": "duration",
       "equipmentCategory": "foam_roller",
       "primaryMuscleGroup": "calves",
-      "notes": "Roll the back AND sides of the calf. Extra attention on the right side around the Achilles area — not directly on the tendon, but the muscle above it.",
+      "notes": "Roll the back AND sides of the calf. Extra attention around the Achilles area — not directly over the tendon, but the muscle above it.",
       "videoURL": "https://www.youtube.com/results?search_query=foam+roll+calves+achilles+area",
       "searchTerms": "Foam roll calves",
       "archived": true
@@ -1508,7 +1508,7 @@
       "id": "session-b",
       "title": "Session B — Pistol Squat",
       "subtitle": "Lower Loaded Mobility",
-      "description": "ATG split squat + RDL together cover the entire lower body in two movements (EMG-confirmed: ATG covers the anterior chain, RDL the posterior). Eccentric calf work maintains Achilles health from Phase 1. Single-leg balance directly closes the Phase 1 gate test gap.",
+      "description": "ATG split squat + RDL together cover the entire lower body in two movements (EMG-confirmed: ATG covers the anterior chain, RDL the posterior). Eccentric calf work maintains tendon health from Phase 1. Single-leg balance directly closes the Phase 1 gate test gap.",
       "color": "rgb(96, 200, 140)",
       "sortOrder": 3,
       "folderGroup": "Phase 2: Strength Prerequisites",
@@ -1526,7 +1526,7 @@
         {
           "exerciseTemplateId": "eccentric-calf-raise",
           "sets": "2×15 each leg",
-          "notes": "Rise on two feet, lower slowly on one (3–5s down). Do both straight and bent-knee sets for gastrocnemius and soleus. Alfredson protocol — maintained for repaired Achilles."
+          "notes": "Rise on two feet, lower slowly on one (3–5s down). Do both straight and bent-knee sets for gastrocnemius and soleus. Alfredson protocol — maintained for tendon resilience."
         },
         {
           "exerciseTemplateId": "single-leg-balance",
@@ -1930,7 +1930,7 @@
       "status": "completed",
       "color": "rgb(96, 165, 224)",
       "sortOrder": 1,
-      "summary": "Rebuilt shoulder stability, knee resilience, Achilles health, core strength, and thoracic mobility. 8 gate tests required to advance.",
+      "summary": "Rebuilt shoulder stability, knee resilience, tendon health, core strength, and thoracic mobility. 8 gate tests required to advance.",
       "keyFocus": "Foundation complete. Most gate tests passed. Pull-up count and single-leg balance were the main gaps at phase exit — both are active targets in Phase 2.",
       "gateTests": [
         "pain-free-planks",
@@ -1951,7 +1951,7 @@
       "color": "rgb(224, 134, 96)",
       "sortOrder": 2,
       "summary": "Build the raw strength and movement prerequisites for all 5 skill goals simultaneously. Evidence-based compound selection for maximum coverage per session.",
-      "keyFocus": "This phase adds One-Arm Push-Up as a 5th equal skill goal alongside muscle-up, pistol squat, handstand, and tuck planche. Chest and arm hypertrophy is explicitly programmed to address mass loss. The benchmark session appears every 6th cycle — do not skip it.",
+      "keyFocus": "This phase adds One-Arm Push-Up as a 5th equal skill goal alongside muscle-up, pistol squat, handstand, and tuck planche. Chest and arm hypertrophy is explicitly programmed. The benchmark session appears every 6th cycle — do not skip it.",
       "gateTests": [
         "pain-free-planks",
         "strict-pullups-12",
@@ -2051,7 +2051,7 @@
       "icon": "●",
       "color": "rgb(96, 200, 140)",
       "currentState": "Phase 1 built knee stability and improved ankle dorsiflexion. ATG split squat at bodyweight. Single-leg balance is the remaining Phase 1 gap.",
-      "requirements": "Full ankle dorsiflexion (especially right post-Achilles), strong VMO, hip flexor endurance, single-leg balance, and hip mobility for full depth.",
+      "requirements": "Full ankle dorsiflexion, strong VMO, hip flexor endurance, single-leg balance, and hip mobility for full depth.",
       "gapAnalysis": "Session B systematically addresses all three limiters: ATG split squat for ankle + quad + hip flexor, single-leg balance for proprioception, and RDL for posterior chain support.",
       "timeline": "Pistol to 16-inch box (Phase 2 gate): Week 12–16. Pistol to 8-inch box: Week 20. Full pistol with counterbalance: Week 28. Full pistol no counterbalance: Week 36.",
       "milestones": [
@@ -2087,9 +2087,9 @@
       "priority": 1,
       "icon": "◉",
       "color": "rgb(224, 100, 80)",
-      "currentState": "Added in Phase 2. Phase 1 built shoulder stability and core. Coming off rehab — regular push-ups available. Chest experiencing mass loss from Phase 1 focus on mobility over strength.",
+      "currentState": "Added in Phase 2. Phase 1 built shoulder stability and core. Regular push-ups available. Chest hypertrophy prioritized coming out of a mobility-led Phase 1.",
       "requirements": "Chest strength at all angles, tricep mass, core anti-rotation, wrist conditioning, scapular stability. All addressed by Session C.",
-      "gapAnalysis": "Session C uses dips (most comprehensive push exercise) + incline press (upper chest hypertrophy) + archer push-up (direct skill path) + floor press (flat angle + triceps). The chest mass loss concern is directly addressed by the hypertrophy prescription (3–4 sets, 8–12 reps, progressive overload).",
+      "gapAnalysis": "Session C uses dips (most comprehensive push exercise) + incline press (upper chest hypertrophy) + archer push-up (direct skill path) + floor press (flat angle + triceps). The chest hypertrophy focus is directly addressed by the prescription (3–4 sets, 8–12 reps, progressive overload).",
       "timeline": "15 strict push-ups: Week 10. Archer push-ups 5 each side: Week 20. One-arm negative (3s): Week 28. First one-arm push-up: Week 36. 3–5 reps: Week 48+.",
       "milestones": [
         {
@@ -2202,7 +2202,7 @@
       "id": "pain-free-planks",
       "name": "Pain-Free Plank",
       "howTo": "Standard forearm plank. Time until you either fail or feel shoulder discomfort.",
-      "target": "60+ seconds with zero shoulder pain",
+      "target": "60+ seconds with zero shoulder discomfort",
       "frequency": "Every 4 weeks",
       "unit": "seconds",
       "frequencyDays": 28
@@ -2255,7 +2255,7 @@
       "id": "wall-dorsiflexion-4in",
       "name": "Wall Dorsiflexion 4+ Inches",
       "howTo": "Face wall, drive knee forward keeping heel down. Measure toe-to-wall distance at heel-lift point.",
-      "target": "4+ inches each side. Track right side separately.",
+      "target": "4+ inches each side. Track each side separately.",
       "frequency": "Every 2 weeks",
       "unit": "inches",
       "frequencyDays": 14
